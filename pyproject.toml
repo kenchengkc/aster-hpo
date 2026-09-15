@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling>=1.25,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aster-hpo"
+version = "0.1.0"
+description = "Parallel hyperparameter search with adaptive replication for noisy simulations"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "Ken Cheng"}]
+keywords = ["hyperparameter-optimization", "simulation", "parallel", "research"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "ruff>=0.9,<1", "build>=1.2,<2"]
+
+[project.urls]
+Homepage = "https://github.com/kenchengkc/aster-hpo"
+Issues = "https://github.com/kenchengkc/aster-hpo/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aster_hpo"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
