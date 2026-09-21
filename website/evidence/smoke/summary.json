@@ -1,0 +1,26 @@
+{
+  "full_budget": {
+    "best_config": {
+      "x": 0.0879356388499728
+    },
+    "true_loss": 0.026264857154966445,
+    "audit_mean": 0.029357200335110738,
+    "audit_standard_error": 0.011028582783646981,
+    "search_replications": 432,
+    "search_wall_seconds": 0.11490558413788676,
+    "objective_cpu_seconds": 0.004006999999999955,
+    "pruned_trials": 0
+  },
+  "race": {
+    "best_config": {
+      "x": 0.0879356388499728
+    },
+    "true_loss": 0.026264857154966445,
+    "audit_mean": 0.029357200335110738,
+    "audit_standard_error": 0.011028582783646981,
+    "search_replications": 72,
+    "search_wall_seconds": 0.07115841703489423,
+    "objective_cpu_seconds": 0.0007670000000000246,
+    "pruned_trials": 15
+  }
+}

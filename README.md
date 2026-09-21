@@ -2,6 +2,8 @@
 
 **Parallel hyperparameter search for noisy simulations.**
 
+[Project website](https://aster-hpo.vercel.app) · [Research design](DESIGN.md) · [Roadmap](ROADMAP.md)
+
 [![CI](https://github.com/kenchengkc/aster-hpo/actions/workflows/ci.yml/badge.svg)](https://github.com/kenchengkc/aster-hpo/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -13,6 +15,10 @@ paired results look clearly worse than their peers.
 sampling, full-budget search, heuristic replication pruning, and an isolated audit helper
 work today. The financial benchmark and comparative performance study are planned.
 There are no established speedup or quality-preservation claims yet.
+
+The [project website](https://aster-hpo.vercel.app) presents the architecture and a saved
+synthetic smoke-test snapshot. It is a static site and does not run optimization jobs for
+visitors. Website source and deployment instructions are in [docs/WEBSITE.md](docs/WEBSITE.md).
 
 ## Why build this?
 
