@@ -2,12 +2,18 @@
 
 **Parallel hyperparameter optimization for stochastic simulations with adaptive replication allocation.**
 
+[Project website](https://aster-hpo.vercel.app) · [Research design](DESIGN.md) · [Roadmap](ROADMAP.md)
+
 [![CI](https://github.com/kenchengkc/aster-hpo/actions/workflows/ci.yml/badge.svg)](https://github.com/kenchengkc/aster-hpo/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Aster is a research prototype for tuning models whose evaluation is noisy and expensive. Rather than spending the same number of replications on every configuration, it can evaluate candidates in parallel and stop configurations whose matched outcomes look clearly worse than their peers.
 
 The core question is simple: **can we spend fewer simulation runs while preserving the quality of the selected configuration?**
+
+The [project website](https://aster-hpo.vercel.app) presents the architecture and a saved
+synthetic smoke-test snapshot. It is a static site and does not run optimization jobs for
+visitors. Website source and deployment instructions are in [docs/WEBSITE.md](docs/WEBSITE.md).
 
 ## What is implemented
 
