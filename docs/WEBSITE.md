@@ -37,7 +37,7 @@ The hosted page serves saved files. It never launches experiments in response to
 `website/evidence/manifest.json` identifies the library revision, command, seed, capture
 date, and hashes for the raw JSON in `website/evidence/smoke/`. The capture uses the
 existing noisy-quadratic example, not a financial simulation or a performance benchmark.
-The site's graph reports evaluation counts for that specific saved run.
+The site's figures show per-candidate allocation for that specific saved run.
 
 To produce a new snapshot, first install the package as described in the root README:
 
@@ -45,8 +45,9 @@ To produce a new snapshot, first install the package as described in the root RE
 python examples/noisy_quadratic.py --workers 2 --configs 16 --seed 17 --output website/evidence/smoke
 ```
 
-Then update the manifest, its file hashes, the displayed capture date, counts, and chart
-widths to match the new output. Do not change the snapshot during deployment. Asynchronous
+Then update the manifest, its file hashes, the displayed capture date, counts, and figure
+descriptions to match the new output. Run `python scripts/render_website_evidence.py`
+to regenerate the static SVG allocation figures (16 candidates, replication cap 27). Do not change the snapshot during deployment. Asynchronous
 scheduling can change allocation on later runs even with identical seeds.
 
 Keep planned capabilities and completed work distinct. Do not present this smoke test as
@@ -62,3 +63,10 @@ the control selects the commands for manual copying.
 After deployment, verify that the production URL is publicly readable without signing in
 and that CSS, JavaScript, and evidence JSON load successfully. Preview deployments may
 remain protected. Confirm that the deployment contains no Python functions.
+
+## Visual direction
+
+The site uses a compact scientific-software layout: persistent section navigation,
+an API example, allocation figures drawn from the saved records, and research notes.
+Optuna and Dask informed the emphasis on runnable examples and execution data.
+All fonts are system fonts; no external assets or frontend dependencies are required.

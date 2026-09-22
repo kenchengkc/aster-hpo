@@ -39,7 +39,7 @@ if (copyButton && navigator.clipboard && window.isSecureContext) {
 }
 
 if ("IntersectionObserver" in window) {
-  const links = [...document.querySelectorAll("nav a")];
+  const links = [...document.querySelectorAll('nav a[href^="#"]')];
   const observer = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
