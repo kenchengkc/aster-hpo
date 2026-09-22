@@ -1,112 +1,187 @@
 <!doctype html>
+
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <meta content="#ffffff" name="theme-color" />
     <title>Aster — Parallel optimization for stochastic simulations</title>
     <meta
-      name="description"
       content="A small, open-source Python library for parallel hyperparameter optimization with adaptive replication allocation. Code, experiment records, and research notes."
+      name="description"
     />
-    <link rel="canonical" href="https://aster-hpo.vercel.app/" />
-    <meta property="og:url" content="https://aster-hpo.vercel.app/" />
+    <link href="https://aster-hpo.vercel.app/" rel="canonical" />
+    <meta content="https://aster-hpo.vercel.app/" property="og:url" />
     <meta
-      property="og:title"
       content="Aster — Parallel optimization for stochastic simulations"
+      property="og:title"
     />
     <meta
-      property="og:description"
       content="Parallel evaluation. Adaptive replication. Inspectable experiments. An open-source research project in Python."
+      property="og:description"
     />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary" />
-    <link rel="icon" href="/assets/mark.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/assets/style.css?v=4" />
-    <script src="/assets/site.js?v=3" defer></script>
+    <meta content="website" property="og:type" />
+    <meta content="summary" name="twitter:card" />
+    <link href="/assets/mark.svg" rel="icon" type="image/svg+xml" />
+    <link href="/assets/style.css?v=5" rel="stylesheet" />
+    <script defer="" src="/assets/site.js?v=4"></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="masthead">
       <a class="brand" href="#overview"
-        ><img src="/assets/mark.svg" width="30" height="30" alt="" />aster<span
+        ><img alt="" height="30" src="/assets/mark.svg" width="30" />aster<span
           class="version"
           >0.1</span
         ></a
       >
-      <span class="masthead-description"
-        >Research software for stochastic optimization</span
-      >
+
+      <nav aria-label="Main navigation">
+        <a href="#features">Features</a><a href="#quickstart">Getting started</a
+        ><a href="#evidence">Experiments</a><a href="#roadmap">Research</a>
+      </nav>
       <a class="source-link" href="https://github.com/kenchengkc/aster-hpo"
         >GitHub <span aria-hidden="true">↗</span></a
       >
     </header>
     <div class="page-layout">
-      <aside class="sidebar">
-        <nav aria-label="On this page">
-          <p class="nav-label">The project</p>
-          <a href="#overview" aria-current="location">Overview</a>
-          <a href="#evidence">Experiment record</a>
-          <a href="#architecture">How it works</a>
-          <a href="#quickstart">Getting started</a>
-          <a href="#roadmap">Research agenda</a>
-        </nav>
-        <div class="sidebar-resources">
-          <p class="nav-label">From the repository</p>
-          <a href="https://github.com/kenchengkc/aster-hpo/blob/main/DESIGN.md"
-            >Design notes ↗</a
-          >
-          <a
-            href="https://github.com/kenchengkc/aster-hpo/blob/main/docs/BENCHMARKING.md"
-            >Benchmark protocol ↗</a
-          >
-          <a
-            href="https://github.com/kenchengkc/aster-hpo/blob/main/CONTRIBUTING.md"
-            >Contributing ↗</a
-          >
-        </div>
-        <div class="sidebar-foot">
-          <span class="status-dot" aria-hidden="true"></span> Research
-          prototype<br /><span>Python 3.11+ · MIT license</span>
-        </div>
-      </aside>
       <main id="main">
         <section
+          aria-labelledby="overview-title"
           class="overview"
           id="overview"
-          aria-labelledby="overview-title"
         >
-          <div class="eyebrow">Open-source Python library</div>
           <div class="intro-grid">
             <div>
               <h1 id="overview-title">
-                Parallel search for<br class="desktop-break" />
-                noisy simulations.
+                Parallel optimization for noisy simulations
               </h1>
               <p class="lead">
-                Aster allocates repeated evaluations across competing
-                configurations. Run trials in parallel, compare matched
-                outcomes, and stop allocating compute to candidates that fall
-                behind.
-              </p>
-              <div class="intro-actions">
-                <a class="button" href="#quickstart"
-                  >Get started <span aria-hidden="true">→</span></a
-                ><a
-                  href="https://github.com/kenchengkc/aster-hpo/tree/main/src/aster_hpo"
-                  >Read the source ↗</a
-                >
-              </div>
-              <p class="scope-note">
-                Local processes. Zero runtime dependencies.<br />Built for
-                experiments you can inspect and reproduce.
+                An open-source Python library for parallel hyperparameter search
+                with adaptive replication allocation.
               </p>
             </div>
-            <div class="code-example">
-              <div class="code-heading">
-                <span>Scheduling API</span><span>Python</span>
-              </div>
-              <pre><code><span class="syntax-key">from</span> aster_hpo <span class="syntax-key">import</span> (
+          </div>
+        </section>
+        <section aria-labelledby="features-title" id="features">
+          <h2 id="features-title">Key features</h2>
+          <dl class="principles">
+            <div>
+              <dt>Parallel evaluation</dt>
+              <svg
+                aria-hidden="true"
+                class="feature-icon"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="4"
+                viewbox="0 0 64 64"
+              >
+                <path d="M12 16h40M12 32h40M12 48h40"></path>
+                <circle cx="24" cy="16" r="5"></circle>
+                <circle cx="42" cy="32" r="5"></circle>
+                <circle cx="30" cy="48" r="5"></circle>
+              </svg>
+              <dd>
+                Independent replications run across local worker processes.
+              </dd>
+            </div>
+            <div>
+              <dt>Adaptive allocation</dt>
+              <svg
+                aria-hidden="true"
+                class="feature-icon"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="4"
+                viewbox="0 0 64 64"
+              >
+                <path
+                  d="M12 52V12M12 52h42M20 40l12-12 9 5 13-19M42 14h12v12"
+                ></path>
+              </svg>
+              <dd>
+                Matched comparisons guide which configurations receive more
+                work.
+              </dd>
+            </div>
+            <div>
+              <dt>Independent audit</dt>
+              <svg
+                aria-hidden="true"
+                class="feature-icon"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="4"
+                viewbox="0 0 64 64"
+              >
+                <path
+                  d="M32 7l21 8v17c0 13-21 25-21 25S11 45 11 32V15zM22 31l7 7 14-16"
+                ></path>
+              </svg>
+              <dd>
+                Evaluate the selected configuration with a separate seed
+                namespace.
+              </dd>
+            </div>
+          </dl>
+          <div class="intro-actions">
+            <a class="button" href="#quickstart"
+              >Get started <span aria-hidden="true">→</span></a
+            ><a
+              href="https://github.com/kenchengkc/aster-hpo/tree/main/src/aster_hpo"
+              >Read the source ↗</a
+            >
+          </div>
+        </section>
+        <section aria-labelledby="quickstart-title" id="quickstart">
+          <div class="section-heading">
+            <h2 id="quickstart-title">Getting started</h2>
+          </div>
+          <p class="section-intro">
+            Clone the repository and run the synthetic comparison locally. A
+            laptop with two available CPU workers is enough for this example.
+          </p>
+          <div class="install-block">
+            <div class="code-heading">
+              <span>Install from source · macOS / Linux</span
+              ><button
+                aria-label="Copy installation commands"
+                hidden=""
+                id="copy-command"
+                type="button"
+              >
+                Copy
+              </button>
+            </div>
+            <pre><code id="install-command">git clone https://github.com/kenchengkc/aster-hpo.git
+cd aster-hpo
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+python examples/noisy_quadratic.py --workers 2</code></pre>
+          </div>
+          <p
+            aria-live="polite"
+            class="copy-status"
+            id="copy-status"
+            role="status"
+          ></p>
+          <p class="small-note">
+            The example writes JSON to <code>results/smoke/</code>, then exits.
+            This website displays saved files; visiting it does not start a
+            computation.
+          </p>
+          <div class="code-example">
+            <div class="code-heading">
+              <span>Scheduling API</span><span>Python</span>
+            </div>
+            <pre><code><span class="syntax-key">from</span> aster_hpo <span class="syntax-key">import</span> (
     Float, ReplicationRace,
     Study, sample_configs,
 )
@@ -124,41 +199,16 @@
         workers=2, seed=17,
     )
     result = study.optimize(objective)</code></pre>
-              <a
-                class="code-footer"
-                href="https://github.com/kenchengkc/aster-hpo/blob/main/examples/noisy_quadratic.py"
-                >Complete runnable example <span aria-hidden="true">↗</span></a
-              >
-            </div>
+            <a
+              class="code-footer"
+              href="https://github.com/kenchengkc/aster-hpo/blob/main/examples/noisy_quadratic.py"
+              >Complete runnable example <span aria-hidden="true">↗</span></a
+            >
           </div>
-          <dl class="principles">
-            <div>
-              <dt>Parallel evaluation</dt>
-              <dd>
-                Independent replications run across local worker processes.
-              </dd>
-            </div>
-            <div>
-              <dt>Adaptive allocation</dt>
-              <dd>
-                Matched comparisons guide which configurations receive more
-                work.
-              </dd>
-            </div>
-            <div>
-              <dt>Independent audit</dt>
-              <dd>
-                Evaluate the selected configuration with a separate seed
-                namespace.
-              </dd>
-            </div>
-          </dl>
         </section>
-
-        <section id="evidence" aria-labelledby="evidence-title">
+        <section aria-labelledby="evidence-title" id="evidence">
           <div class="section-heading">
             <h2 id="evidence-title">Experiment record</h2>
-            <span class="section-meta">001 / SYNTHETIC SMOKE TEST</span>
           </div>
           <p class="section-intro">
             The same 16 configurations, evaluated by two schedulers. Each square
@@ -176,10 +226,10 @@
                   <span><strong>432</strong> evaluations</span>
                 </div>
                 <img
+                  alt="Full budget: all 16 candidates receive 27 evaluations, totaling 432."
+                  height="308"
                   src="/assets/full-budget.svg"
                   width="392"
-                  height="308"
-                  alt="Full budget: all 16 candidates receive 27 evaluations, totaling 432."
                 />
               </div>
               <div>
@@ -188,19 +238,19 @@
                   <span><strong>72</strong> evaluations</span>
                 </div>
                 <img
+                  alt="Replication race: candidate 00 receives 27 evaluations; the other 15 candidates each receive 3, totaling 72."
+                  height="308"
                   src="/assets/replication-race.svg"
                   width="392"
-                  height="308"
-                  alt="Replication race: candidate 00 receives 27 evaluations; the other 15 candidates each receive 3, totaling 72."
                 />
               </div>
             </div>
             <div class="plot-legend">
               <span
-                ><i class="legend-cell" aria-hidden="true"></i> Completed
+                ><i aria-hidden="true" class="legend-cell"></i> Completed
                 evaluation</span
               ><span
-                ><i class="legend-cell unallocated" aria-hidden="true"></i> Not
+                ><i aria-hidden="true" class="legend-cell unallocated"></i> Not
                 allocated</span
               ><span>Rows: candidates · Columns: replications</span>
             </div>
@@ -238,8 +288,7 @@
             ><a href="/evidence/smoke/summary.json">Summary ↗</a>
           </div>
         </section>
-
-        <section id="architecture" aria-labelledby="architecture-title">
+        <section aria-labelledby="architecture-title" id="architecture">
           <div class="section-heading">
             <h2 id="architecture-title">How it works</h2>
             <a
@@ -253,25 +302,21 @@
           </p>
           <ol class="workflow">
             <li>
-              <span class="step">01</span>
               <h3>Sample</h3>
               <p>Generate a candidate pool from typed search spaces.</p>
               <code>sample_configs()</code>
             </li>
             <li>
-              <span class="step">02</span>
               <h3>Allocate</h3>
               <p>Continue or prune candidates at replication checkpoints.</p>
               <code>Study + scheduler</code>
             </li>
             <li>
-              <span class="step">03</span>
               <h3>Execute</h3>
               <p>Evaluate objectives in local worker processes.</p>
               <code>ProcessPoolExecutor</code>
             </li>
             <li>
-              <span class="step">04</span>
               <h3>Audit</h3>
               <p>Lock the selection, evaluate new seeds, and export results.</p>
               <code>audit() · result.save()</code>
@@ -308,48 +353,7 @@
           </details>
         </section>
 
-        <section id="quickstart" aria-labelledby="quickstart-title">
-          <div class="section-heading">
-            <h2 id="quickstart-title">Getting started</h2>
-            <span class="section-meta">PYTHON 3.11+</span>
-          </div>
-          <p class="section-intro">
-            Clone the repository and run the synthetic comparison locally. A
-            laptop with two available CPU workers is enough for this example.
-          </p>
-          <div class="install-block">
-            <div class="code-heading">
-              <span>Install from source · macOS / Linux</span
-              ><button
-                type="button"
-                id="copy-command"
-                aria-label="Copy installation commands"
-                hidden
-              >
-                Copy
-              </button>
-            </div>
-            <pre><code id="install-command">git clone https://github.com/kenchengkc/aster-hpo.git
-cd aster-hpo
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -e .
-python examples/noisy_quadratic.py --workers 2</code></pre>
-          </div>
-          <p
-            id="copy-status"
-            class="copy-status"
-            role="status"
-            aria-live="polite"
-          ></p>
-          <p class="small-note">
-            The example writes JSON to <code>results/smoke/</code>, then exits.
-            This website displays saved files; visiting it does not start a
-            computation.
-          </p>
-        </section>
-
-        <section id="roadmap" aria-labelledby="roadmap-title">
+        <section aria-labelledby="roadmap-title" id="roadmap">
           <div class="section-heading">
             <h2 id="roadmap-title">Research agenda</h2>
             <a

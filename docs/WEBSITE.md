@@ -66,7 +66,7 @@ remain protected. Confirm that the deployment contains no Python functions.
 
 ## Visual direction
 
-The site uses a compact scientific-software layout: persistent section navigation,
-an API example, allocation figures drawn from the saved records, and research notes.
-Optuna and Dask informed the emphasis on runnable examples and execution data.
-All fonts are system fonts; no external assets or frontend dependencies are required.
+The layout follows Optuna's project page: simple top navigation, a broad blue hero,
+three prominent feature panels, and larger reading text. Arial is used throughout
+the interface and figures; code blocks alone use a monospace font. No external font
+or frontend dependencies are required.
