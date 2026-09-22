@@ -6,7 +6,7 @@
   background: #fff;
   scroll-behavior: smooth;
   scroll-padding-top: 24px;
-  --blue: #204d91;
+  --blue: #324f70;
   --pale: #f3f5f8;
 }
 * {
@@ -47,13 +47,13 @@ h3 {
   overflow-wrap: anywhere;
 }
 h1 {
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   margin-bottom: 20px;
 }
 h2 {
   font-size: 2rem;
   margin-bottom: 30px;
-  text-align: center;
+  text-align: left;
 }
 h3 {
   font-size: 1.2rem;
@@ -151,8 +151,8 @@ footer {
 }
 .overview {
   max-width: none;
-  background: #204d91;
-  color: #fff;
+  background: #edf1f5;
+  color: #25384c;
   padding: 64px max(24px, calc((100% - 1084px) / 2));
 }
 .intro-grid {
@@ -170,15 +170,14 @@ footer {
   margin-top: 40px;
 }
 .principles > div {
-  padding: 36px 25px;
-  border-radius: 12px;
-  box-shadow: 0 5px 16px #172b4720;
-  text-align: center;
+  padding: 10px 0;
+  text-align: left;
 }
 .principles dt {
   font-size: 1.22rem;
   font-weight: 700;
   line-height: 1.4;
+  margin-bottom: 14px;
 }
 .principles dd {
   text-align: left;
@@ -192,7 +191,7 @@ footer {
 }
 .intro-actions {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   flex-wrap: wrap;
   gap: 20px;
@@ -210,7 +209,7 @@ footer {
 }
 .section-heading {
   margin-bottom: 24px;
-  text-align: center;
+  text-align: left;
 }
 .section-heading h2 {
   margin-bottom: 16px;
@@ -221,7 +220,7 @@ footer {
 .code-example,
 .install-block {
   background: var(--pale);
-  border-radius: 8px;
+  border-radius: 3px;
   overflow: hidden;
   margin-top: 26px;
 }
@@ -265,7 +264,7 @@ footer {
 .experiment {
   background: var(--pale);
   padding: 28px;
-  border-radius: 10px;
+  border-radius: 3px;
 }
 .experiment-meta {
   display: flex;
@@ -335,7 +334,7 @@ figcaption {
 .workflow li {
   background: var(--pale);
   padding: 26px;
-  border-radius: 8px;
+  border-radius: 3px;
   min-width: 0;
 }
 .workflow p {
@@ -362,7 +361,7 @@ summary {
   padding: 26px;
   margin-top: 18px;
   background: var(--pale);
-  border-radius: 8px;
+  border-radius: 3px;
 }
 .agenda-state {
   font-weight: 700;
@@ -416,13 +415,13 @@ footer > div {
     grid-template-columns: minmax(0, 1fr);
   }
   .principles > div {
-    padding: 30px;
+    padding: 12px 0;
   }
   section {
     padding: 44px 24px;
   }
   .principles dd {
-    text-align: center;
+    text-align: left;
   }
   .experiment {
     padding: 20px;
@@ -454,4 +453,15 @@ footer > div {
   :root {
     scroll-behavior: auto;
   }
+}
+
+.research-byline {
+  margin: 26px 0 0;
+  font-size: 1rem;
+  color: #526276;
+}
+.intro-actions a + a {
+  background: transparent;
+  color: var(--blue);
+  padding-left: 0;
 }

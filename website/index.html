@@ -23,7 +23,7 @@
     <meta content="website" property="og:type" />
     <meta content="summary" name="twitter:card" />
     <link href="/assets/mark.svg" rel="icon" type="image/svg+xml" />
-    <link href="/assets/style.css?v=5" rel="stylesheet" />
+    <link href="/assets/style.css?v=6" rel="stylesheet" />
     <script defer="" src="/assets/site.js?v=4"></script>
   </head>
   <body>
@@ -35,9 +35,8 @@
           >0.1</span
         ></a
       >
-
       <nav aria-label="Main navigation">
-        <a href="#features">Features</a><a href="#quickstart">Getting started</a
+        <a href="#features">Approach</a><a href="#quickstart">Getting started</a
         ><a href="#evidence">Experiments</a><a href="#roadmap">Research</a>
       </nav>
       <a class="source-link" href="https://github.com/kenchengkc/aster-hpo"
@@ -54,55 +53,32 @@
           <div class="intro-grid">
             <div>
               <h1 id="overview-title">
-                Parallel optimization for noisy simulations
+                Parallel hyperparameter optimization for stochastic simulations
               </h1>
               <p class="lead">
-                An open-source Python library for parallel hyperparameter search
-                with adaptive replication allocation.
+                Aster is an open-source research library investigating adaptive
+                replication allocation: how to reduce simulation work while
+                preserving the quality of the selected configuration.
+              </p>
+              <p class="research-byline">
+                Research prototype · Ken Cheng · Python / MIT license
               </p>
             </div>
           </div>
         </section>
         <section aria-labelledby="features-title" id="features">
-          <h2 id="features-title">Key features</h2>
+          <h2 id="features-title">Research approach</h2>
           <dl class="principles">
             <div>
               <dt>Parallel evaluation</dt>
-              <svg
-                aria-hidden="true"
-                class="feature-icon"
-                fill="none"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="4"
-                viewbox="0 0 64 64"
-              >
-                <path d="M12 16h40M12 32h40M12 48h40"></path>
-                <circle cx="24" cy="16" r="5"></circle>
-                <circle cx="42" cy="32" r="5"></circle>
-                <circle cx="30" cy="48" r="5"></circle>
-              </svg>
+
               <dd>
                 Independent replications run across local worker processes.
               </dd>
             </div>
             <div>
               <dt>Adaptive allocation</dt>
-              <svg
-                aria-hidden="true"
-                class="feature-icon"
-                fill="none"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="4"
-                viewbox="0 0 64 64"
-              >
-                <path
-                  d="M12 52V12M12 52h42M20 40l12-12 9 5 13-19M42 14h12v12"
-                ></path>
-              </svg>
+
               <dd>
                 Matched comparisons guide which configurations receive more
                 work.
@@ -110,20 +86,7 @@
             </div>
             <div>
               <dt>Independent audit</dt>
-              <svg
-                aria-hidden="true"
-                class="feature-icon"
-                fill="none"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="4"
-                viewbox="0 0 64 64"
-              >
-                <path
-                  d="M32 7l21 8v17c0 13-21 25-21 25S11 45 11 32V15zM22 31l7 7 14-16"
-                ></path>
-              </svg>
+
               <dd>
                 Evaluate the selected configuration with a separate seed
                 namespace.
@@ -131,8 +94,7 @@
             </div>
           </dl>
           <div class="intro-actions">
-            <a class="button" href="#quickstart"
-              >Get started <span aria-hidden="true">→</span></a
+            <a class="button" href="#quickstart">Run the example</a
             ><a
               href="https://github.com/kenchengkc/aster-hpo/tree/main/src/aster_hpo"
               >Read the source ↗</a
@@ -141,7 +103,7 @@
         </section>
         <section aria-labelledby="quickstart-title" id="quickstart">
           <div class="section-heading">
-            <h2 id="quickstart-title">Getting started</h2>
+            <h2 id="quickstart-title">Reproduce the example</h2>
           </div>
           <p class="section-intro">
             Clone the repository and run the synthetic comparison locally. A
@@ -208,7 +170,7 @@ python examples/noisy_quadratic.py --workers 2</code></pre>
         </section>
         <section aria-labelledby="evidence-title" id="evidence">
           <div class="section-heading">
-            <h2 id="evidence-title">Experiment record</h2>
+            <h2 id="evidence-title">Preliminary experiment</h2>
           </div>
           <p class="section-intro">
             The same 16 configurations, evaluated by two schedulers. Each square
@@ -290,7 +252,7 @@ python examples/noisy_quadratic.py --workers 2</code></pre>
         </section>
         <section aria-labelledby="architecture-title" id="architecture">
           <div class="section-heading">
-            <h2 id="architecture-title">How it works</h2>
+            <h2 id="architecture-title">Method and implementation</h2>
             <a
               href="https://github.com/kenchengkc/aster-hpo/blob/main/DESIGN.md"
               >Design notes ↗</a
@@ -352,7 +314,6 @@ python examples/noisy_quadratic.py --workers 2</code></pre>
             </div>
           </details>
         </section>
-
         <section aria-labelledby="roadmap-title" id="roadmap">
           <div class="section-heading">
             <h2 id="roadmap-title">Research agenda</h2>
