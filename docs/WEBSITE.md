@@ -66,7 +66,8 @@ remain protected. Confirm that the deployment contains no Python functions.
 
 ## Visual direction
 
-The layout follows Optuna's project page: simple top navigation, a broad blue hero,
-three prominent feature panels, and larger reading text. Arial is used throughout
-the interface and figures; code blocks alone use a monospace font. No external font
-or frontend dependencies are required.
+The layout retains Optuna-inspired navigation and generous reading text, with a
+restrained academic presentation: a pale blue introduction, left-aligned research
+sections, and unboxed method summaries. Arial is used throughout the interface and
+figures; code blocks alone use monospace. Body text is 18px, with no tiny labels or
+decorative divider lines. No external font or frontend dependencies are required.
