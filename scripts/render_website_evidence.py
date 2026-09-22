@@ -17,7 +17,7 @@ def render(source: str, target: str, label: str) -> None:
         f'<title id="title">{label}: objective evaluations by candidate</title>',
         '<desc id="desc">Each square is one replication. '
         "Rows are candidate IDs, columns are replication indices.</desc>",
-        '<g font-family="monospace" font-size="10" fill="#5d6961">',
+        '<g font-family="Arial, sans-serif" font-size="10" fill="#5d6961">',
         '<text x="0" y="15">ID</text>',
         '<text x="47" y="15">01</text>',
         '<text x="143" y="15">09</text>',
@@ -30,14 +30,14 @@ def render(source: str, target: str, label: str) -> None:
         assert count <= cap
         y = 29 + row * 16
         svg.append(
-            f'<text x="0" y="{y + 9}" font-family="monospace" '
+            f'<text x="0" y="{y + 9}" font-family="Arial, sans-serif" '
             f'font-size="10" fill="#5d6961">{trial["id"]:02d}</text>'
         )
         for col in range(cap):
-            color = "#226343" if col < count else "#e7ece6"
+            color = "#204d91" if col < count else "#e7ece6"
             svg.append(f'<rect x="{47 + col * 12}" y="{y}" width="9" height="9" fill="{color}"/>')
     svg.append(
-        '<text x="47" y="300" font-family="monospace" font-size="10" '
+        '<text x="47" y="300" font-family="Arial, sans-serif" font-size="10" '
         'fill="#5d6961">Replication index →</text></svg>'
     )
     (ROOT / "website/assets" / target).write_text("\n".join(svg) + "\n")
