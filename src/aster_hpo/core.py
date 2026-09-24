@@ -17,6 +17,7 @@ from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+from .schedulers import RacePolicy
 from .space import Scalar
 
 Config = dict[str, Scalar]
@@ -175,34 +176,6 @@ def _evaluate(objective: Objective, config: Config, replication: Replication) ->
     )
 
 
-def _pruning_decision(trial: Trial, trials: list[Trial], policy: ReplicationRace) -> dict | None:
-    n = len(trial.losses)
-    if n not in policy.checkpoints[:-1]:
-        return None
-    peers = [
-        t
-        for t in trials
-        if t.id != trial.id and t.status not in {"failed", "pruned"} and len(t.losses) >= n
-    ]
-    if not peers:
-        return None
-    peer = min(peers, key=lambda t: (statistics.mean(t.losses[:n]), t.id))
-    differences = [a - b for a, b in zip(trial.losses, peer.losses[:n], strict=True)]
-    mean = statistics.mean(differences)
-    se = statistics.stdev(differences) / math.sqrt(n)
-    lower = mean - policy.z * se
-    return {
-        "trial_id": trial.id,
-        "peer_id": peer.id,
-        "replications": n,
-        "mean_difference": mean,
-        "standard_error": se,
-        "heuristic_lower_bound": lower,
-        "tolerance": policy.tolerance,
-        "action": "prune" if lower > policy.tolerance else "continue",
-    }
-
-
 class Study:
     """Minimize a finite configuration pool with one in-flight replication per trial.
 
@@ -240,6 +213,7 @@ class Study:
         trials = [Trial(i, dict(c)) for i, c in enumerate(self.configs)]
         ready = deque(range(len(trials)))
         decisions = []
+        policy = RacePolicy(self.scheduler) if isinstance(self.scheduler, ReplicationRace) else None
 
         def replication_for(trial):
             return Replication.create(
@@ -248,25 +222,26 @@ class Study:
 
         def accept(trial, observation):
             trial.observations.append(observation)
-            if observation.error is not None:
-                trial.status = "failed"
-                return
-            if len(trial.losses) == self.scheduler.maximum:
-                trial.status = "complete"
-                return
-            if isinstance(self.scheduler, ReplicationRace):
-                decision = _pruning_decision(trial, trials, self.scheduler)
-                if decision:
+            # A peer may have pruned this candidate while its replication was in flight.
+            if trial.status != "pruned":
+                if observation.error is not None:
+                    trial.status = "failed"
+                elif len(trial.losses) == self.scheduler.maximum:
+                    trial.status = "complete"
+                else:
+                    trial.status = "pending"
+                    ready.append(trial.id)
+            if policy is not None:
+                for decision in policy.decisions(trials):
                     decisions.append(decision)
                     if decision["action"] == "prune":
-                        trial.status = "pruned"
-                        return
-            trial.status = "pending"
-            ready.append(trial.id)
+                        trials[decision["trial_id"]].status = "pruned"
 
         if self.workers == 1:
             while ready:
                 trial = trials[ready.popleft()]
+                if trial.status != "pending":
+                    continue
                 accept(trial, _evaluate(objective, trial.config, replication_for(trial)))
         else:
             with ProcessPoolExecutor(
@@ -276,11 +251,15 @@ class Study:
                 while ready or pending:
                     while ready and len(pending) < self.workers:
                         trial = trials[ready.popleft()]
+                        if trial.status != "pending":
+                            continue
                         trial.status = "running"
                         future = pool.submit(
                             _evaluate, objective, trial.config, replication_for(trial)
                         )
                         pending[future] = trial
+                    if not pending:
+                        break
                     done, _ = wait(pending, return_when=FIRST_COMPLETED)
                     for future in sorted(done, key=lambda f: pending[f].id):
                         # Broken pools / serialization errors abort rather than fabricate losses.
