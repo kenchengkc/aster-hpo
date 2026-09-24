@@ -1,5 +1,27 @@
 # Benchmarking protocol
 
+## Runnable synthetic diagnostics
+
+From an editable installation in this repository:
+
+```bash
+python -m benchmarks.diagnostics --output results/diagnostics --seeds 20
+# With Matplotlib installed:
+python -m benchmarks.diagnostics --output results/diagnostics --report-only --plots
+```
+
+The default suite runs 640 campaigns: four noise models, 20 independent seeds,
+shared/independent scenarios, two candidate orders, and two allocation methods.
+Every campaign uses a frozen candidate pool. The suite records analytical regret,
+replication counts, pruned optima, and paired differences. Order permutations are
+reported separately and are not treated as independent optimizer runs.
+
+Each output directory is immutable for execution: choose a new directory for a new
+experiment. Reporting can be regenerated from its manifest and raw run files.
+Missing or mismatched artifacts fail reporting rather than silently shrinking the
+sample. These cheap objectives diagnose allocation behavior; they do not establish
+practical wall-time speedups.
+
 No comparative performance results are established yet. The synthetic example is a smoke
 test, not a benchmark of practical speedups.
 
