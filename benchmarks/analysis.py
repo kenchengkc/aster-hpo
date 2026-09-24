@@ -16,11 +16,15 @@ def paired_analysis(differences, *, margin, confidence=0.95):
     n = len(values)
     mean = statistics.mean(values) if n else None
     se = statistics.stdev(values) / math.sqrt(n) if n >= 2 else None
-    upper = mean + float(t.ppf(confidence, n - 1)) * se if n >= 2 else None
+    upper = mean + float(t.ppf(confidence, n - 1)) * se if n >= 2 and se > 0 else None
     if n != len(differences):
         status = "incomplete"
     elif n < 2:
         status = "insufficient"
+    elif se == 0:
+        # Constant observed differences do not estimate between-run variation.
+        # Report the observed mean without a zero-width inferential t bound.
+        status = "degenerate"
     else:
         status = "noninferior" if upper < margin else "inconclusive"
     return {

@@ -27,6 +27,24 @@ def test_missing_or_insufficient_runs_cannot_support_preservation():
         paired_analysis([1, 2], margin=-1)
 
 
+@pytest.mark.parametrize("difference", [0.0, 0.01, -0.01])
+def test_constant_paired_differences_have_no_inferential_bound(difference):
+    from benchmarks.analysis import paired_analysis
+
+    result = paired_analysis([difference] * 20, margin=1)
+    assert result["mean_difference"] == difference
+    assert result["standard_error"] == 0
+    assert result["upper_bound"] is None
+    assert result["status"] == "degenerate"
+
+
+def test_plot_interval_requires_multiple_independent_runs():
+    from benchmarks.study_plots import mean_interval
+
+    assert mean_interval([1]) is None
+    assert mean_interval([1, 2, 3]) == pytest.approx(2.484137712, rel=1e-7)
+
+
 def test_nested_replications_reduce_to_one_difference_per_optimizer_seed():
     from benchmarks.analysis import analyze_campaigns
 

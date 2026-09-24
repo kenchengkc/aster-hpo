@@ -103,3 +103,14 @@ def test_synthetic_noise_has_residual_uncertainty_and_finite_heavy_tails():
     assert expected_loss("near_ties", {"x": 2}) == pytest.approx(0.08)
     with pytest.raises(ValueError):
         SyntheticObjective("unknown")
+
+
+def test_manifest_records_installed_native_thread_controller():
+    import importlib.metadata
+
+    from benchmarks.common import environment
+
+    pytest.importorskip("threadpoolctl")
+    assert environment()["dependencies"]["threadpoolctl"] == importlib.metadata.version(
+        "threadpoolctl"
+    )

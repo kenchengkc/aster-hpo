@@ -21,13 +21,22 @@ COLORS = {
 }
 
 
+def mean_interval(values):
+    """Return a nominal 95% t half-width, or no interval for insufficient runs."""
+    from scipy.stats import t
+
+    if len(values) < 2:
+        return None
+    se = statistics.stdev(values) / math.sqrt(len(values))
+    return float(t.ppf(0.975, len(values) - 1)) * se
+
+
 def plot_study(output):
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from matplotlib.patches import Patch
-    from scipy.stats import t
 
     output = Path(output)
     report = regenerate(output)
@@ -50,16 +59,14 @@ def plot_study(output):
             ]
             if not means:
                 continue
-            se = statistics.stdev(means) / math.sqrt(len(means)) if len(means) > 1 else 0
-            error = float(t.ppf(0.975, len(means) - 1)) * se if len(means) > 1 else 0
             ax.errorbar(
                 row[field],
                 row["mean_audited_loss"],
-                yerr=error,
+                yerr=mean_interval(means),
                 fmt="o",
                 capsize=4,
                 color=COLORS[method],
-                label=LABELS[method],
+                label=LABELS[method] + (" (one run; no interval)" if len(means) == 1 else ""),
             )
         ax.set(
             xlabel=xlabel,
@@ -72,7 +79,7 @@ def plot_study(output):
         fig.text(
             0.02,
             -0.04,
-            "95% t intervals across optimizer seeds; not time-to-target curves.",
+            "95% t intervals when ≥2 optimizer seeds; not time-to-target curves.",
             fontsize=9,
         )
         fig.savefig(output / filename, dpi=160, bbox_inches="tight")

@@ -79,8 +79,8 @@ class Coordinator:
             for trial in self.trials:
                 if trial.status == "running":
                     trial.status = "pending"
-                    if trial.id not in self.ready:
-                        self.ready.append(trial.id)
+                if trial.status == "pending" and trial.id not in self.ready:
+                    self.ready.append(trial.id)
             self.decisions = saved["decisions"]
         else:
             self.trials = [Trial(i, dict(config)) for i, config in enumerate(study.configs)]
@@ -105,8 +105,9 @@ class Coordinator:
 
     def dispatch(self):
         while self.ready:
-            trial = self.trials[self.ready.popleft()]
+            trial = self.trials[self.ready[0]]
             if trial.status != "pending":
+                self.ready.popleft()
                 continue
             replication = Replication.create(
                 self.study.seed,
@@ -120,6 +121,7 @@ class Coordinator:
                     f"Infrastructure retry budget exhausted for trial {trial.id}, "
                     f"replication {replication.index}"
                 )
+            self.ready.popleft()
             trial.status = "running"
             attempt = self.store.begin_attempt(trial.id, asdict(replication), self.snapshot())
             return trial, replication, attempt
@@ -155,11 +157,16 @@ class Coordinator:
             self.store.fail_attempt(attempt, "infrastructure_failed", str(error), self.snapshot())
 
     def interrupt(self):
+        # In-memory changes may be speculative if dispatch/accept/retry raised
+        # before their SQLite transaction committed. Cleanup must only preserve
+        # committed state, including when an interrupt arrived just after commit.
+        committed = self.store.load()
+        committed["wall_seconds"] = self.snapshot()["wall_seconds"]
         attempts, _ = self.store.journal()
         for attempt in attempts:
             if attempt["status"] == "running":
                 self.store.fail_attempt(
-                    attempt["id"], "interrupted", "coordinator stopped", self.snapshot()
+                    attempt["id"], "interrupted", "coordinator stopped", committed
                 )
 
 

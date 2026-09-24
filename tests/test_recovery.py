@@ -180,3 +180,64 @@ Study([{'x': 0}], scheduler=FullBudget(4), storage=root / 'killed.sqlite',
     ).optimize(resumed)
     assert calls == [2, 3]
     assert result.trials[0].losses == [0, 1, 2, 3]
+
+
+@pytest.mark.parametrize("boundary", ["before", "during", "after", "rejected"])
+def test_interrupted_acceptance_recovers_only_committed_state(tmp_path, monkeypatch, boundary):
+    from aster_hpo.core import _evaluate
+    from aster_hpo.runtime import Coordinator
+    from aster_hpo.storage import SQLiteStore
+
+    study = Study([{"x": 1}], scheduler=FullBudget(1))
+    with SQLiteStore(tmp_path / "accept.sqlite", {}) as store:
+        coordinator = Coordinator(study, store)
+        job = coordinator.dispatch()
+        observation = _evaluate(deterministic, job[0].config, job[1])
+        accept = store.accept
+
+        def interrupted(*args):
+            if boundary == "after":
+                accept(*args)
+            if boundary == "rejected":
+                return False
+            raise KeyboardInterrupt
+
+        # 'during' interrupts after INSERT observation but before transaction commit.
+        with monkeypatch.context() as patch:
+            patch.setattr(store, "_save" if boundary == "during" else "accept", interrupted)
+            with pytest.raises(RuntimeError if boundary == "rejected" else KeyboardInterrupt):
+                coordinator.accept(job, observation)
+        coordinator.interrupt()
+        recovered = Coordinator(study, store)
+        if boundary == "after":
+            assert recovered.dispatch() is None
+        else:
+            retry = recovered.dispatch()
+            assert retry is not None
+            assert retry[1] == job[1]
+            recovered.accept(retry, observation)
+        assert recovered.trials[0].status == "complete"
+        assert recovered.trials[0].losses == [observation.loss]
+        assert len(store.load()["trials"][0]["observations"]) == 1
+
+
+def test_retry_exhaustion_cannot_remove_pending_work_on_resume(tmp_path):
+    from aster_hpo.runtime import Coordinator
+    from aster_hpo.storage import SQLiteStore
+
+    study = Study([{"x": 0}, {"x": 1}], scheduler=FullBudget(1), max_retries=0)
+    with SQLiteStore(tmp_path / "exhausted.sqlite", {}) as store:
+        coordinator = Coordinator(study, store)
+        first, second = coordinator.dispatch(), coordinator.dispatch()
+        coordinator.retry([second], "worker disappeared")
+        with pytest.raises(RuntimeError, match="retry budget"):
+            coordinator.dispatch()
+        assert second[0].id in coordinator.ready
+        coordinator.interrupt()
+        recovered = Coordinator(study, store)
+        # Trial 1 remains pending and must still fail explicitly, even while a
+        # different trial had been in flight during interruption cleanup.
+        assert second[0].id in recovered.ready
+        with pytest.raises(RuntimeError, match="retry budget"):
+            recovered.dispatch()
+        assert recovered.trials[first[0].id].status == "pending"

@@ -23,7 +23,9 @@ def pilot(path):
     write_json(path / "summary.json", {"full_budget": {"audit_mean": 0.01}})
 
 
-def test_frozen_study_runs_resumes_and_regenerates_from_evidence(tmp_path):
+def test_frozen_study_runs_resumes_and_regenerates_from_evidence(tmp_path, monkeypatch):
+    import importlib.metadata
+
     from benchmarks.study import freeze_protocol, regenerate, run_study
 
     pilot(tmp_path / "pilot")
@@ -45,6 +47,15 @@ def test_frozen_study_runs_resumes_and_regenerates_from_evidence(tmp_path):
     assert report["comparisons"]["race"]["n"] == 2
     assert regenerate(output) == report
     assert run_study(protocol, output, resume=True) == report
+    original_version = importlib.metadata.version
+    with monkeypatch.context() as patch:
+        patch.setattr(
+            importlib.metadata,
+            "version",
+            lambda name: "changed" if name == "threadpoolctl" else original_version(name),
+        )
+        with pytest.raises(ValueError, match="threadpoolctl"):
+            run_study(protocol, output, resume=True)
     with pytest.raises(FileExistsError):
         run_study(protocol, output)
     manifest = json.loads((output / "manifest.json").read_text())

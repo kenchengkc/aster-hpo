@@ -131,6 +131,8 @@ def regenerate(output):
             "their mean differences; it is not a sequential pruning guarantee.",
             "Audit paths and training replications are nested within optimizer runs, not counted",
             "as extra independent runs. Inconclusive intervals do not establish equivalence.",
+            "A degenerate comparison has zero sample variance: its observed difference is",
+            "reported, but no inferential bound or non-inferiority conclusion is supplied.",
             "",
             "## Cost and scope",
             "",
