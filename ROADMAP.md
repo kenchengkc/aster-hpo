@@ -1,50 +1,39 @@
 # Roadmap
 
-The versions below describe milestones, not promised release dates. The project design
-assumes roughly 10–12 weeks for the first complete research study.
+v0.2 delivers the local runtime and first reproducible CPU research study. Remaining
+items are research directions, not promised release dates or achieved guarantees.
 
-## v0.1 — Contributor foundation
+## Implemented in v0.2
 
-- [x] Installable Python package with no runtime dependencies
-- [x] Typed random search spaces and a frozen candidate pool
-- [x] Local asynchronous process execution
-- [x] Full-budget baseline and experimental paired replication pruning
-- [x] Isolated audit seed namespace and descriptive summary
-- [x] JSON observations, timings, failures, and decision records
-- [x] Runnable synthetic example, tests, CI, MIT license, contribution guidelines
+- [x] Dependency-free package, typed random spaces, fixed candidate pools.
+- [x] Full-budget, stopping-ASHA, and matched-prefix replication racing.
+- [x] SQLite acceptance transactions, resume, attempt identities, bounded retries.
+- [x] Thread controls, immutable experiment manifests, worker timelines, explicit unknown costs.
+- [x] Shared/independent scenario and candidate-order diagnostic ablations.
+- [x] Additive, heteroscedastic, near-tie, and finite-variance heavy-tail diagnostics.
+- [x] CPU neural hedging with transaction costs, delta reference, gradient/accounting checks.
+- [x] Locked winners, disjoint audits, paired analysis across independent optimizer runs.
+- [x] Four-method allocation study and separate fixed-workload scaling measurements.
+- [x] Raw evidence, standalone figures, technical report, report regeneration.
+- [x] Single-bracket ASHA decision compatibility test against pinned Ray 2.58.0.
 
-## v0.2 — Reliable experiment runtime
+## Runtime extensions
 
-- [ ] Coordinator-owned SQLite storage with explicit state transitions
-- [ ] Resume interrupted experiments; deduplicate replication results
-- [ ] Attempt identities, bounded infrastructure retries, and stale-result rejection
-- [ ] Cancellation, deadlines, compute-budget enforcement, and complete cost accounting
-- [ ] Numerical-library thread limits and machine/configuration manifests
-- [ ] Scheduler event replay and explicit result-schema versioning policy
+- [ ] Hard deadlines, cancellation, and enforced wall/compute budgets.
+- [ ] Distributed execution and durable multi-machine coordination.
+- [ ] Schema migrations and a public event-replay API.
+- [ ] Multiple concurrent replications per candidate, with explicit decision ordering.
+- [ ] System-level resource measurement beyond returned objective CPU time.
 
-## v0.3 — Reproducible comparisons
+## Research extensions
 
-- [ ] ASHA implementation and established-tool baselines
-- [ ] Fixed-budget finalist selection and independent paired non-inferiority analysis
-- [ ] Controlled noise, near-tie, heavy-tail, and runtime-correlation test workloads
-- [ ] Ablations for shared scenarios, uncertainty, and asynchronous dispatch
-- [ ] Repeated-seed experiment runner and standalone figures
+- [ ] Full Ray Tune and Optuna TPE comparisons, with proposer/runtime differences separated.
+- [ ] Prespecified time-to-target, equal-wall-budget, and equal-compute studies.
+- [ ] Explicit finalist-selection budgets and formal sequential guarantees under stated assumptions.
+- [ ] Runtime-correlated noise and synchronous-dispatch ablations.
+- [ ] Larger candidate pools, harder ranking tasks, additional hardware, and longer workloads.
+- [ ] Stochastic volatility and broader financial stress tests.
+- [ ] Cost-aware allocation and validated fidelity policies.
 
-## v0.4 — Financial research benchmark
-
-- [ ] Small neural hedging policy under proportional transaction costs
-- [ ] Simulator checks and a delta-hedge reference
-- [ ] Hyperparameter search with fixed simulation and training specifications
-- [ ] Independent training replications and out-of-search evaluation paths
-- [ ] Hedging-error, turnover, cost, and instability diagnostics
-- [ ] Technical report with raw results and one-command reproduction
-
-## Later research
-
-- [ ] Optuna proposer adapter and Ray executor
-- [ ] Formal selection procedure under explicit, testable assumptions
-- [ ] Stochastic-volatility workload
-- [ ] Cost-aware allocation and carefully validated fidelity policies
-
-Release gates: tests and CI pass; examples run from the installed package; documentation
-matches implemented behavior; empirical claims link to reproducible results.
+Release gates: meaningful tests pass, installed-package examples work, and empirical
+claims link to raw records with their protocol and limitations. See [results](docs/RESULTS.md).

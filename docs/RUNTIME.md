@@ -58,3 +58,14 @@ than concurrent threads in one process.
 
 The store uses schema version 2. Other schemas or incompatible manifests are
 rejected; automatic migration is not provided.
+
+`audit()` accepts the same storage, objective_id, retry, worker, and thread options.
+Use a separate database for audit; its replication identities retain the `audit`
+phase. An audit locks one configuration and therefore runs at most one replication
+at a time under the current per-candidate concurrency rule.
+
+Interruption cleanup persists the last committed database state, not speculative
+in-memory decisions. A failure before or during acceptance leaves that replication
+eligible for retry; an interruption after commit preserves its accepted observation.
+Exhausted retry entries remain visible on resume and fail explicitly. Recovery does
+not silently report a campaign with missing pending candidates as finished.

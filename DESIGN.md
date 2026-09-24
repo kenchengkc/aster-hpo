@@ -1,8 +1,8 @@
 # Aster: Parallel Hyperparameter Optimization for Noisy Simulations
 
-Status: target architecture and research plan. A v0.1 prototype now implements a subset;
+Status: target architecture and research plan. v0.2 implements the local runtime and first CPU study;
 see [README.md](README.md) for current behavior and [ROADMAP.md](ROADMAP.md) for remaining
-work. No comparative benchmark results are established yet. API sketches below describe
+work. The first measured comparison is in [docs/RESULTS.md](docs/RESULTS.md). API sketches below describe
 the intended system and are not the current runnable API.
 
 ## Project thesis

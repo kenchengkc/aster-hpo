@@ -8,8 +8,8 @@ clear motivation and evidence are easiest to review.
 Fork the repository, clone your fork, create a virtual environment, and install:
 
 ```bash
-python -m pip install -e '.[dev]'
-pytest
+python -m pip install -e '.[dev,benchmark]'
+python -m pytest
 ```
 
 Use a descriptive branch such as `fix/seed-validation` or `feat/asha-scheduler`.
@@ -20,7 +20,7 @@ documentation corrections, and regression tests can go directly to a pull reques
 
 - Explain the concrete problem and resulting behavior.
 - Add meaningful tests for changes to scheduling, statistics, seeds, budgets, or failures.
-- Run `pytest`, `ruff check .`, `ruff format --check .`, and `python -m build`.
+- Run `python -m pytest`, `ruff check .`, `ruff format --check .`, and `python -m build`.
 - Update documentation when behavior or the public API changes.
 - Keep unrelated changes separate and preserve backward compatibility where practical.
 

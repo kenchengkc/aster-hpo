@@ -1,0 +1,7 @@
+# Numerical/reporting versions used for the archived CPU study (Python 3.11.5, arm64).
+# Install the project separately with: python -m pip install -e '.[dev,benchmark]'
+numpy==2.4.1
+scipy==1.17.0
+matplotlib==3.10.8
+threadpoolctl==3.6.0
+# Optional policy-reference test: python -m pip install -e '.[baseline]'

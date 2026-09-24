@@ -31,6 +31,9 @@ Issues = "https://github.com/kenchengkc/aster-hpo/issues"
 [tool.hatch.build.targets.wheel]
 packages = ["src/aster_hpo"]
 
+[tool.hatch.build.targets.sdist]
+exclude = ["/.superpowers", "/docs/evidence/**/*.tar.gz"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
