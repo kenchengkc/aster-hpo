@@ -21,6 +21,7 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<10", "ruff>=0.9,<1", "build>=1.2,<2"]
+benchmark = ["numpy>=1.26,<3", "scipy>=1.11,<2", "matplotlib>=3.9,<4", "threadpoolctl>=3,<4"]
 
 [project.urls]
 Homepage = "https://github.com/kenchengkc/aster-hpo"
