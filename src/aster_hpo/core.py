@@ -13,6 +13,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+from .schedulers import ASHA
 from .space import Scalar
 
 Config = dict[str, Scalar]
@@ -194,7 +195,7 @@ class Study:
         self,
         configs: Sequence[Mapping[str, Scalar]],
         *,
-        scheduler: FullBudget | ReplicationRace | None = None,
+        scheduler: FullBudget | ReplicationRace | ASHA | None = None,
         workers: int = 1,
         seed: int = 0,
         shared_scenarios: bool = True,
@@ -210,6 +211,7 @@ class Study:
         if storage is not None and (not isinstance(objective_id, str) or not objective_id.strip()):
             raise ValueError("Persistent studies require an explicit objective_id")
         self.storage, self.objective_id = storage, objective_id
+        self._phase = "search"
         self.max_retries, self.threads_per_worker = max_retries, threads_per_worker
         if type(seed) is not int:
             raise ValueError("seed must be an integer")
@@ -222,7 +224,7 @@ class Study:
                 raise ValueError("Configuration values must be JSON scalars")
         self.configs = json.loads(json.dumps([dict(c) for c in configs], allow_nan=False))
         self.scheduler = scheduler if scheduler is not None else FullBudget()
-        if not isinstance(self.scheduler, FullBudget | ReplicationRace):
+        if not isinstance(self.scheduler, FullBudget | ReplicationRace | ASHA):
             raise TypeError("Unsupported scheduler")
         self.workers, self.seed, self.shared_scenarios = workers, seed, shared_scenarios
 
@@ -235,6 +237,8 @@ class Study:
 @dataclass
 class AuditResult:
     observations: list[Observation]
+    wall_seconds: float = 0.0
+    metadata: dict = field(default_factory=dict)
 
     @property
     def mean(self) -> float:
@@ -248,22 +252,41 @@ class AuditResult:
 
 
 def audit(
-    objective: Objective, config: Config, *, replications: int = 30, seed: int = 0
+    objective: Objective,
+    config: Config,
+    *,
+    replications: int = 30,
+    seed: int = 0,
+    workers: int = 1,
+    storage: str | Path | None = None,
+    objective_id: str | None = None,
+    max_retries: int = 1,
+    threads_per_worker: int = 1,
 ) -> AuditResult:
-    """Evaluate a locked configuration on an isolated seed namespace, serially.
+    """Evaluate a locked configuration in a separate, optionally durable namespace.
 
-    Choose sample count in advance; mean and standard error are descriptive. Repeated
-    calls with the same inputs reuse data and must not be treated as fresh evidence.
+    Choose sample count in advance. Repeated calls with identical seeds reuse data
+    and must not be treated as fresh evidence. A persistent audit resumes work.
     """
     _positive_integer(replications, "replications")
     if replications < 2:
         raise ValueError("Audit requires at least two replications")
-    observations = []
-    for index in range(replications):
-        observation = _evaluate(
-            objective, config, Replication.create(seed, config, index, "audit", True)
-        )
+    study = Study(
+        [config],
+        scheduler=FullBudget(replications),
+        workers=workers,
+        seed=seed,
+        storage=storage,
+        objective_id=objective_id,
+        max_retries=max_retries,
+        threads_per_worker=threads_per_worker,
+    )
+    study._phase = "audit"
+    result = study.optimize(objective)
+    observations = result.trials[0].observations
+    for observation in observations:
         if observation.error is not None:
-            raise RuntimeError(f"Audit replication {index} failed: {observation.error}")
-        observations.append(observation)
-    return AuditResult(observations)
+            raise RuntimeError(
+                f"Audit replication {observation.replication.index} failed: {observation.error}"
+            )
+    return AuditResult(observations, result.wall_seconds, result.metadata)

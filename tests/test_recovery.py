@@ -116,6 +116,26 @@ def test_persistent_studies_require_explicit_objective_identity(tmp_path):
         Study([{"x": 0}], storage=tmp_path / "run.sqlite")
 
 
+def test_audit_is_resumable_and_keeps_its_seed_namespace(tmp_path):
+    from aster_hpo import audit
+
+    calls = []
+
+    def objective(config, replication):
+        calls.append((replication.phase, replication.index))
+        return deterministic(config, replication)
+
+    settings = dict(
+        replications=3, seed=7, storage=tmp_path / "audit.sqlite", objective_id="audit-v1"
+    )
+    first = audit(objective, {"x": 0}, **settings)
+    second = audit(objective, {"x": 0}, **settings)
+    assert calls == [("audit", 0), ("audit", 1), ("audit", 2)]
+    assert first.mean == second.mean
+    assert second.metadata["phase"] == "audit"
+    assert second.wall_seconds > 0
+
+
 def test_killed_coordinator_resumes_without_repeating_committed_work(tmp_path):
     driver = tmp_path / "driver.py"
     db = tmp_path / "killed.sqlite"

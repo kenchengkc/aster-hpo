@@ -12,8 +12,9 @@ from concurrent.futures.process import BrokenProcessPool
 from contextlib import contextmanager
 from dataclasses import asdict
 
+from ._version import __version__
 from .core import Observation, Replication, ReplicationRace, StudyResult, Trial, _evaluate
-from .schedulers import RacePolicy
+from .schedulers import ASHA, ASHAPolicy, RacePolicy
 from .storage import SQLiteStore
 
 THREAD_VARIABLES = (
@@ -85,11 +86,12 @@ class Coordinator:
             self.trials = [Trial(i, dict(config)) for i, config in enumerate(study.configs)]
             self.ready = deque(range(len(self.trials)))
             self.decisions = []
-        self.policy = (
-            RacePolicy(study.scheduler, self.decisions)
-            if isinstance(study.scheduler, ReplicationRace)
-            else None
-        )
+        if isinstance(study.scheduler, ReplicationRace):
+            self.policy = RacePolicy(study.scheduler, self.decisions)
+        elif isinstance(study.scheduler, ASHA):
+            self.policy = ASHAPolicy(study.scheduler, self.decisions)
+        else:
+            self.policy = None
         store.recover(self.snapshot())
 
     def snapshot(self):
@@ -110,7 +112,7 @@ class Coordinator:
                 self.study.seed,
                 trial.config,
                 len(trial.observations),
-                "search",
+                self.study._phase,
                 self.study.shared_scenarios,
             )
             if self.store.attempt_count(trial.id, replication.index) > self.study.max_retries:
@@ -225,6 +227,7 @@ def _parallel(coordinator, objective):
 def run(study, objective):
     manifest = {
         "schema_version": 2,
+        "phase": study._phase,
         "configs": study.configs,
         "seed": study.seed,
         "scheduler": type(study.scheduler).__name__,
@@ -260,7 +263,7 @@ def run(study, objective):
             snapshot["wall_seconds"],
             {
                 **manifest,
-                "package_version": "0.1.0",
+                "package_version": __version__,
                 "python": platform.python_version(),
                 "platform": platform.platform(),
                 "persistent": study.storage is not None,

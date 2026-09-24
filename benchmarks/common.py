@@ -40,6 +40,11 @@ def environment():
         except importlib.metadata.PackageNotFoundError:
             pass
     dirty = git("status", "--porcelain")
+    cpu_model = platform.processor()
+    if platform.system() == "Darwin":
+        cpu_model = subprocess.check_output(
+            ["sysctl", "-n", "machdep.cpu.brand_string"], text=True
+        ).strip()
     return {
         "revision": git("rev-parse", "HEAD"),
         "dirty": None if dirty is None else bool(dirty),
@@ -47,6 +52,7 @@ def environment():
         "platform": platform.platform(),
         "machine": platform.machine(),
         "cpu_count": os.cpu_count(),
+        "cpu_model": cpu_model,
         "dependencies": versions,
         "thread_environment": {
             name: os.environ.get(name)

@@ -1,5 +1,6 @@
 """Small, dependency-free building blocks for stochastic optimization."""
 
+from ._version import __version__ as __version__
 from .core import (
     AuditResult,
     FullBudget,
@@ -9,10 +10,11 @@ from .core import (
     StudyResult,
     audit,
 )
+from .schedulers import ASHA
 from .space import Choice, Float, Int, sample_configs
 
-__version__ = "0.1.0"
 __all__ = [
+    "ASHA",
     "AuditResult",
     "Choice",
     "Float",

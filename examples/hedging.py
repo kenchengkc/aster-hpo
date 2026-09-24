@@ -18,8 +18,10 @@ def main():
     parser.add_argument("--workers", type=int, default=2)
     parser.add_argument("--configs", type=int, default=6)
     parser.add_argument("--seed", type=int, default=10000)
+    parser.add_argument("--epochs", type=int, default=64)
+    parser.add_argument("--batch-paths", type=int, default=128)
     args = parser.parse_args()
-    market = Market()
+    market = Market(epochs=args.epochs, batch_paths=args.batch_paths)
     output = create_experiment(
         args.output,
         {
