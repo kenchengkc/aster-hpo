@@ -5,19 +5,14 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-import multiprocessing
 import os
-import platform
 import statistics
 import tempfile
 import time
-from collections import deque
 from collections.abc import Callable, Mapping, Sequence
-from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-from .schedulers import RacePolicy
 from .space import Scalar
 
 Config = dict[str, Scalar]
@@ -105,6 +100,9 @@ class Observation:
     wall_seconds: float
     cpu_seconds: float
     error: str | None = None
+    started_at: float | None = None
+    finished_at: float | None = None
+    worker_pid: int | None = None
 
 
 @dataclass
@@ -163,6 +161,7 @@ class StudyResult:
 
 
 def _evaluate(objective: Objective, config: Config, replication: Replication) -> Observation:
+    started_at = time.time()
     wall, cpu = time.perf_counter(), time.process_time()
     try:
         loss = float(objective(dict(config), replication))
@@ -172,7 +171,14 @@ def _evaluate(objective: Objective, config: Config, replication: Replication) ->
     except Exception as exc:
         loss, error = None, f"{type(exc).__name__}: {exc}"
     return Observation(
-        replication, loss, time.perf_counter() - wall, time.process_time() - cpu, error
+        replication,
+        loss,
+        time.perf_counter() - wall,
+        time.process_time() - cpu,
+        error,
+        started_at,
+        time.time(),
+        os.getpid(),
     )
 
 
@@ -180,7 +186,8 @@ class Study:
     """Minimize a finite configuration pool with one in-flight replication per trial.
 
     Workers use spawn, so objectives must be importable top-level callables. A one-worker
-    study runs in the caller for debugging. No retries, deadlines, or resume in v0.1.
+    study runs in the caller. Optional SQLite storage resumes committed progress.
+    Infrastructure retries reuse seeds; objective failures are never retried.
     """
 
     def __init__(
@@ -191,8 +198,19 @@ class Study:
         workers: int = 1,
         seed: int = 0,
         shared_scenarios: bool = True,
+        storage: str | Path | None = None,
+        objective_id: str | None = None,
+        max_retries: int = 1,
+        threads_per_worker: int = 1,
     ):
         _positive_integer(workers, "workers")
+        _positive_integer(threads_per_worker, "threads_per_worker")
+        if type(max_retries) is not int or max_retries < 0:
+            raise ValueError("max_retries must be a nonnegative integer")
+        if storage is not None and (not isinstance(objective_id, str) or not objective_id.strip()):
+            raise ValueError("Persistent studies require an explicit objective_id")
+        self.storage, self.objective_id = storage, objective_id
+        self.max_retries, self.threads_per_worker = max_retries, threads_per_worker
         if type(seed) is not int:
             raise ValueError("seed must be an integer")
         if not configs:
@@ -209,78 +227,9 @@ class Study:
         self.workers, self.seed, self.shared_scenarios = workers, seed, shared_scenarios
 
     def optimize(self, objective: Objective) -> StudyResult:
-        start = time.perf_counter()
-        trials = [Trial(i, dict(c)) for i, c in enumerate(self.configs)]
-        ready = deque(range(len(trials)))
-        decisions = []
-        policy = RacePolicy(self.scheduler) if isinstance(self.scheduler, ReplicationRace) else None
+        from .runtime import run
 
-        def replication_for(trial):
-            return Replication.create(
-                self.seed, trial.config, len(trial.observations), "search", self.shared_scenarios
-            )
-
-        def accept(trial, observation):
-            trial.observations.append(observation)
-            # A peer may have pruned this candidate while its replication was in flight.
-            if trial.status != "pruned":
-                if observation.error is not None:
-                    trial.status = "failed"
-                elif len(trial.losses) == self.scheduler.maximum:
-                    trial.status = "complete"
-                else:
-                    trial.status = "pending"
-                    ready.append(trial.id)
-            if policy is not None:
-                for decision in policy.decisions(trials):
-                    decisions.append(decision)
-                    if decision["action"] == "prune":
-                        trials[decision["trial_id"]].status = "pruned"
-
-        if self.workers == 1:
-            while ready:
-                trial = trials[ready.popleft()]
-                if trial.status != "pending":
-                    continue
-                accept(trial, _evaluate(objective, trial.config, replication_for(trial)))
-        else:
-            with ProcessPoolExecutor(
-                max_workers=self.workers, mp_context=multiprocessing.get_context("spawn")
-            ) as pool:
-                pending = {}
-                while ready or pending:
-                    while ready and len(pending) < self.workers:
-                        trial = trials[ready.popleft()]
-                        if trial.status != "pending":
-                            continue
-                        trial.status = "running"
-                        future = pool.submit(
-                            _evaluate, objective, trial.config, replication_for(trial)
-                        )
-                        pending[future] = trial
-                    if not pending:
-                        break
-                    done, _ = wait(pending, return_when=FIRST_COMPLETED)
-                    for future in sorted(done, key=lambda f: pending[f].id):
-                        # Broken pools / serialization errors abort rather than fabricate losses.
-                        accept(pending.pop(future), future.result())
-
-        return StudyResult(
-            trials,
-            decisions,
-            time.perf_counter() - start,
-            {
-                "schema_version": 1,
-                "package_version": "0.1.0",
-                "python": platform.python_version(),
-                "platform": platform.platform(),
-                "workers": self.workers,
-                "seed": self.seed,
-                "shared_scenarios": self.shared_scenarios,
-                "scheduler": type(self.scheduler).__name__,
-                "scheduler_parameters": asdict(self.scheduler),
-            },
-        )
+        return run(self, objective)
 
 
 @dataclass

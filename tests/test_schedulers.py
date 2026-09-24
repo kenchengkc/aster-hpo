@@ -85,7 +85,7 @@ def test_in_flight_result_cannot_reactivate_pruned_trial(monkeypatch):
     """Control completion order; exercise real evaluation and coordinator state."""
     from concurrent.futures import Future
 
-    from aster_hpo import core
+    from aster_hpo import runtime
 
     class OrderedPool:
         def __init__(self, **kwargs):
@@ -95,6 +95,9 @@ def test_in_flight_result_cannot_reactivate_pruned_trial(monkeypatch):
             return self
 
         def __exit__(self, *args):
+            pass
+
+        def shutdown(self, **kwargs):
             pass
 
         def submit(self, fn, objective, config, replication):
@@ -113,8 +116,8 @@ def test_in_flight_result_cannot_reactivate_pruned_trial(monkeypatch):
         future.set_result(fn(objective, config, replication))
         return {future}, set(pending) - {future}
 
-    monkeypatch.setattr(core, "ProcessPoolExecutor", OrderedPool)
-    monkeypatch.setattr(core, "wait", finish_one)
+    monkeypatch.setattr(runtime, "ProcessPoolExecutor", OrderedPool)
+    monkeypatch.setattr(runtime, "wait", finish_one)
     result = Study([{"x": 5}, {"x": 0}], scheduler=ReplicationRace((3, 9)), workers=2).optimize(
         noisy
     )
