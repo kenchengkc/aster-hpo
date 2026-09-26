@@ -2,13 +2,10 @@
 
 from __future__ import annotations
 
-import multiprocessing
 import os
 import platform
 import time
 from collections import deque
-from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
-from concurrent.futures.process import BrokenProcessPool
 from contextlib import contextmanager
 from dataclasses import asdict
 
@@ -17,6 +14,7 @@ from .control import SessionControl
 from .core import Observation, Replication, ReplicationRace, StudyResult, Trial, _evaluate
 from .schedulers import ASHA, ASHAPolicy, RacePolicy
 from .storage import SQLiteStore
+from .workers import run_parallel
 
 THREAD_VARIABLES = (
     "OMP_NUM_THREADS",
@@ -161,6 +159,22 @@ class Coordinator:
         for _, _, attempt in jobs:
             self.store.fail_attempt(attempt, "infrastructure_failed", str(error), self.snapshot())
 
+    def cancel(self, jobs, reason):
+        for trial, _, _ in jobs:
+            if trial.status == "running":
+                trial.status = "pending"
+                if trial.id not in self.ready:
+                    self.ready.append(trial.id)
+        self.store.stop_attempts([job[2] for job in jobs], "cancelled", reason, self.snapshot())
+
+    def timeout(self, job):
+        trial, _, attempt = job
+        if trial.status != "pruned":
+            trial.status = "failed"
+        self.store.stop_attempts(
+            [attempt], "timed_out", "evaluation dispatch timeout", self.snapshot()
+        )
+
     def interrupt(self):
         # In-memory changes may be speculative if dispatch/accept/retry raised
         # before their SQLite transaction committed. Cleanup must only preserve
@@ -173,67 +187,6 @@ class Coordinator:
                 self.store.fail_attempt(
                     attempt["id"], "interrupted", "coordinator stopped", committed
                 )
-
-
-def _parallel(coordinator, objective):
-    pool = None
-    pending = {}
-
-    def restart(extra, error):
-        nonlocal pool
-        lost = list(extra)
-        # Salvage already finished results before abandoning a broken pool.
-        for future, job in list(pending.items()):
-            if future.done():
-                try:
-                    observation = future.result()
-                except BrokenProcessPool:
-                    lost.append(job)
-                else:
-                    coordinator.accept(job, observation)
-            else:
-                lost.append(job)
-        pending.clear()
-        pool.shutdown(wait=True, cancel_futures=True)
-        pool = None
-        coordinator.retry(lost, error)
-
-    try:
-        while coordinator.ready or pending:
-            if pool is None:
-                pool = ProcessPoolExecutor(
-                    max_workers=coordinator.study.workers,
-                    mp_context=multiprocessing.get_context("spawn"),
-                )
-            failed_submission = False
-            while coordinator.ready and len(pending) < coordinator.study.workers:
-                job = coordinator.dispatch()
-                if job is None:
-                    break
-                trial, replication, _ = job
-                try:
-                    future = pool.submit(_evaluate, objective, trial.config, replication)
-                except BrokenProcessPool as exc:
-                    restart([job], exc)
-                    failed_submission = True
-                    break
-                pending[future] = job
-            if failed_submission:
-                continue
-            if not pending:
-                break
-            done, _ = wait(pending, return_when=FIRST_COMPLETED)
-            for future in sorted(done, key=lambda f: pending[f][0].id):
-                job = pending.pop(future)
-                try:
-                    observation = future.result()
-                except BrokenProcessPool as exc:
-                    restart([job], exc)
-                    break
-                coordinator.accept(job, observation)
-    finally:
-        if pool is not None:
-            pool.shutdown(wait=True, cancel_futures=True)
 
 
 def run(study, objective, *, budget=None, cancellation=None):
@@ -258,7 +211,9 @@ def run(study, objective, *, budget=None, cancellation=None):
         coordinator = Coordinator(study, store)
         initial_attempts = store.total_attempts()
         backend = (
-            "in_process" if study.workers == 1 and not limits.needs_process else "process_pool"
+            "in_process"
+            if study.workers == 1 and not limits.needs_process
+            else "supervised_processes"
         )
         session_id = store.event(
             "session_start",
@@ -272,9 +227,7 @@ def run(study, objective, *, budget=None, cancellation=None):
         try:
             if limits.stop_reason():
                 reason = limits.stop_reason()
-            elif limits.needs_process:
-                raise NotImplementedError("Timed controls require supervised workers")
-            elif study.workers == 1:
+            elif backend == "in_process":
                 while coordinator.has_work:
                     if limits.admission_closed:
                         reason = "attempt_budget"
@@ -286,9 +239,7 @@ def run(study, objective, *, budget=None, cancellation=None):
                     trial, replication, _ = job
                     coordinator.accept(job, _evaluate(objective, trial.config, replication))
             else:
-                if limits.budget.max_attempts is not None:
-                    raise NotImplementedError("Parallel caps require supervised workers")
-                _parallel(coordinator, objective)
+                reason = run_parallel(coordinator, objective, limits)
         except BaseException as exc:
             coordinator.interrupt()
             store.event(

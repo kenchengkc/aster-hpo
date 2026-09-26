@@ -81,49 +81,38 @@ def test_decisions_survive_restoring_seen_comparisons():
     assert list(restored.decisions(candidates)) == []
 
 
-def test_in_flight_result_cannot_reactivate_pruned_trial(monkeypatch):
-    """Control completion order; exercise real evaluation and coordinator state."""
-    from concurrent.futures import Future
+def test_in_flight_result_cannot_reactivate_pruned_trial():
+    """Drive completion order at the coordinator boundary, independent of executor."""
+    from aster_hpo.core import _evaluate
+    from aster_hpo.runtime import Coordinator
+    from aster_hpo.storage import SQLiteStore
 
-    from aster_hpo import runtime
-
-    class OrderedPool:
-        def __init__(self, **kwargs):
-            pass
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, *args):
-            pass
-
-        def shutdown(self, **kwargs):
-            pass
-
-        def submit(self, fn, objective, config, replication):
-            future = Future()
-            future.job = (fn, objective, config, replication)
-            return future
-
-    def finish_one(pending, **kwargs):
-        def order(future):
-            _, _, config, replication = future.job
-            # Let the bad trial start replication 4 before the good trial reaches 3.
-            return (config["x"] == 5 and replication.index >= 3, config["x"] == 0)
-
-        future = min(pending, key=order)
-        fn, objective, config, replication = future.job
-        future.set_result(fn(objective, config, replication))
-        return {future}, set(pending) - {future}
-
-    monkeypatch.setattr(runtime, "ProcessPoolExecutor", OrderedPool)
-    monkeypatch.setattr(runtime, "wait", finish_one)
-    result = Study([{"x": 5}, {"x": 0}], scheduler=ReplicationRace((3, 9)), workers=2).optimize(
-        noisy
-    )
-    bad, good = result.trials
-    assert bad.status == "pruned"
-    assert len(bad.observations) == 4
-    assert good.status == "complete"
-    assert len(good.observations) == 9
-    assert result.cpu_seconds == sum(o.cpu_seconds for t in result.trials for o in t.observations)
+    study = Study([{"x": 5}, {"x": 0}], scheduler=ReplicationRace((3, 9)), workers=2)
+    with SQLiteStore(None, {}) as store:
+        coordinator = Coordinator(study, store)
+        pending = []
+        accepted_after_prune = False
+        while coordinator.has_work or pending:
+            while len(pending) < 2:
+                job = coordinator.dispatch()
+                if job is None:
+                    break
+                pending.append(job)
+            # The bad trial starts its fourth replication before the good trial
+            # supplies its third observation. Complete that in-flight work last.
+            job = min(pending, key=lambda j: (j[0].id == 0 and j[1].index >= 3, j[0].id == 1))
+            pending.remove(job)
+            candidate, replication, _ = job
+            was_pruned = candidate.status == "pruned"
+            coordinator.accept(job, _evaluate(noisy, candidate.config, replication))
+            if was_pruned:
+                accepted_after_prune = True
+                assert candidate.status == "pruned"
+        bad, good = coordinator.trials
+        assert accepted_after_prune
+        assert bad.status == "pruned"
+        assert len(bad.observations) == 4
+        assert good.status == "complete"
+        assert len(good.observations) == 9
+        assert len(store.load()["trials"][0]["observations"]) == 4
+        assert all(a["status"] == "accepted" for a in store.journal()[0])
