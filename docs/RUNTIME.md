@@ -35,11 +35,11 @@ After interruption, completed observations are reused. Uncommitted evaluations m
 run again with the same seeds. This is exactly-once **acceptance**, not exactly-once
 objective execution; objectives should tolerate repeated evaluation.
 
-Broken worker pools are restarted up to the per-replication retry budget. Objective
+Lost workers are replaced individually up to the per-replication retry budget. Objective
 exceptions and non-finite values fail the trial and are not retried. Serialization
 errors abort the campaign. Exhausted retries abort rather than fabricate a loss.
-A graceful interruption can wait for running process-pool tasks to exit; hard task
-deadlines and forceful cancellation are not implemented.
+Managed workers are terminated during interruption cleanup. Timed limits and caller
+cancellation are available through the session controls described below.
 
 Every exported result includes attempts, submission/acceptance events, and objective
 start/finish timestamps and process IDs. Objective CPU time sums returned
@@ -69,3 +69,100 @@ in-memory decisions. A failure before or during acceptance leaves that replicati
 eligible for retry; an interruption after commit preserves its accepted observation.
 Exhausted retry entries remain visible on resume and fail explicitly. Recovery does
 not silently report a campaign with missing pending candidates as finished.
+
+## Resource limits in v0.3
+
+```python
+from aster_hpo import RunBudget
+
+partial = study.optimize(
+    objective,
+    budget=RunBudget(
+        max_wall_seconds=60,
+        max_attempts=100,
+        evaluation_timeout_seconds=10,
+    ),
+)
+print(partial.metadata['termination_reason'])
+# A new invocation has a fresh allowance and reuses committed progress.
+continued = study.optimize(objective, budget=RunBudget(max_wall_seconds=120))
+```
+
+The controls are optional and apply to **one invocation**. They do not modify the
+immutable study identity. Each invocation appends a `session_start` event with its
+limits and backend, and a `session_end` event with its outcome and work count. A
+coordinator killed before cleanup may leave an unmatched start event, recording an
+unclean end. Session IDs refer to the corresponding start event sequence number.
+
+| Control | Behavior |
+| --- | --- |
+| `max_attempts` | Stop admitting new evaluations after this many durable dispatch attempts, including retries; drain admitted work. |
+| `max_wall_seconds` | Stop dispatching and terminate active managed workers when the invocation's wall allowance expires. |
+| `evaluation_timeout_seconds` | Terminate an overdue worker and fail its trial. Timing starts at dispatch and includes startup and IPC. Other trials continue. |
+| `cancellation` | A caller-supplied `CancellationToken`; calling `cancel()` stops active workers and preserves resumable progress. |
+
+An attempt cap alone does not limit the duration of an admitted evaluation. Combine
+it with a wall limit when an objective might hang. These are dispatch-count limits,
+not measured CPU-second budgets. Limits must be finite and positive; booleans and
+fractional attempt counts are rejected.
+
+```python
+from aster_hpo import CancellationToken
+
+token = CancellationToken()
+# A UI handler or another thread can call token.cancel().
+result = study.optimize(objective, cancellation=token)
+```
+
+A token is one-way: reuse after cancellation stops immediately; use a new token to
+resume. Supplying a token or any timed limit moves even a one-worker run to a managed
+spawn process. Use a module-level objective and a main guard. Untimed one-worker runs
+with only an attempt cap retain support for local functions and closures.
+
+### Stopping and resuming
+
+`metadata['termination_reason']` is `completed`, `attempt_budget`, `wall_budget`, or
+`cancelled`. Completion means no pending/running work remains; inspect trial statuses
+for numerical failures, timeouts, and pruning. Errors and KeyboardInterrupt propagate
+rather than returning a normal result, and their session end records `error`.
+
+A deliberately cancelled attempt is recorded as `cancelled`, its unfinished trial is
+returned to `pending`, and its next invocation reuses the same replication seeds.
+Such attempts count toward dispatch usage and unknown cost, but not the infrastructure
+retry allowance. Already pruned trials remain pruned. A timeout is recorded as
+`timed_out` and fails the affected trial without fabricating a scalar loss; it is not
+a retry or a resumable pending trial. A full study reset requires a new database.
+
+Completed observations commit once. A partial result can have no winner: `best_trial`
+only considers configurations that reached the scheduler's full replication cap.
+The ordinary independent `audit()` helper remains unbounded; this version adds run
+controls to `Study.optimize`, not partially sampled audit statistics.
+
+### Timing, ownership, and cost
+
+The coordinator checks cancellation and deadlines at most every 20ms while waiting
+for workers. It uses parent I/O threads so a partial result transfer does not block
+these checks. Each worker has its own channel; forced termination discards that channel.
+Python documents the risks of terminating a process using shared pipes, queues, or
+locks, and that terminating a process does not terminate its descendants.
+[Python multiprocessing reference](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.terminate).
+
+All managed workers receive a stop signal together. After a shared 200ms grace period,
+remaining workers are killed and given up to one shared second to exit; I/O threads
+have a shared 200ms cleanup allowance. Cleanup failure raises an error. These are
+objective-preemption controls, not real-time OS guarantees: scheduling, interpreter
+startup/serialization, filesystem/SQLite operations, and cleanup can exceed a wall
+allowance. Aster controls its worker processes, not arbitrary descendant processes,
+external programs, or remote services started by an objective. Forceful termination
+can interrupt objective side effects; make objective outputs atomic and retry-safe.
+
+`session_attempts` is the current invocation's durable dispatch count.
+`session_wall_seconds` includes session setup and worker cleanup. The existing
+`wall_seconds` and allocated-worker fields remain cumulative coordinator-session
+measurements, excluding downtime and setup before coordinator construction.
+Returned observations supply measured objective CPU time. Killed or unreturned work
+has unknown CPU cost, reported by `unmeasured_attempts`; no zero-cost assumption is made.
+
+Run `python -m examples.budgeted_search --output results/budget-demo` for an actual
+CPU-work example that stops on a wall allowance, resumes the same SQLite study with
+zero infrastructure retries, and exports both session results.

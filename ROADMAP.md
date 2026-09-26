@@ -17,9 +17,16 @@ items are research directions, not promised release dates or achieved guarantees
 - [x] Raw evidence, standalone figures, technical report, report regeneration.
 - [x] Single-bracket ASHA decision compatibility test against pinned Ray 2.58.0.
 
+## Implemented in v0.3
+
+- [x] Per-invocation wall deadlines and exact evaluation-attempt admission caps.
+- [x] Caller cancellation and per-dispatch evaluation timeouts with owned workers.
+- [x] Session limits/outcomes in the journal and resume after deliberate stopping.
+- [x] Bounded worker cleanup, kill escalation, and isolated worker replacement.
+
 ## Runtime extensions
 
-- [ ] Hard deadlines, cancellation, and enforced wall/compute budgets.
+- [ ] Measured CPU-time budgets and broader system-level resource accounting.
 - [ ] Distributed execution and durable multi-machine coordination.
 - [ ] Schema migrations and a public event-replay API.
 - [ ] Multiple concurrent replications per candidate, with explicit decision ordering.

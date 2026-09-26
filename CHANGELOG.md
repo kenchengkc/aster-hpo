@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.0 — Resource budgets and cancellation
+
+- Add `RunBudget` and thread-safe `CancellationToken` controls on `Study.optimize`.
+- Enforce per-invocation attempt admission caps, wall deadlines, and per-dispatch
+  evaluation timeouts; retain incomplete trials for resume after deliberate stopping.
+- Replace process-pool execution with owned spawn workers, isolated communication
+  channels, parent I/O threads, and bounded termination/kill cleanup.
+- Retry only the affected worker's unfinished replication after worker death.
+- Record session limits, backend, outcome, and attempts. Cancelled work remains in
+  cost records but does not consume infrastructure retries. Timeouts fail a trial
+  without fabricating an observation or loss.
+- Preserve late results from pruned work after the final surviving trial completes.
+- Keep unlimited one-worker local callables supported; timed/cancellable calls use
+  a managed process and require a picklable objective.
+- Add a budget/resume demonstration and fault tests for worker cleanup and recovery.
+  The archived v0.2 performance study is unchanged and does not benchmark this executor.
+
 ## 0.2.0 — Recoverable runtime and reproducible research
 
 - Reconsider eligible matched-prefix comparisons when late peers arrive; retain costs

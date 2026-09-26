@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "aster-hpo"
-version = "0.2.0"
+version = "0.3.0"
 description = "Parallel hyperparameter search with adaptive replication for noisy simulations"
 readme = "README.md"
 requires-python = ">=3.11"

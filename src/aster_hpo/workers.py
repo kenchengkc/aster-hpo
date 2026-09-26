@@ -43,16 +43,19 @@ class Worker:
         self.requests = queue.SimpleQueue()
         self.responses = queue.SimpleQueue()
         self.wake = wake
+        self.thread = threading.Thread(target=self._exchange, name="aster-worker-io", daemon=True)
         try:
             self.process.start()
+            self.thread.start()
         except BaseException:
-            self.connection.close()
-            self.process.close()
+            if self.process.pid is not None:
+                stop_workers([self], force=True)
+            else:
+                self.connection.close()
+                self.process.close()
             raise
         finally:
             child.close()
-        self.thread = threading.Thread(target=self._exchange, name="aster-worker-io", daemon=True)
-        self.thread.start()
 
     def _exchange(self):
         try:
@@ -106,7 +109,9 @@ def stop_workers(workers, *, force):
         raise RuntimeError(f"Managed workers did not exit after kill: {alive}")
     deadline = time.perf_counter() + 0.2
     for worker in workers:
-        worker.thread.join(timeout=max(0, deadline - time.perf_counter()))
+        if worker.thread.ident is not None:
+            worker.thread.join(timeout=max(0, deadline - time.perf_counter()))
+        worker.connection.close()
         worker.process.close()
     if any(worker.thread.is_alive() for worker in workers):
         raise RuntimeError("Worker I/O did not finish during cleanup")

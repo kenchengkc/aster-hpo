@@ -16,7 +16,7 @@ In a **20-seed CPU neural-hedging study**, replication racing used **52.3% fewer
 replications** and achieved a **1.43× median paired search speedup** versus full-budget
 search with the same four workers. Both methods selected the same configuration in
 20/20 runs, giving identical independent audit outcomes. This is observed agreement
-on one synthetic market; the zero-variance comparison does **not** establish a general
+on one synthetic market using the recorded v0.2 runtime; the zero-variance comparison does **not** establish a general
 quality-preservation guarantee. [Protocol, raw evidence, limitations →](docs/RESULTS.md)
 
 ![Fixed-budget hedging quality and search time](docs/evidence/cpu-2026-09-24/quality_time.png)
@@ -25,6 +25,8 @@ quality-preservation guarantee. [Protocol, raw evidence, limitations →](docs/R
 
 - Local process execution with a coordinator-owned SQLite journal, resume, bounded
   infrastructure retries, and duplicate/stale-result rejection.
+- Per-invocation wall/attempt budgets, evaluation timeouts, and caller cancellation
+  through owned, terminable workers. [Budget and resume semantics →](docs/RUNTIME.md#resource-limits-in-v03)
 - `FullBudget`, single-bracket stopping `ASHA`, and heuristic `ReplicationRace`
   schedulers operating on replication counts.
 - Matched-prefix comparisons reconsidered when peers finish; already running pruned
@@ -49,6 +51,7 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev,benchmark]'
 python examples/noisy_quadratic.py --workers 2
+python -m examples.budgeted_search --output results/budget-demo
 python -m examples.hedging --output results/hedging-pilot
 ```
 
@@ -131,11 +134,13 @@ across independent optimizer seeds, with explicit incomplete, insufficient, and
 zero-variance outcomes.
 
 Execution is local, with at most one replication in flight per candidate. There is
-no cluster executor, hard deadline, or forceful task cancellation. Recovery provides
-exactly-once acceptance, while interrupted objectives may execute again. CPU cost
-of unreturned work remains unknown. Native thread controls do not make numerical
-results bitwise portable across hardware, and asynchronous completion can change
-pruning decisions.
+no cluster executor or measured CPU-time cap. Wall limits and cancellation preempt
+managed workers; OS scheduling, coordinator operations, and cleanup add latency.
+They do not control arbitrary subprocesses or external services created by objectives.
+Recovery provides exactly-once acceptance, while interrupted objectives may execute
+again. CPU cost of unreturned work remains unknown. Native thread controls do not
+make numerical results bitwise portable across hardware, and asynchronous completion
+can change pruning decisions.
 
 The financial workload uses a small policy in a synthetic GBM market. Results do not
 measure live trading performance, stochastic-volatility robustness, or superiority

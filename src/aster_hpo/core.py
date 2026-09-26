@@ -142,7 +142,7 @@ class StudyResult:
         return sum(o.cpu_seconds for t in self.trials for o in t.observations)
 
     def save(self, path: str | Path) -> None:
-        """Atomically save a completed result; this is not a resumable checkpoint."""
+        """Atomically export a result, including partial runs; resume uses SQLite."""
         destination = Path(path)
         destination.parent.mkdir(parents=True, exist_ok=True)
         payload = asdict(self)
@@ -188,7 +188,8 @@ class Study:
     """Minimize a finite configuration pool with one in-flight replication per trial.
 
     Workers use spawn, so objectives must be importable top-level callables. A one-worker
-    study runs in the caller. Optional SQLite storage resumes committed progress.
+    study runs in the caller unless timed limits or cancellation require a managed worker.
+    Optional SQLite storage resumes committed progress.
     Infrastructure retries reuse seeds; objective failures are never retried.
     """
 
@@ -236,6 +237,12 @@ class Study:
         budget: RunBudget | None = None,
         cancellation: CancellationToken | None = None,
     ) -> StudyResult:
+        """Run or resume with a fresh per-invocation allowance.
+
+        Wall/caller stops return partial, resumable results. The best trial still
+        requires the full scheduler cap. Timed/cancellable runs use spawn even
+        with one worker; objectives must then be importable and picklable.
+        """
         from .runtime import run
 
         return run(self, objective, budget=budget, cancellation=cancellation)

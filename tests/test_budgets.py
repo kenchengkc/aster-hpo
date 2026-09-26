@@ -244,3 +244,28 @@ def test_timed_single_worker_requires_a_picklable_objective():
     with pytest.raises((AttributeError, TypeError), match="pickle"):
         Study([{"x": 0}]).optimize(lambda c, r: 0, budget=RunBudget(max_wall_seconds=1))
     assert_workers_stopped()
+
+
+def test_exchange_thread_start_failure_does_not_orphan_a_worker(monkeypatch):
+    original_start = threading.Thread.start
+
+    def fail_exchange_start(thread):
+        if thread.name == "aster-worker-io":
+            raise RuntimeError("fixture cannot start exchange thread")
+        return original_start(thread)
+
+    monkeypatch.setattr(threading.Thread, "start", fail_exchange_start)
+    with pytest.raises(RuntimeError, match="cannot start exchange thread"):
+        Study([{"x": 0}], workers=2).optimize(pure)
+    leaked = [p for p in multiprocessing.active_children() if p.name.startswith("aster-worker")]
+    try:
+        assert leaked == []
+    finally:
+        # Clean up the deliberately reproduced bug so a failing test cannot
+        # leave pytest's multiprocessing exit handler blocked on this worker.
+        for process in leaked:
+            process.terminate()
+            process.join(timeout=2)
+            if process.is_alive():
+                process.kill()
+                process.join(timeout=2)
