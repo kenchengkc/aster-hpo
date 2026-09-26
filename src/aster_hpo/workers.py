@@ -64,13 +64,16 @@ class Worker:
                 self.connection.send(request)
                 if request is None:
                     return
-                self.responses.put(self.connection.recv())
+                response = self.connection.recv()
+                # Judge the deadline at receipt, even if other worker cleanup
+                # delays the coordinator's inspection of this mailbox.
+                self.responses.put((*response, time.perf_counter()))
                 self.wake.set()
         except (EOFError, OSError) as exc:
-            self.responses.put(("lost", None, f"{type(exc).__name__}: {exc}"))
+            self.responses.put(("lost", None, f"{type(exc).__name__}: {exc}", time.perf_counter()))
             self.wake.set()
         except BaseException as exc:
-            self.responses.put(("fatal", None, f"{type(exc).__name__}: {exc}"))
+            self.responses.put(("fatal", None, f"{type(exc).__name__}: {exc}", time.perf_counter()))
             self.wake.set()
         finally:
             self.connection.close()
@@ -136,14 +139,16 @@ def run_parallel(coordinator, objective, limits):
                 if limits.stop_reason():
                     break
                 timeout = limits.budget.evaluation_timeout_seconds
-                if timeout is not None and time.perf_counter() - worker.dispatched >= timeout:
+                inspected = time.perf_counter()
+                response = worker.poll()
+                received = response[3] if response is not None else inspected
+                if timeout is not None and received - worker.dispatched >= timeout:
                     workers.remove(worker)
                     stop_workers([worker], force=True)
                     coordinator.timeout(worker.job)
                     continue
-                response = worker.poll()
                 if response is not None:
-                    kind, attempt, payload = response
+                    kind, attempt, payload, _ = response
                     if kind == "fatal":
                         raise RuntimeError(f"Worker transport/objective failure: {payload}")
                     if kind == "result":

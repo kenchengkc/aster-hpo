@@ -269,3 +269,44 @@ def test_exchange_thread_start_failure_does_not_orphan_a_worker(monkeypatch):
             if process.is_alive():
                 process.kill()
                 process.join(timeout=2)
+
+
+def overlapping_timeouts(config, replication):
+    import signal
+
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    if config["x"] == 0:
+        time.sleep(60)
+    else:
+        time.sleep(0.1 if replication.index == 0 else config["second_delay"])
+    return float(config["x"])
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX signal-resistance fixture")
+@pytest.mark.parametrize("second_delay, expected", [(0.3, "complete"), (0.5, "failed")])
+def test_mailbox_receipt_decides_timeout_despite_other_worker_cleanup(
+    monkeypatch, second_delay, expected
+):
+    from aster_hpo import workers
+
+    original_stop = workers.stop_workers
+
+    def delayed_cleanup(group, *, force):
+        delay = force and len(group) == 1 and group[0].job[0].id == 0
+        original_stop(group, force=force)
+        if delay:
+            # Simulate other coordinator cleanup while the healthy worker's
+            # I/O thread receives its result. Both variants queue a result:
+            # one within its own deadline, and one genuinely after it.
+            time.sleep(0.3)
+
+    monkeypatch.setattr(workers, "stop_workers", delayed_cleanup)
+    result = Study(
+        [{"x": 0}, {"x": 1, "second_delay": second_delay}],
+        workers=2,
+        scheduler=FullBudget(2),
+    ).optimize(overlapping_timeouts, budget=RunBudget(evaluation_timeout_seconds=0.4))
+    assert result.trials[0].status == "failed"
+    assert result.trials[1].status == expected
+    assert result.trials[1].losses == ([1, 1] if expected == "complete" else [1])
+    assert_workers_stopped()

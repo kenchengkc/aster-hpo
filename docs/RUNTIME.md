@@ -119,6 +119,10 @@ resume. Supplying a token or any timed limit moves even a one-worker run to a ma
 spawn process. Use a module-level objective and a main guard. Untimed one-worker runs
 with only an attempt cap retain support for local functions and closures.
 
+Managed workers retain their objective callable across evaluations. Derive simulation
+state from each replication's seeds rather than mutable callable state or call order;
+worker replacement and parallel scheduling can change which calls share a process.
+
 ### Stopping and resuming
 
 `metadata['termination_reason']` is `completed`, `attempt_budget`, `wall_budget`, or
@@ -143,6 +147,9 @@ controls to `Study.optimize`, not partially sampled audit statistics.
 The coordinator checks cancellation and deadlines at most every 20ms while waiting
 for workers. It uses parent I/O threads so a partial result transfer does not block
 these checks. Each worker has its own channel; forced termination discards that channel.
+Evaluation timeouts use the time the full response reaches the parent mailbox. Cleanup
+of another worker can delay inspection without invalidating a response received before
+its own deadline; a response received after its deadline is discarded.
 Python documents the risks of terminating a process using shared pipes, queues, or
 locks, and that terminating a process does not terminate its descendants.
 [Python multiprocessing reference](https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Process.terminate).
@@ -166,3 +173,5 @@ has unknown CPU cost, reported by `unmeasured_attempts`; no zero-cost assumption
 Run `python -m examples.budgeted_search --output results/budget-demo` for an actual
 CPU-work example that stops on a wall allowance, resumes the same SQLite study with
 zero infrastructure retries, and exports both session results.
+The [recorded demonstration](evidence/runtime-2026-09-26/README.md) includes checked
+JSON exports and machine/revision metadata. It demonstrates recovery, not speedup.

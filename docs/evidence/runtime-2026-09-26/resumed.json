@@ -1,0 +1,2108 @@
+{
+  "trials": [
+    {
+      "id": 0,
+      "config": {
+        "x": -1.0
+      },
+      "status": "complete",
+      "observations": [
+        {
+          "replication": {
+            "index": 0,
+            "scenario_seed": 4948586203083712819,
+            "training_seed": 8449717557083789729,
+            "phase": "search"
+          },
+          "loss": 1.5628315902484637,
+          "wall_seconds": 0.016393791884183884,
+          "cpu_seconds": 0.016387,
+          "error": null,
+          "started_at": 1790461226.7234209,
+          "finished_at": 1790461226.739816,
+          "worker_pid": 23013
+        },
+        {
+          "replication": {
+            "index": 1,
+            "scenario_seed": 9666538785158860074,
+            "training_seed": 16032080185219427517,
+            "phase": "search"
+          },
+          "loss": 1.5611451635717581,
+          "wall_seconds": 0.01633987482637167,
+          "cpu_seconds": 0.01634000000000002,
+          "error": null,
+          "started_at": 1790461226.824804,
+          "finished_at": 1790461226.841144,
+          "worker_pid": 23013
+        },
+        {
+          "replication": {
+            "index": 2,
+            "scenario_seed": 9827804643647993872,
+            "training_seed": 12321973361264618913,
+            "phase": "search"
+          },
+          "loss": 1.5648013567342949,
+          "wall_seconds": 0.016296291025355458,
+          "cpu_seconds": 0.016291,
+          "error": null,
+          "started_at": 1790461226.9248781,
+          "finished_at": 1790461226.941175,
+          "worker_pid": 23014
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "config": {
+        "x": -0.75
+      },
+      "status": "complete",
+      "observations": [
+        {
+          "replication": {
+            "index": 0,
+            "scenario_seed": 4948586203083712819,
+            "training_seed": 2418605364030551677,
+            "phase": "search"
+          },
+          "loss": 1.0003315902484637,
+          "wall_seconds": 0.01639400003477931,
+          "cpu_seconds": 0.016394,
+          "error": null,
+          "started_at": 1790461226.723711,
+          "finished_at": 1790461226.740107,
+          "worker_pid": 23014
+        },
+        {
+          "replication": {
+            "index": 1,
+            "scenario_seed": 9666538785158860074,
+            "training_seed": 13475013167299769832,
+            "phase": "search"
+          },
+          "loss": 0.998645163571758,
+          "wall_seconds": 0.016294957837089896,
+          "cpu_seconds": 0.016294999999999976,
+          "error": null,
+          "started_at": 1790461226.824911,
+          "finished_at": 1790461226.841206,
+          "worker_pid": 23014
+        },
+        {
+          "replication": {
+            "index": 2,
+            "scenario_seed": 9827804643647993872,
+            "training_seed": 2131971418771416780,
+            "phase": "search"
+          },
+          "loss": 1.0023013567342949,
+          "wall_seconds": 0.016380665823817253,
+          "cpu_seconds": 0.016381000000000007,
+          "error": null,
+          "started_at": 1790461226.925153,
+          "finished_at": 1790461226.941534,
+          "worker_pid": 23013
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "config": {
+        "x": -0.5
+      },
+      "status": "complete",
+      "observations": [
+        {
+          "replication": {
+            "index": 0,
+            "scenario_seed": 4948586203083712819,
+            "training_seed": 7949172002682378652,
+            "phase": "search"
+          },
+          "loss": 0.5628315902484637,
+          "wall_seconds": 0.0163422089535743,
+          "cpu_seconds": 0.016336000000000003,
+          "error": null,
+          "started_at": 1790461226.740743,
+          "finished_at": 1790461226.757087,
+          "worker_pid": 23013
+        },
+        {
+          "replication": {
+            "index": 1,
+            "scenario_seed": 9666538785158860074,
+            "training_seed": 7617717781372145505,
+            "phase": "search"
+          },
+          "loss": 0.561145163571758,
+          "wall_seconds": 0.01639991602860391,
+          "cpu_seconds": 0.016394999999999993,
+          "error": null,
+          "started_at": 1790461226.841633,
+          "finished_at": 1790461226.858034,
+          "worker_pid": 23013
+        },
+        {
+          "replication": {
+            "index": 2,
+            "scenario_seed": 9827804643647993872,
+            "training_seed": 15512755799516314372,
+            "phase": "search"
+          },
+          "loss": 0.5648013567342949,
+          "wall_seconds": 0.016317624831572175,
+          "cpu_seconds": 0.016317000000000026,
+          "error": null,
+          "started_at": 1790461226.941791,
+          "finished_at": 1790461226.9581099,
+          "worker_pid": 23013
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "config": {
+        "x": -0.25
+      },
+      "status": "complete",
+      "observations": [
+        {
+          "replication": {
+            "index": 0,
+            "scenario_seed": 4948586203083712819,
+            "training_seed": 1258348502969517259,
+            "phase": "search"
+          },
+          "loss": 0.25033159024846374,
+          "wall_seconds": 0.01633500005118549,
+          "cpu_seconds": 0.016335000000000002,
+          "error": null,
+          "started_at": 1790461226.740843,
+          "finished_at": 1790461226.7571788,
+          "worker_pid": 23014
+        },
+        {
+          "replication": {
+            "index": 1,
+            "scenario_seed": 9666538785158860074,
+            "training_seed": 12732178447534202070,
+            "phase": "search"
+          },
+          "loss": 0.2486451635717581,
+          "wall_seconds": 0.016269833082333207,
+          "cpu_seconds": 0.016270000000000007,
+          "error": null,
+          "started_at": 1790461226.841739,
+          "finished_at": 1790461226.858009,
+          "worker_pid": 23014
+        },
+        {
+          "replication": {
+            "index": 2,
+            "scenario_seed": 9827804643647993872,
+            "training_seed": 9856053279514878650,
+            "phase": "search"
+          },
+          "loss": 0.2523013567342948,
+          "wall_seconds": 0.0163568330463022,
+          "cpu_seconds": 0.016350999999999977,
+          "error": null,
+          "started_at": 1790461226.941458,
+          "finished_at": 1790461226.9578161,
+          "worker_pid": 23014
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "config": {
+        "x": 0.0
+      },
+      "status": "complete",
+      "observations": [
+        {
+          "replication": {
+            "index": 0,
+            "scenario_seed": 4948586203083712819,
+            "training_seed": 7001790885212510316,
+            "phase": "search"
+          },
+          "loss": 0.06283159024846377,
+          "wall_seconds": 0.016348167089745402,
+          "cpu_seconds": 0.016348,
+          "error": null,
+          "started_at": 1790461226.757708,
+          "finished_at": 1790461226.774057,
+          "worker_pid": 23013
+        },
+        {
+          "replication": {
+            "index": 1,
+            "scenario_seed": 9666538785158860074,
+            "training_seed": 13045095088841727419,
+            "phase": "search"
+          },
+          "loss": 0.06114516357175809,
+          "wall_seconds": 0.016310709062963724,
+          "cpu_seconds": 0.01631000000000002,
+          "error": null,
+          "started_at": 1790461226.8583732,
+          "finished_at": 1790461226.8746848,
+          "worker_pid": 23014
+        },
+        {
+          "replication": {
+            "index": 2,
+            "scenario_seed": 9827804643647993872,
+            "training_seed": 11847242906353908644,
+            "phase": "search"
+          },
+          "loss": 0.06480135673429484,
+          "wall_seconds": 0.016275207977741957,
+          "cpu_seconds": 0.01627500000000004,
+          "error": null,
+          "started_at": 1790461226.958122,
+          "finished_at": 1790461226.974398,
+          "worker_pid": 23014
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "config": {
+        "x": 0.25
+      },
+      "status": "complete",
+      "observations": [
+        {
+          "replication": {
+            "index": 0,
+            "scenario_seed": 4948586203083712819,
+            "training_seed": 6427849734482734016,
+            "phase": "search"
+          },
+          "loss": 0.00033159024846376897,
+          "wall_seconds": 0.016343416878953576,
+          "cpu_seconds": 0.01634300000000001,
+          "error": null,
+          "started_at": 1790461226.757895,
+          "finished_at": 1790461226.7742422,
+          "worker_pid": 23014
+        },
+        {
+          "replication": {
+            "index": 1,
+            "scenario_seed": 9666538785158860074,
+            "training_seed": 8138936776408971669,
+            "phase": "search"
+          },
+          "loss": -0.0013548364282419151,
+          "wall_seconds": 0.016368167009204626,
+          "cpu_seconds": 0.016362000000000015,
+          "error": null,
+          "started_at": 1790461226.8586218,
+          "finished_at": 1790461226.8749912,
+          "worker_pid": 23013
+        },
+        {
+          "replication": {
+            "index": 2,
+            "scenario_seed": 9827804643647993872,
+            "training_seed": 513469608138469484,
+            "phase": "search"
+          },
+          "loss": 0.0023013567342948433,
+          "wall_seconds": 0.016362583031877875,
+          "cpu_seconds": 0.01636299999999996,
+          "error": null,
+          "started_at": 1790461226.958424,
+          "finished_at": 1790461226.974787,
+          "worker_pid": 23013
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "config": {
+        "x": 0.5
+      },
+      "status": "complete",
+      "observations": [
+        {
+          "replication": {
+            "index": 0,
+            "scenario_seed": 4948586203083712819,
+            "training_seed": 12638022621305270765,
+            "phase": "search"
+          },
+          "loss": 0.06283159024846377,
+          "wall_seconds": 0.016349459066987038,
+          "cpu_seconds": 0.016345,
+          "error": null,
+          "started_at": 1790461226.774496,
+          "finished_at": 1790461226.790847,
+          "worker_pid": 23013
+        },
+        {
+          "replication": {
+            "index": 1,
+            "scenario_seed": 9666538785158860074,
+            "training_seed": 9751831316039833788,
+            "phase": "search"
+          },
+          "loss": 0.06114516357175809,
+          "wall_seconds": 0.016363458009436727,
+          "cpu_seconds": 0.01635800000000001,
+          "error": null,
+          "started_at": 1790461226.87496,
+          "finished_at": 1790461226.8913238,
+          "worker_pid": 23014
+        },
+        {
+          "replication": {
+            "index": 2,
+            "scenario_seed": 9827804643647993872,
+            "training_seed": 6776892331708505942,
+            "phase": "search"
+          },
+          "loss": 0.06480135673429484,
+          "wall_seconds": 0.0161550419870764,
+          "cpu_seconds": 0.016132000000000007,
+          "error": null,
+          "started_at": 1790461227.072643,
+          "finished_at": 1790461227.088799,
+          "worker_pid": 23017
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "config": {
+        "x": 0.75
+      },
+      "status": "complete",
+      "observations": [
+        {
+          "replication": {
+            "index": 0,
+            "scenario_seed": 4948586203083712819,
+            "training_seed": 7550394983538361164,
+            "phase": "search"
+          },
+          "loss": 0.25033159024846374,
+          "wall_seconds": 0.016313208965584636,
+          "cpu_seconds": 0.01631400000000001,
+          "error": null,
+          "started_at": 1790461226.774712,
+          "finished_at": 1790461226.7910259,
+          "worker_pid": 23014
+        },
+        {
+          "replication": {
+            "index": 1,
+            "scenario_seed": 9666538785158860074,
+            "training_seed": 12043108724532908780,
+            "phase": "search"
+          },
+          "loss": 0.2486451635717581,
+          "wall_seconds": 0.016293292166665196,
+          "cpu_seconds": 0.016288999999999998,
+          "error": null,
+          "started_at": 1790461226.8752599,
+          "finished_at": 1790461226.891555,
+          "worker_pid": 23013
+        },
+        {
+          "replication": {
+            "index": 2,
+            "scenario_seed": 9827804643647993872,
+            "training_seed": 10663463322434977187,
+            "phase": "search"
+          },
+          "loss": 0.2523013567342948,
+          "wall_seconds": 0.01612779195420444,
+          "cpu_seconds": 0.01611900000000001,
+          "error": null,
+          "started_at": 1790461227.072433,
+          "finished_at": 1790461227.088562,
+          "worker_pid": 23018
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "config": {
+        "x": 1.0
+      },
+      "status": "complete",
+      "observations": [
+        {
+          "replication": {
+            "index": 0,
+            "scenario_seed": 4948586203083712819,
+            "training_seed": 8384735403280829906,
+            "phase": "search"
+          },
+          "loss": 0.5628315902484637,
+          "wall_seconds": 0.016352750128135085,
+          "cpu_seconds": 0.016348,
+          "error": null,
+          "started_at": 1790461226.7912252,
+          "finished_at": 1790461226.8075788,
+          "worker_pid": 23013
+        },
+        {
+          "replication": {
+            "index": 1,
+            "scenario_seed": 9666538785158860074,
+            "training_seed": 15377258213798616925,
+            "phase": "search"
+          },
+          "loss": 0.561145163571758,
+          "wall_seconds": 0.016304749995470047,
+          "cpu_seconds": 0.016300999999999982,
+          "error": null,
+          "started_at": 1790461226.891635,
+          "finished_at": 1790461226.907941,
+          "worker_pid": 23014
+        },
+        {
+          "replication": {
+            "index": 2,
+            "scenario_seed": 9827804643647993872,
+            "training_seed": 14697787076134086030,
+            "phase": "search"
+          },
+          "loss": 0.5648013567342949,
+          "wall_seconds": 0.016395458951592445,
+          "cpu_seconds": 0.016383999999999996,
+          "error": null,
+          "started_at": 1790461227.03864,
+          "finished_at": 1790461227.055037,
+          "worker_pid": 23017
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "config": {
+        "x": 1.25
+      },
+      "status": "complete",
+      "observations": [
+        {
+          "replication": {
+            "index": 0,
+            "scenario_seed": 4948586203083712819,
+            "training_seed": 3418567764938585409,
+            "phase": "search"
+          },
+          "loss": 1.0003315902484637,
+          "wall_seconds": 0.01627041702158749,
+          "cpu_seconds": 0.016270000000000007,
+          "error": null,
+          "started_at": 1790461226.791456,
+          "finished_at": 1790461226.807727,
+          "worker_pid": 23014
+        },
+        {
+          "replication": {
+            "index": 1,
+            "scenario_seed": 9666538785158860074,
+            "training_seed": 6951000287693944527,
+            "phase": "search"
+          },
+          "loss": 0.998645163571758,
+          "wall_seconds": 0.016358959022909403,
+          "cpu_seconds": 0.016359999999999986,
+          "error": null,
+          "started_at": 1790461226.891839,
+          "finished_at": 1790461226.9081988,
+          "worker_pid": 23013
+        },
+        {
+          "replication": {
+            "index": 2,
+            "scenario_seed": 9827804643647993872,
+            "training_seed": 552606161860039664,
+            "phase": "search"
+          },
+          "loss": 1.0023013567342949,
+          "wall_seconds": 0.01626904192380607,
+          "cpu_seconds": 0.016269000000000006,
+          "error": null,
+          "started_at": 1790461227.038719,
+          "finished_at": 1790461227.054989,
+          "worker_pid": 23018
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "config": {
+        "x": 1.5
+      },
+      "status": "complete",
+      "observations": [
+        {
+          "replication": {
+            "index": 0,
+            "scenario_seed": 4948586203083712819,
+            "training_seed": 4833362854076713547,
+            "phase": "search"
+          },
+          "loss": 1.5628315902484637,
+          "wall_seconds": 0.016340125119313598,
+          "cpu_seconds": 0.016338999999999992,
+          "error": null,
+          "started_at": 1790461226.8080158,
+          "finished_at": 1790461226.824357,
+          "worker_pid": 23013
+        },
+        {
+          "replication": {
+            "index": 1,
+            "scenario_seed": 9666538785158860074,
+            "training_seed": 16893162647293740843,
+            "phase": "search"
+          },
+          "loss": 1.5611451635717581,
+          "wall_seconds": 0.01636966597288847,
+          "cpu_seconds": 0.01636399999999999,
+          "error": null,
+          "started_at": 1790461226.9081979,
+          "finished_at": 1790461226.9245691,
+          "worker_pid": 23014
+        },
+        {
+          "replication": {
+            "index": 2,
+            "scenario_seed": 9827804643647993872,
+            "training_seed": 6882665167097167363,
+            "phase": "search"
+          },
+          "loss": 1.5648013567342949,
+          "wall_seconds": 0.016228958033025265,
+          "cpu_seconds": 0.016191999999999998,
+          "error": null,
+          "started_at": 1790461227.055663,
+          "finished_at": 1790461227.071894,
+          "worker_pid": 23018
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "config": {
+        "x": 1.75
+      },
+      "status": "complete",
+      "observations": [
+        {
+          "replication": {
+            "index": 0,
+            "scenario_seed": 4948586203083712819,
+            "training_seed": 4173986308597314628,
+            "phase": "search"
+          },
+          "loss": 2.250331590248464,
+          "wall_seconds": 0.016234791139140725,
+          "cpu_seconds": 0.016235000000000013,
+          "error": null,
+          "started_at": 1790461226.808227,
+          "finished_at": 1790461226.8244631,
+          "worker_pid": 23014
+        },
+        {
+          "replication": {
+            "index": 1,
+            "scenario_seed": 9666538785158860074,
+            "training_seed": 2362713270174944046,
+            "phase": "search"
+          },
+          "loss": 2.248645163571758,
+          "wall_seconds": 0.016353749902918935,
+          "cpu_seconds": 0.016354000000000007,
+          "error": null,
+          "started_at": 1790461226.9084759,
+          "finished_at": 1790461226.924831,
+          "worker_pid": 23013
+        },
+        {
+          "replication": {
+            "index": 2,
+            "scenario_seed": 9827804643647993872,
+            "training_seed": 16422018119459871830,
+            "phase": "search"
+          },
+          "loss": 2.2523013567342947,
+          "wall_seconds": 0.016311249928548932,
+          "cpu_seconds": 0.016227999999999992,
+          "error": null,
+          "started_at": 1790461227.055899,
+          "finished_at": 1790461227.072212,
+          "worker_pid": 23017
+        }
+      ]
+    }
+  ],
+  "decisions": [],
+  "wall_seconds": 0.3978272080421448,
+  "metadata": {
+    "schema_version": 2,
+    "phase": "search",
+    "configs": [
+      {
+        "x": -1.0
+      },
+      {
+        "x": -0.75
+      },
+      {
+        "x": -0.5
+      },
+      {
+        "x": -0.25
+      },
+      {
+        "x": 0.0
+      },
+      {
+        "x": 0.25
+      },
+      {
+        "x": 0.5
+      },
+      {
+        "x": 0.75
+      },
+      {
+        "x": 1.0
+      },
+      {
+        "x": 1.25
+      },
+      {
+        "x": 1.5
+      },
+      {
+        "x": 1.75
+      }
+    ],
+    "seed": 41,
+    "scheduler": "FullBudget",
+    "scheduler_parameters": {
+      "replications": 3
+    },
+    "workers": 2,
+    "shared_scenarios": true,
+    "objective_id": "mc-quadratic-v1",
+    "max_retries": 0,
+    "threads_per_worker": 1,
+    "package_version": "0.3.0",
+    "termination_reason": "completed",
+    "session_id": 67,
+    "session_budget": {
+      "max_wall_seconds": null,
+      "max_attempts": null,
+      "evaluation_timeout_seconds": null
+    },
+    "session_attempts": 6,
+    "session_wall_seconds": 0.09218149981461465,
+    "execution_backend": "supervised_processes",
+    "python": "3.11.5",
+    "platform": "macOS-26.4-arm64-arm-64bit",
+    "persistent": true,
+    "attempts": [
+      {
+        "id": 1,
+        "trial_id": 0,
+        "replication_index": 0,
+        "replication": {
+          "index": 0,
+          "phase": "search",
+          "scenario_seed": 4948586203083712819,
+          "training_seed": 8449717557083789729
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.685867,
+        "finished_at": 1790461226.740101,
+        "error": null
+      },
+      {
+        "id": 2,
+        "trial_id": 1,
+        "replication_index": 0,
+        "replication": {
+          "index": 0,
+          "phase": "search",
+          "scenario_seed": 4948586203083712819,
+          "training_seed": 2418605364030551677
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.689188,
+        "finished_at": 1790461226.74036,
+        "error": null
+      },
+      {
+        "id": 3,
+        "trial_id": 2,
+        "replication_index": 0,
+        "replication": {
+          "index": 0,
+          "phase": "search",
+          "scenario_seed": 4948586203083712819,
+          "training_seed": 7949172002682378652
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.7405188,
+        "finished_at": 1790461226.75721,
+        "error": null
+      },
+      {
+        "id": 4,
+        "trial_id": 3,
+        "replication_index": 0,
+        "replication": {
+          "index": 0,
+          "phase": "search",
+          "scenario_seed": 4948586203083712819,
+          "training_seed": 1258348502969517259
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.7406778,
+        "finished_at": 1790461226.757374,
+        "error": null
+      },
+      {
+        "id": 5,
+        "trial_id": 4,
+        "replication_index": 0,
+        "replication": {
+          "index": 0,
+          "phase": "search",
+          "scenario_seed": 4948586203083712819,
+          "training_seed": 7001790885212510316
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.757517,
+        "finished_at": 1790461226.774133,
+        "error": null
+      },
+      {
+        "id": 6,
+        "trial_id": 5,
+        "replication_index": 0,
+        "replication": {
+          "index": 0,
+          "phase": "search",
+          "scenario_seed": 4948586203083712819,
+          "training_seed": 6427849734482734016
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.7577112,
+        "finished_at": 1790461226.774438,
+        "error": null
+      },
+      {
+        "id": 7,
+        "trial_id": 6,
+        "replication_index": 0,
+        "replication": {
+          "index": 0,
+          "phase": "search",
+          "scenario_seed": 4948586203083712819,
+          "training_seed": 12638022621305270765
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.774247,
+        "finished_at": 1790461226.790926,
+        "error": null
+      },
+      {
+        "id": 8,
+        "trial_id": 7,
+        "replication_index": 0,
+        "replication": {
+          "index": 0,
+          "phase": "search",
+          "scenario_seed": 4948586203083712819,
+          "training_seed": 7550394983538361164
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.774573,
+        "finished_at": 1790461226.791198,
+        "error": null
+      },
+      {
+        "id": 9,
+        "trial_id": 8,
+        "replication_index": 0,
+        "replication": {
+          "index": 0,
+          "phase": "search",
+          "scenario_seed": 4948586203083712819,
+          "training_seed": 8384735403280829906
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.791032,
+        "finished_at": 1790461226.8076422,
+        "error": null
+      },
+      {
+        "id": 10,
+        "trial_id": 9,
+        "replication_index": 0,
+        "replication": {
+          "index": 0,
+          "phase": "search",
+          "scenario_seed": 4948586203083712819,
+          "training_seed": 3418567764938585409
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.79133,
+        "finished_at": 1790461226.8079731,
+        "error": null
+      },
+      {
+        "id": 11,
+        "trial_id": 10,
+        "replication_index": 0,
+        "replication": {
+          "index": 0,
+          "phase": "search",
+          "scenario_seed": 4948586203083712819,
+          "training_seed": 4833362854076713547
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.807821,
+        "finished_at": 1790461226.824408,
+        "error": null
+      },
+      {
+        "id": 12,
+        "trial_id": 11,
+        "replication_index": 0,
+        "replication": {
+          "index": 0,
+          "phase": "search",
+          "scenario_seed": 4948586203083712819,
+          "training_seed": 4173986308597314628
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.808102,
+        "finished_at": 1790461226.824517,
+        "error": null
+      },
+      {
+        "id": 13,
+        "trial_id": 0,
+        "replication_index": 1,
+        "replication": {
+          "index": 1,
+          "phase": "search",
+          "scenario_seed": 9666538785158860074,
+          "training_seed": 16032080185219427517
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.824627,
+        "finished_at": 1790461226.8412008,
+        "error": null
+      },
+      {
+        "id": 14,
+        "trial_id": 1,
+        "replication_index": 1,
+        "replication": {
+          "index": 1,
+          "phase": "search",
+          "scenario_seed": 9666538785158860074,
+          "training_seed": 13475013167299769832
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.824756,
+        "finished_at": 1790461226.841344,
+        "error": null
+      },
+      {
+        "id": 15,
+        "trial_id": 2,
+        "replication_index": 1,
+        "replication": {
+          "index": 1,
+          "phase": "search",
+          "scenario_seed": 9666538785158860074,
+          "training_seed": 7617717781372145505
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.841457,
+        "finished_at": 1790461226.8583648,
+        "error": null
+      },
+      {
+        "id": 16,
+        "trial_id": 3,
+        "replication_index": 1,
+        "replication": {
+          "index": 1,
+          "phase": "search",
+          "scenario_seed": 9666538785158860074,
+          "training_seed": 12732178447534202070
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.841582,
+        "finished_at": 1790461226.858089,
+        "error": null
+      },
+      {
+        "id": 17,
+        "trial_id": 4,
+        "replication_index": 1,
+        "replication": {
+          "index": 1,
+          "phase": "search",
+          "scenario_seed": 9666538785158860074,
+          "training_seed": 13045095088841727419
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.8582091,
+        "finished_at": 1790461226.874736,
+        "error": null
+      },
+      {
+        "id": 18,
+        "trial_id": 5,
+        "replication_index": 1,
+        "replication": {
+          "index": 1,
+          "phase": "search",
+          "scenario_seed": 9666538785158860074,
+          "training_seed": 8138936776408971669
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.858477,
+        "finished_at": 1790461226.875048,
+        "error": null
+      },
+      {
+        "id": 19,
+        "trial_id": 6,
+        "replication_index": 1,
+        "replication": {
+          "index": 1,
+          "phase": "search",
+          "scenario_seed": 9666538785158860074,
+          "training_seed": 9751831316039833788
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.874841,
+        "finished_at": 1790461226.891378,
+        "error": null
+      },
+      {
+        "id": 20,
+        "trial_id": 7,
+        "replication_index": 1,
+        "replication": {
+          "index": 1,
+          "phase": "search",
+          "scenario_seed": 9666538785158860074,
+          "training_seed": 12043108724532908780
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.8751411,
+        "finished_at": 1790461226.891635,
+        "error": null
+      },
+      {
+        "id": 21,
+        "trial_id": 8,
+        "replication_index": 1,
+        "replication": {
+          "index": 1,
+          "phase": "search",
+          "scenario_seed": 9666538785158860074,
+          "training_seed": 15377258213798616925
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.8914728,
+        "finished_at": 1790461226.90799,
+        "error": null
+      },
+      {
+        "id": 22,
+        "trial_id": 9,
+        "replication_index": 1,
+        "replication": {
+          "index": 1,
+          "phase": "search",
+          "scenario_seed": 9666538785158860074,
+          "training_seed": 6951000287693944527
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.891726,
+        "finished_at": 1790461226.908261,
+        "error": null
+      },
+      {
+        "id": 23,
+        "trial_id": 10,
+        "replication_index": 1,
+        "replication": {
+          "index": 1,
+          "phase": "search",
+          "scenario_seed": 9666538785158860074,
+          "training_seed": 16893162647293740843
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.908088,
+        "finished_at": 1790461226.924635,
+        "error": null
+      },
+      {
+        "id": 24,
+        "trial_id": 11,
+        "replication_index": 1,
+        "replication": {
+          "index": 1,
+          "phase": "search",
+          "scenario_seed": 9666538785158860074,
+          "training_seed": 2362713270174944046
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.908365,
+        "finished_at": 1790461226.924895,
+        "error": null
+      },
+      {
+        "id": 25,
+        "trial_id": 0,
+        "replication_index": 2,
+        "replication": {
+          "index": 2,
+          "phase": "search",
+          "scenario_seed": 9827804643647993872,
+          "training_seed": 12321973361264618913
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.924743,
+        "finished_at": 1790461226.941227,
+        "error": null
+      },
+      {
+        "id": 26,
+        "trial_id": 1,
+        "replication_index": 2,
+        "replication": {
+          "index": 2,
+          "phase": "search",
+          "scenario_seed": 9827804643647993872,
+          "training_seed": 2131971418771416780
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.925032,
+        "finished_at": 1790461226.941586,
+        "error": null
+      },
+      {
+        "id": 27,
+        "trial_id": 3,
+        "replication_index": 2,
+        "replication": {
+          "index": 2,
+          "phase": "search",
+          "scenario_seed": 9827804643647993872,
+          "training_seed": 9856053279514878650
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.941333,
+        "finished_at": 1790461226.957881,
+        "error": null
+      },
+      {
+        "id": 28,
+        "trial_id": 2,
+        "replication_index": 2,
+        "replication": {
+          "index": 2,
+          "phase": "search",
+          "scenario_seed": 9827804643647993872,
+          "training_seed": 15512755799516314372
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.941685,
+        "finished_at": 1790461226.958173,
+        "error": null
+      },
+      {
+        "id": 29,
+        "trial_id": 4,
+        "replication_index": 2,
+        "replication": {
+          "index": 2,
+          "phase": "search",
+          "scenario_seed": 9827804643647993872,
+          "training_seed": 11847242906353908644
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.9580019,
+        "finished_at": 1790461226.974449,
+        "error": null
+      },
+      {
+        "id": 30,
+        "trial_id": 5,
+        "replication_index": 2,
+        "replication": {
+          "index": 2,
+          "phase": "search",
+          "scenario_seed": 9827804643647993872,
+          "training_seed": 513469608138469484
+        },
+        "status": "accepted",
+        "submitted_at": 1790461226.958289,
+        "finished_at": 1790461226.9748402,
+        "error": null
+      },
+      {
+        "id": 31,
+        "trial_id": 6,
+        "replication_index": 2,
+        "replication": {
+          "index": 2,
+          "phase": "search",
+          "scenario_seed": 9827804643647993872,
+          "training_seed": 6776892331708505942
+        },
+        "status": "cancelled",
+        "submitted_at": 1790461226.9745479,
+        "finished_at": 1790461226.992043,
+        "error": "wall_budget"
+      },
+      {
+        "id": 32,
+        "trial_id": 7,
+        "replication_index": 2,
+        "replication": {
+          "index": 2,
+          "phase": "search",
+          "scenario_seed": 9827804643647993872,
+          "training_seed": 10663463322434977187
+        },
+        "status": "cancelled",
+        "submitted_at": 1790461226.974952,
+        "finished_at": 1790461226.992021,
+        "error": "wall_budget"
+      },
+      {
+        "id": 33,
+        "trial_id": 8,
+        "replication_index": 2,
+        "replication": {
+          "index": 2,
+          "phase": "search",
+          "scenario_seed": 9827804643647993872,
+          "training_seed": 14697787076134086030
+        },
+        "status": "accepted",
+        "submitted_at": 1790461227.003157,
+        "finished_at": 1790461227.055618,
+        "error": null
+      },
+      {
+        "id": 34,
+        "trial_id": 9,
+        "replication_index": 2,
+        "replication": {
+          "index": 2,
+          "phase": "search",
+          "scenario_seed": 9827804643647993872,
+          "training_seed": 552606161860039664
+        },
+        "status": "accepted",
+        "submitted_at": 1790461227.004245,
+        "finished_at": 1790461227.055253,
+        "error": null
+      },
+      {
+        "id": 35,
+        "trial_id": 10,
+        "replication_index": 2,
+        "replication": {
+          "index": 2,
+          "phase": "search",
+          "scenario_seed": 9827804643647993872,
+          "training_seed": 6882665167097167363
+        },
+        "status": "accepted",
+        "submitted_at": 1790461227.055467,
+        "finished_at": 1790461227.072028,
+        "error": null
+      },
+      {
+        "id": 36,
+        "trial_id": 11,
+        "replication_index": 2,
+        "replication": {
+          "index": 2,
+          "phase": "search",
+          "scenario_seed": 9827804643647993872,
+          "training_seed": 16422018119459871830
+        },
+        "status": "accepted",
+        "submitted_at": 1790461227.05575,
+        "finished_at": 1790461227.072382,
+        "error": null
+      },
+      {
+        "id": 37,
+        "trial_id": 7,
+        "replication_index": 2,
+        "replication": {
+          "index": 2,
+          "phase": "search",
+          "scenario_seed": 9827804643647993872,
+          "training_seed": 10663463322434977187
+        },
+        "status": "accepted",
+        "submitted_at": 1790461227.072186,
+        "finished_at": 1790461227.088649,
+        "error": null
+      },
+      {
+        "id": 38,
+        "trial_id": 6,
+        "replication_index": 2,
+        "replication": {
+          "index": 2,
+          "phase": "search",
+          "scenario_seed": 9827804643647993872,
+          "training_seed": 6776892331708505942
+        },
+        "status": "accepted",
+        "submitted_at": 1790461227.072504,
+        "finished_at": 1790461227.088854,
+        "error": null
+      }
+    ],
+    "events": [
+      {
+        "seq": 1,
+        "at": 1790461226.685744,
+        "kind": "session_start",
+        "payload": {
+          "budget": {
+            "evaluation_timeout_seconds": null,
+            "max_attempts": null,
+            "max_wall_seconds": 0.3
+          },
+          "cancellation_enabled": false,
+          "execution_backend": "supervised_processes"
+        }
+      },
+      {
+        "seq": 2,
+        "at": 1790461226.6858912,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 1,
+          "replication_index": 0,
+          "trial_id": 0
+        }
+      },
+      {
+        "seq": 3,
+        "at": 1790461226.689227,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 2,
+          "replication_index": 0,
+          "trial_id": 1
+        }
+      },
+      {
+        "seq": 4,
+        "at": 1790461226.7401721,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 1,
+          "replication_index": 0,
+          "trial_id": 0
+        }
+      },
+      {
+        "seq": 5,
+        "at": 1790461226.7403781,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 2,
+          "replication_index": 0,
+          "trial_id": 1
+        }
+      },
+      {
+        "seq": 6,
+        "at": 1790461226.7405481,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 3,
+          "replication_index": 0,
+          "trial_id": 2
+        }
+      },
+      {
+        "seq": 7,
+        "at": 1790461226.740698,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 4,
+          "replication_index": 0,
+          "trial_id": 3
+        }
+      },
+      {
+        "seq": 8,
+        "at": 1790461226.7572439,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 3,
+          "replication_index": 0,
+          "trial_id": 2
+        }
+      },
+      {
+        "seq": 9,
+        "at": 1790461226.757401,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 4,
+          "replication_index": 0,
+          "trial_id": 3
+        }
+      },
+      {
+        "seq": 10,
+        "at": 1790461226.757534,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 5,
+          "replication_index": 0,
+          "trial_id": 4
+        }
+      },
+      {
+        "seq": 11,
+        "at": 1790461226.757739,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 6,
+          "replication_index": 0,
+          "trial_id": 5
+        }
+      },
+      {
+        "seq": 12,
+        "at": 1790461226.77415,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 5,
+          "replication_index": 0,
+          "trial_id": 4
+        }
+      },
+      {
+        "seq": 13,
+        "at": 1790461226.7742798,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 7,
+          "replication_index": 0,
+          "trial_id": 6
+        }
+      },
+      {
+        "seq": 14,
+        "at": 1790461226.774466,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 6,
+          "replication_index": 0,
+          "trial_id": 5
+        }
+      },
+      {
+        "seq": 15,
+        "at": 1790461226.7745888,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 8,
+          "replication_index": 0,
+          "trial_id": 7
+        }
+      },
+      {
+        "seq": 16,
+        "at": 1790461226.790941,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 7,
+          "replication_index": 0,
+          "trial_id": 6
+        }
+      },
+      {
+        "seq": 17,
+        "at": 1790461226.791053,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 9,
+          "replication_index": 0,
+          "trial_id": 8
+        }
+      },
+      {
+        "seq": 18,
+        "at": 1790461226.791234,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 8,
+          "replication_index": 0,
+          "trial_id": 7
+        }
+      },
+      {
+        "seq": 19,
+        "at": 1790461226.791347,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 10,
+          "replication_index": 0,
+          "trial_id": 9
+        }
+      },
+      {
+        "seq": 20,
+        "at": 1790461226.807658,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 9,
+          "replication_index": 0,
+          "trial_id": 8
+        }
+      },
+      {
+        "seq": 21,
+        "at": 1790461226.807841,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 11,
+          "replication_index": 0,
+          "trial_id": 10
+        }
+      },
+      {
+        "seq": 22,
+        "at": 1790461226.807988,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 10,
+          "replication_index": 0,
+          "trial_id": 9
+        }
+      },
+      {
+        "seq": 23,
+        "at": 1790461226.808118,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 12,
+          "replication_index": 0,
+          "trial_id": 11
+        }
+      },
+      {
+        "seq": 24,
+        "at": 1790461226.824422,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 11,
+          "replication_index": 0,
+          "trial_id": 10
+        }
+      },
+      {
+        "seq": 25,
+        "at": 1790461226.824533,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 12,
+          "replication_index": 0,
+          "trial_id": 11
+        }
+      },
+      {
+        "seq": 26,
+        "at": 1790461226.824642,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 13,
+          "replication_index": 1,
+          "trial_id": 0
+        }
+      },
+      {
+        "seq": 27,
+        "at": 1790461226.8247738,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 14,
+          "replication_index": 1,
+          "trial_id": 1
+        }
+      },
+      {
+        "seq": 28,
+        "at": 1790461226.841215,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 13,
+          "replication_index": 1,
+          "trial_id": 0
+        }
+      },
+      {
+        "seq": 29,
+        "at": 1790461226.8413591,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 14,
+          "replication_index": 1,
+          "trial_id": 1
+        }
+      },
+      {
+        "seq": 30,
+        "at": 1790461226.841473,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 15,
+          "replication_index": 1,
+          "trial_id": 2
+        }
+      },
+      {
+        "seq": 31,
+        "at": 1790461226.841599,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 16,
+          "replication_index": 1,
+          "trial_id": 3
+        }
+      },
+      {
+        "seq": 32,
+        "at": 1790461226.858104,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 16,
+          "replication_index": 1,
+          "trial_id": 3
+        }
+      },
+      {
+        "seq": 33,
+        "at": 1790461226.8582242,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 17,
+          "replication_index": 1,
+          "trial_id": 4
+        }
+      },
+      {
+        "seq": 34,
+        "at": 1790461226.858389,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 15,
+          "replication_index": 1,
+          "trial_id": 2
+        }
+      },
+      {
+        "seq": 35,
+        "at": 1790461226.858491,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 18,
+          "replication_index": 1,
+          "trial_id": 5
+        }
+      },
+      {
+        "seq": 36,
+        "at": 1790461226.874751,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 17,
+          "replication_index": 1,
+          "trial_id": 4
+        }
+      },
+      {
+        "seq": 37,
+        "at": 1790461226.874858,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 19,
+          "replication_index": 1,
+          "trial_id": 6
+        }
+      },
+      {
+        "seq": 38,
+        "at": 1790461226.875062,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 18,
+          "replication_index": 1,
+          "trial_id": 5
+        }
+      },
+      {
+        "seq": 39,
+        "at": 1790461226.875156,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 20,
+          "replication_index": 1,
+          "trial_id": 7
+        }
+      },
+      {
+        "seq": 40,
+        "at": 1790461226.891392,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 19,
+          "replication_index": 1,
+          "trial_id": 6
+        }
+      },
+      {
+        "seq": 41,
+        "at": 1790461226.891488,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 21,
+          "replication_index": 1,
+          "trial_id": 8
+        }
+      },
+      {
+        "seq": 42,
+        "at": 1790461226.891652,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 20,
+          "replication_index": 1,
+          "trial_id": 7
+        }
+      },
+      {
+        "seq": 43,
+        "at": 1790461226.891741,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 22,
+          "replication_index": 1,
+          "trial_id": 9
+        }
+      },
+      {
+        "seq": 44,
+        "at": 1790461226.908004,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 21,
+          "replication_index": 1,
+          "trial_id": 8
+        }
+      },
+      {
+        "seq": 45,
+        "at": 1790461226.9081018,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 23,
+          "replication_index": 1,
+          "trial_id": 10
+        }
+      },
+      {
+        "seq": 46,
+        "at": 1790461226.908276,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 22,
+          "replication_index": 1,
+          "trial_id": 9
+        }
+      },
+      {
+        "seq": 47,
+        "at": 1790461226.908381,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 24,
+          "replication_index": 1,
+          "trial_id": 11
+        }
+      },
+      {
+        "seq": 48,
+        "at": 1790461226.92465,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 23,
+          "replication_index": 1,
+          "trial_id": 10
+        }
+      },
+      {
+        "seq": 49,
+        "at": 1790461226.924757,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 25,
+          "replication_index": 2,
+          "trial_id": 0
+        }
+      },
+      {
+        "seq": 50,
+        "at": 1790461226.924908,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 24,
+          "replication_index": 1,
+          "trial_id": 11
+        }
+      },
+      {
+        "seq": 51,
+        "at": 1790461226.9250472,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 26,
+          "replication_index": 2,
+          "trial_id": 1
+        }
+      },
+      {
+        "seq": 52,
+        "at": 1790461226.941241,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 25,
+          "replication_index": 2,
+          "trial_id": 0
+        }
+      },
+      {
+        "seq": 53,
+        "at": 1790461226.94135,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 27,
+          "replication_index": 2,
+          "trial_id": 3
+        }
+      },
+      {
+        "seq": 54,
+        "at": 1790461226.941601,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 26,
+          "replication_index": 2,
+          "trial_id": 1
+        }
+      },
+      {
+        "seq": 55,
+        "at": 1790461226.941702,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 28,
+          "replication_index": 2,
+          "trial_id": 2
+        }
+      },
+      {
+        "seq": 56,
+        "at": 1790461226.9578948,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 27,
+          "replication_index": 2,
+          "trial_id": 3
+        }
+      },
+      {
+        "seq": 57,
+        "at": 1790461226.958018,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 29,
+          "replication_index": 2,
+          "trial_id": 4
+        }
+      },
+      {
+        "seq": 58,
+        "at": 1790461226.958188,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 28,
+          "replication_index": 2,
+          "trial_id": 2
+        }
+      },
+      {
+        "seq": 59,
+        "at": 1790461226.958306,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 30,
+          "replication_index": 2,
+          "trial_id": 5
+        }
+      },
+      {
+        "seq": 60,
+        "at": 1790461226.974462,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 29,
+          "replication_index": 2,
+          "trial_id": 4
+        }
+      },
+      {
+        "seq": 61,
+        "at": 1790461226.9745631,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 31,
+          "replication_index": 2,
+          "trial_id": 6
+        }
+      },
+      {
+        "seq": 62,
+        "at": 1790461226.974855,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 30,
+          "replication_index": 2,
+          "trial_id": 5
+        }
+      },
+      {
+        "seq": 63,
+        "at": 1790461226.974967,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 32,
+          "replication_index": 2,
+          "trial_id": 7
+        }
+      },
+      {
+        "seq": 64,
+        "at": 1790461226.992039,
+        "kind": "cancelled",
+        "payload": {
+          "attempt_id": 32,
+          "error": "wall_budget"
+        }
+      },
+      {
+        "seq": 65,
+        "at": 1790461226.992044,
+        "kind": "cancelled",
+        "payload": {
+          "attempt_id": 31,
+          "error": "wall_budget"
+        }
+      },
+      {
+        "seq": 66,
+        "at": 1790461226.992255,
+        "kind": "session_end",
+        "payload": {
+          "attempts": 32,
+          "session_id": 1,
+          "termination_reason": "wall_budget",
+          "wall_seconds": 0.3151658328715712
+        }
+      },
+      {
+        "seq": 67,
+        "at": 1790461227.00308,
+        "kind": "session_start",
+        "payload": {
+          "budget": {
+            "evaluation_timeout_seconds": null,
+            "max_attempts": null,
+            "max_wall_seconds": null
+          },
+          "cancellation_enabled": false,
+          "execution_backend": "supervised_processes"
+        }
+      },
+      {
+        "seq": 68,
+        "at": 1790461227.003176,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 33,
+          "replication_index": 2,
+          "trial_id": 8
+        }
+      },
+      {
+        "seq": 69,
+        "at": 1790461227.0042791,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 34,
+          "replication_index": 2,
+          "trial_id": 9
+        }
+      },
+      {
+        "seq": 70,
+        "at": 1790461227.0552828,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 34,
+          "replication_index": 2,
+          "trial_id": 9
+        }
+      },
+      {
+        "seq": 71,
+        "at": 1790461227.0554838,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 35,
+          "replication_index": 2,
+          "trial_id": 10
+        }
+      },
+      {
+        "seq": 72,
+        "at": 1790461227.055661,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 33,
+          "replication_index": 2,
+          "trial_id": 8
+        }
+      },
+      {
+        "seq": 73,
+        "at": 1790461227.055767,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 36,
+          "replication_index": 2,
+          "trial_id": 11
+        }
+      },
+      {
+        "seq": 74,
+        "at": 1790461227.0720499,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 35,
+          "replication_index": 2,
+          "trial_id": 10
+        }
+      },
+      {
+        "seq": 75,
+        "at": 1790461227.072221,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 37,
+          "replication_index": 2,
+          "trial_id": 7
+        }
+      },
+      {
+        "seq": 76,
+        "at": 1790461227.0723999,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 36,
+          "replication_index": 2,
+          "trial_id": 11
+        }
+      },
+      {
+        "seq": 77,
+        "at": 1790461227.0725188,
+        "kind": "submit",
+        "payload": {
+          "attempt_id": 38,
+          "replication_index": 2,
+          "trial_id": 6
+        }
+      },
+      {
+        "seq": 78,
+        "at": 1790461227.088671,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 37,
+          "replication_index": 2,
+          "trial_id": 7
+        }
+      },
+      {
+        "seq": 79,
+        "at": 1790461227.0888672,
+        "kind": "accept",
+        "payload": {
+          "attempt_id": 38,
+          "replication_index": 2,
+          "trial_id": 6
+        }
+      },
+      {
+        "seq": 80,
+        "at": 1790461227.0941381,
+        "kind": "session_end",
+        "payload": {
+          "attempts": 6,
+          "session_id": 67,
+          "termination_reason": "completed",
+          "wall_seconds": 0.09218149981461465
+        }
+      }
+    ],
+    "unmeasured_attempts": 2,
+    "objective_cpu_accounting_complete": false,
+    "native_thread_control": "environment and threadpoolctl",
+    "allocated_worker_seconds": 0.7956544160842896
+  },
+  "best_trial_id": 5,
+  "objective_cpu_seconds": 0.5872940000000001
+}

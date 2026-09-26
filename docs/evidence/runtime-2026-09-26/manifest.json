@@ -1,0 +1,29 @@
+{
+  "kind": "runtime control demonstration",
+  "environment": {
+    "revision": "6eec3d22d7aae364803413c055f828c75ad83e80",
+    "dirty": false,
+    "python": "3.11.5",
+    "platform": "macOS-26.4-arm64-arm-64bit",
+    "machine": "arm64",
+    "cpu_count": 10,
+    "cpu_model": "Apple M5",
+    "dependencies": {
+      "aster-hpo": "0.3.0",
+      "numpy": "2.4.1",
+      "scipy": "1.17.0",
+      "matplotlib": "3.10.8",
+      "threadpoolctl": "3.6.0",
+      "ray": "2.58.0"
+    },
+    "thread_environment": {
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null
+    }
+  },
+  "source_revision": "6eec3d2",
+  "command": "python -m examples.budgeted_search --seconds 0.3 --workers 2",
+  "not_a_performance_benchmark": true,
+  "sqlite_excluded": true
+}

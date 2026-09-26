@@ -1,0 +1,14 @@
+{
+  "interpretation": "runtime control demonstration; not a performance benchmark",
+  "first_stop_reason": "wall_budget",
+  "wall_allowance_seconds": 0.3,
+  "first_session_wall_seconds": 0.3151658328715712,
+  "first_session_attempts": 32,
+  "first_accepted_observations": 30,
+  "resume_stop_reason": "completed",
+  "total_accepted_observations": 36,
+  "unmeasured_attempts": 2,
+  "winner": {
+    "x": 0.25
+  }
+}
