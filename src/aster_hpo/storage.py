@@ -93,10 +93,17 @@ class SQLiteStore:
             self.lock = None
 
     def _event(self, kind, payload):
-        self.db.execute(
+        return self.db.execute(
             "INSERT INTO events (at,kind,payload) VALUES (?,?,?)",
             (time.time(), kind, _json(payload)),
-        )
+        ).lastrowid
+
+    def event(self, kind, payload):
+        with self.db:
+            return self._event(kind, payload)
+
+    def total_attempts(self):
+        return self.db.execute("SELECT COUNT(*) FROM attempts").fetchone()[0]
 
     def _save(self, snapshot):
         state = {
@@ -153,7 +160,8 @@ class SQLiteStore:
 
     def attempt_count(self, trial_id, replication_index):
         return self.db.execute(
-            "SELECT COUNT(*) FROM attempts WHERE trial_id=? AND replication_index=?",
+            "SELECT COUNT(*) FROM attempts WHERE trial_id=? AND replication_index=? "
+            "AND status != 'cancelled'",
             (trial_id, replication_index),
         ).fetchone()[0]
 
@@ -209,16 +217,20 @@ class SQLiteStore:
         return True
 
     def fail_attempt(self, attempt_id, status, error, snapshot):
-        if status not in {"interrupted", "infrastructure_failed"}:
+        self.stop_attempts([attempt_id], status, error, snapshot)
+
+    def stop_attempts(self, attempt_ids, status, error, snapshot):
+        if status not in {"interrupted", "infrastructure_failed", "cancelled", "timed_out"}:
             raise ValueError("Invalid failed-attempt status")
         with self.db:
-            cursor = self.db.execute(
-                "UPDATE attempts SET status=?,finished_at=?,error=? "
-                "WHERE id=? AND status='running'",
-                (status, time.time(), error, attempt_id),
-            )
-            if cursor.rowcount:
-                self._event(status, {"attempt_id": attempt_id, "error": error})
+            for attempt_id in attempt_ids:
+                cursor = self.db.execute(
+                    "UPDATE attempts SET status=?,finished_at=?,error=? "
+                    "WHERE id=? AND status='running'",
+                    (status, time.time(), error, attempt_id),
+                )
+                if cursor.rowcount:
+                    self._event(status, {"attempt_id": attempt_id, "error": error})
             self._save(snapshot)
 
     def journal(self):

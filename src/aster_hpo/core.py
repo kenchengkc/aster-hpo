@@ -13,6 +13,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+from .control import CancellationToken, RunBudget
 from .schedulers import ASHA
 from .space import Scalar
 
@@ -228,10 +229,16 @@ class Study:
             raise TypeError("Unsupported scheduler")
         self.workers, self.seed, self.shared_scenarios = workers, seed, shared_scenarios
 
-    def optimize(self, objective: Objective) -> StudyResult:
+    def optimize(
+        self,
+        objective: Objective,
+        *,
+        budget: RunBudget | None = None,
+        cancellation: CancellationToken | None = None,
+    ) -> StudyResult:
         from .runtime import run
 
-        return run(self, objective)
+        return run(self, objective, budget=budget, cancellation=cancellation)
 
 
 @dataclass

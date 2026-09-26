@@ -13,6 +13,7 @@ from contextlib import contextmanager
 from dataclasses import asdict
 
 from ._version import __version__
+from .control import SessionControl
 from .core import Observation, Replication, ReplicationRace, StudyResult, Trial, _evaluate
 from .schedulers import ASHA, ASHAPolicy, RacePolicy
 from .storage import SQLiteStore
@@ -93,6 +94,10 @@ class Coordinator:
         else:
             self.policy = None
         store.recover(self.snapshot())
+
+    @property
+    def has_work(self):
+        return any(t.status in {"pending", "running"} for t in self.trials)
 
     def snapshot(self):
         # Observations live in normalized rows, not the coordinator snapshot.
@@ -231,7 +236,8 @@ def _parallel(coordinator, objective):
             pool.shutdown(wait=True, cancel_futures=True)
 
 
-def run(study, objective):
+def run(study, objective, *, budget=None, cancellation=None):
+    limits = SessionControl(budget, cancellation)
     manifest = {
         "schema_version": 2,
         "phase": study._phase,
@@ -250,18 +256,65 @@ def run(study, objective):
         thread_limits(study.threads_per_worker) as control,
     ):
         coordinator = Coordinator(study, store)
+        initial_attempts = store.total_attempts()
+        backend = (
+            "in_process" if study.workers == 1 and not limits.needs_process else "process_pool"
+        )
+        session_id = store.event(
+            "session_start",
+            {
+                "budget": asdict(limits.budget),
+                "cancellation_enabled": cancellation is not None,
+                "execution_backend": backend,
+            },
+        )
+        reason = "completed"
         try:
-            if study.workers == 1:
-                while job := coordinator.dispatch():
+            if limits.stop_reason():
+                reason = limits.stop_reason()
+            elif limits.needs_process:
+                raise NotImplementedError("Timed controls require supervised workers")
+            elif study.workers == 1:
+                while coordinator.has_work:
+                    if limits.admission_closed:
+                        reason = "attempt_budget"
+                        break
+                    job = coordinator.dispatch()
+                    if job is None:
+                        break
+                    limits.admitted += 1
                     trial, replication, _ = job
                     coordinator.accept(job, _evaluate(objective, trial.config, replication))
             else:
+                if limits.budget.max_attempts is not None:
+                    raise NotImplementedError("Parallel caps require supervised workers")
                 _parallel(coordinator, objective)
-        except BaseException:
+        except BaseException as exc:
             coordinator.interrupt()
+            store.event(
+                "session_end",
+                {
+                    "session_id": session_id,
+                    "termination_reason": "error",
+                    "error": f"{type(exc).__name__}: {exc}",
+                    "wall_seconds": limits.elapsed,
+                    "attempts": store.total_attempts() - initial_attempts,
+                },
+            )
             raise
         snapshot = coordinator.snapshot()
         store.save(snapshot)
+        session_attempts = store.total_attempts() - initial_attempts
+        session_wall = limits.elapsed
+        store.event(
+            "session_end",
+            {
+                "session_id": session_id,
+                "termination_reason": reason,
+                "wall_seconds": session_wall,
+                "attempts": session_attempts,
+            },
+        )
         attempts, events = store.journal()
         unknown = sum(a["status"] != "accepted" for a in attempts)
         return StudyResult(
@@ -271,6 +324,12 @@ def run(study, objective):
             {
                 **manifest,
                 "package_version": __version__,
+                "termination_reason": reason,
+                "session_id": session_id,
+                "session_budget": asdict(limits.budget),
+                "session_attempts": session_attempts,
+                "session_wall_seconds": session_wall,
+                "execution_backend": backend,
                 "python": platform.python_version(),
                 "platform": platform.platform(),
                 "persistent": study.storage is not None,

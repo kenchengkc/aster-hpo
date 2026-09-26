@@ -1,6 +1,7 @@
 """Small, dependency-free building blocks for stochastic optimization."""
 
 from ._version import __version__ as __version__
+from .control import CancellationToken, RunBudget
 from .core import (
     AuditResult,
     FullBudget,
@@ -17,6 +18,8 @@ __all__ = [
     "ASHA",
     "AuditResult",
     "Choice",
+    "CancellationToken",
+    "RunBudget",
     "Float",
     "FullBudget",
     "Int",
