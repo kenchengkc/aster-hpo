@@ -16,29 +16,31 @@ In a **20-seed CPU neural-hedging study**, replication racing used **52.3% fewer
 replications** and achieved a **1.43× median paired search speedup** versus full-budget
 search with the same four workers. Both methods selected the same configuration in
 20/20 runs, giving identical independent audit outcomes. This is observed agreement
-on one synthetic market using the recorded v0.2 runtime; the zero-variance comparison does **not** establish a general
-quality-preservation guarantee. [Protocol, raw evidence, limitations →](docs/RESULTS.md)
+on one synthetic market using the recorded v0.2 runtime; the zero-variance comparison
+does **not** establish a general quality-preservation guarantee.
+[Protocol, raw evidence, limitations →](docs/RESULTS.md)
 
 ![Fixed-budget hedging quality and search time](docs/evidence/cpu-2026-09-24/quality_time.png)
 
-## What is implemented
+## Upgrade progress
 
-- Local process execution with a coordinator-owned SQLite journal, resume, bounded
-  infrastructure retries, and duplicate/stale-result rejection.
-- Per-invocation wall/attempt budgets, evaluation timeouts, and caller cancellation
-  through owned, terminable workers. [Budget and resume semantics →](docs/RUNTIME.md#resource-limits-in-v03)
-- `FullBudget`, single-bracket stopping `ASHA`, and heuristic `ReplicationRace`
-  schedulers operating on replication counts.
-- Matched-prefix comparisons reconsidered when peers finish; already running pruned
-  work retains its outcome and cost.
-- Stable per-replication seeds, locked winners, and independently seeded audits.
-- Native thread controls, attempt/event histories, worker timestamps, and explicit
-  accounting gaps for interrupted work.
-- A NumPy neural-hedging workload with proportional transaction costs, verified
-  cash flows and gradients, and independent training/evaluation paths.
-- Repeated-seed comparisons, noise diagnostics, standalone figures, raw artifacts,
-  and CI configured for Linux/macOS and Python 3.11–3.13.
-- A dependency-free core; numerical, plotting, and reference-baseline packages are optional.
+**Current development version: 0.3.0.** The original six-step research/runtime
+upgrade is implemented. The subsequent resource-control phase is also complete;
+broader benchmarking and scaling work remains on the [roadmap](ROADMAP.md).
+
+| Upgrade | Status | Delivered |
+| --- | --- | --- |
+| 1. Scheduler correctness | Complete | Matched-prefix comparisons reconsidered when peers finish; already running pruned work retains its outcome and cost. |
+| 2. Noisy-simulation diagnostics | Complete | Heteroscedastic, near-tie, and heavy-tail cases, candidate-order checks, and shared/independent scenario comparisons. |
+| 3. Recoverable local execution | Complete | Coordinator-owned SQLite journal, resume, bounded retries, duplicate/stale-result rejection, native thread controls, and attempt/worker telemetry. |
+| 4. CPU financial workload | Complete | NumPy neural hedging with transaction costs, verified cash flows and gradients, and separate training/evaluation paths. |
+| 5. Allocation and quality study | Initial study complete | `FullBudget`, single-bracket stopping `ASHA`, and heuristic `ReplicationRace`; locked winners and independent audits across 20 optimizer seeds. [Evidence](docs/RESULTS.md). |
+| 6. Package, documentation, and review | Complete | Installable package, runnable examples, technical report, raw artifacts, figures, and regression tests. |
+| Resource controls (v0.3) | Complete | Per-invocation wall/attempt budgets, evaluation timeouts, caller cancellation, and supervised worker cleanup. [Runtime contract](docs/RUNTIME.md#resource-limits-in-v03). |
+
+The core has no required dependencies; numerical, plotting, and reference-baseline
+packages are optional. Replications use stable seeds, with disjoint search and audit
+namespaces. CI is configured for Linux/macOS and Python 3.11–3.13.
 
 ## Quick start
 
@@ -56,8 +58,10 @@ python -m examples.hedging --output results/hedging-pilot
 ```
 
 The quadratic example is a functionality demonstration: its cheap objective does not
-measure useful parallel speedup. The hedging example is a disjoint pilot; follow the
-[benchmark protocol](docs/BENCHMARKING.md) to freeze and execute a comparison.
+measure useful parallel speedup. The budget example stops a CPU simulation search and
+resumes the same SQLite study; [recorded exports](docs/evidence/runtime-2026-09-26/README.md)
+show committed observations preserved across sessions. The hedging example is a disjoint
+pilot; follow the [benchmark protocol](docs/BENCHMARKING.md) to freeze and execute a comparison.
 Research modules live in the checkout; the installable wheel contains the core library.
 
 ## Library usage
@@ -76,7 +80,7 @@ def objective(config, replication):
 
 if __name__ == "__main__":
     configs = sample_configs({"x": Float(-2, 2)}, count=16, seed=17)
-    result = Study(
+    study = Study(
         configs,
         scheduler=ReplicationRace(checkpoints=(3, 9, 27)),
         workers=4,
@@ -85,7 +89,8 @@ if __name__ == "__main__":
         objective_id="quadratic-with-training-noise-v1",
         max_retries=1,
         threads_per_worker=1,
-    ).optimize(objective)
+    )
+    result = study.optimize(objective)
 
     if result.best_trial is not None:
         checked = audit(
@@ -103,6 +108,28 @@ Objectives return one finite scalar loss; lower is better. Use a top-level calla
 and a main guard for process execution. Running the same persistent study again
 resumes committed observations. Change `objective_id` when the objective, data, or
 simulation contract changes. See [recovery semantics](docs/RUNTIME.md).
+
+### Limit a session and resume
+
+Replace the `optimize` call inside the main guard above with:
+
+```python
+from aster_hpo import RunBudget
+
+partial = study.optimize(
+    objective,
+    budget=RunBudget(max_wall_seconds=60, max_attempts=100),
+)
+print(partial.metadata["termination_reason"])
+# Reuse committed progress with a fresh allowance for this invocation.
+result = study.optimize(objective, budget=RunBudget(max_wall_seconds=120))
+```
+
+An attempt cap includes retries and drains admitted work. A wall limit stops active
+managed workers and leaves unfinished trials resumable. A partial result may have no
+winner: only candidates that reach the full replication cap are eligible. Per-evaluation
+timeouts and `CancellationToken` are also available; see the
+[stop and resume semantics](docs/RUNTIME.md#stopping-and-resuming).
 
 ## How allocation works
 
@@ -158,7 +185,23 @@ python -m pip install -e '.[baseline]'
 python -m pytest tests/test_asha.py -q
 ```
 
-The [roadmap](ROADMAP.md) separates shipped functionality from remaining research.
+### Remaining upgrades
+
+1. **Keep workers busy as candidates are pruned:** support bounded concurrent
+   replications per candidate while preserving checkpoint decision boundaries.
+2. **Compare complete external workflows:** benchmark Ray Tune and Optuna TPE,
+   separating proposer, scheduler, and runtime differences. Current Ray coverage
+   validates ASHA decisions only; see [baseline scope](docs/BASELINES.md).
+3. **Broaden the research evidence:** prespecified equal-wall-budget and equal-compute
+   studies, larger candidate pools, harder rankings, additional hardware, and financial
+   stress tests.
+4. **Extend resource accounting and execution:** measured CPU-time budgets and durable
+   multi-machine coordination.
+5. **Refresh public presentation:** update the project website with the current
+   runtime, financial evidence, and reproducibility instructions.
+
+These are remaining directions, not implemented features or promised release dates.
+The [roadmap](ROADMAP.md) lists additional runtime and research extensions.
 [DESIGN.md](DESIGN.md) retains the broader target architecture. The existing
 [project website](https://aster-hpo.vercel.app) presents an earlier synthetic smoke
 snapshot; the repository report above is the current evidence.
