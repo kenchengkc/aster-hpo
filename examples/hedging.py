@@ -1,4 +1,4 @@
-"""CPU financial pilot: python -m examples.hedging --output results/hedging-pilot."""
+"""Financial pilot: python -m examples.hedging --output results/hedging-pilot."""
 
 import argparse
 import statistics
@@ -20,14 +20,21 @@ def main():
     parser.add_argument("--seed", type=int, default=10000)
     parser.add_argument("--epochs", type=int, default=64)
     parser.add_argument("--batch-paths", type=int, default=128)
+    parser.add_argument("--evaluation-paths", type=int, default=2048)
+    parser.add_argument("--backend", choices=("numpy", "cuda"), default="numpy")
     args = parser.parse_args()
-    market = Market(epochs=args.epochs, batch_paths=args.batch_paths)
+    if args.backend == "cuda" and args.workers != 1:
+        parser.error("CUDA on one GPU requires --workers 1")
+    market = Market(
+        epochs=args.epochs, batch_paths=args.batch_paths, evaluation_paths=args.evaluation_paths
+    )
     output = create_experiment(
         args.output,
         {
             "schema_version": 1,
             "kind": "financial pilot",
             "market": asdict(market),
+            "backend": args.backend,
             "seed": args.seed,
             "workers": args.workers,
             "count": args.configs,
@@ -38,14 +45,14 @@ def main():
     configs = hedging_pool(args.seed, args.configs)
     summaries = {}
     for name, scheduler in (("full_budget", FullBudget(9)), ("race", ReplicationRace((3, 9)))):
-        objective = HedgingObjective(market, output / name / "metrics")
+        objective = HedgingObjective(market, output / name / "metrics", args.backend)
         result = Study(
             configs,
             scheduler=scheduler,
             workers=args.workers,
             seed=args.seed,
             storage=output / name / "study.sqlite",
-            objective_id="gbm-hedging-pilot-v1",
+            objective_id=f"gbm-hedging-pilot-v1:{args.backend}",
         ).optimize(objective)
         result.save(output / name / "result.json")
         if result.best_trial is None:

@@ -1,4 +1,4 @@
-"""Small CPU neural hedger in a fixed synthetic market with transaction costs.
+"""Neural hedger in a fixed synthetic market with optional resident CUDA execution.
 
 Zero interest and drift; long European call liability; fixed initial capital;
 bounded positions; costs on opening, rebalancing, and terminal liquidation.
@@ -139,7 +139,13 @@ def loss_and_gradient(parameters, paths, market, *, regularization):
     return loss, gradients
 
 
-def train_policy(config, replication, market):
+def validate_backend(backend):
+    if not isinstance(backend, str) or backend not in ("numpy", "cuda"):
+        raise ValueError("backend must be 'numpy' or 'cuda'")
+    return backend
+
+
+def validate_config(config):
     if set(config) != {"width", "learning_rate", "regularization"}:
         raise ValueError("Tune only width, learning_rate, and regularization")
     width, learning_rate, regularization = (
@@ -153,6 +159,11 @@ def train_policy(config, replication, market):
         raise ValueError("learning_rate must be finite and positive")
     if not math.isfinite(regularization) or regularization < 0:
         raise ValueError("regularization must be finite and nonnegative")
+    return width, learning_rate, regularization
+
+
+def train_policy(config, replication, market):
+    width, learning_rate, regularization = validate_config(config)
     initialization, training = np.random.SeedSequence(replication.training_seed).spawn(2)
     parameters = initialize(width, np.random.default_rng(initialization))
     rng = np.random.default_rng(training)
@@ -196,8 +207,16 @@ def evaluate_policy(parameters, paths, market):
 class HedgingObjective:
     market: Market = Market()
     diagnostic_dir: Path | None = None
+    backend: str = "numpy"
+
+    def __post_init__(self):
+        validate_backend(self.backend)
 
     def evaluate(self, config, replication):
+        if self.backend == "cuda":
+            from .hedging_cuda import evaluate
+
+            return evaluate(config, replication, self.market)
         parameters = train_policy(config, replication, self.market)
         paths = simulate_paths(
             self.market,
@@ -219,6 +238,7 @@ class HedgingObjective:
                     "config": config,
                     "replication": asdict(replication),
                     "market": asdict(self.market),
+                    "backend": self.backend,
                     "metrics": metrics,
                 },
             )

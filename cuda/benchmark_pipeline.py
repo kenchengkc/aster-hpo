@@ -224,7 +224,7 @@ def source_hashes():
             )
             and (
                 file.name == "CMakeLists.txt"
-                or file.suffix in {".cu", ".cpp", ".hpp", ".py", ".in", ".toml", ".sh"}
+                or file.suffix in {".cu", ".cuh", ".cpp", ".hpp", ".py", ".in", ".toml", ".sh"}
             )
         ]
     return {str(file.relative_to(ROOT)): sha256(file) for file in sorted(files)}

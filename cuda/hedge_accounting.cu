@@ -1,5 +1,6 @@
 #include <cuda_runtime.h>
 
+#include "accounting_kernel.cuh"
 #include "aster/accounting.hpp"
 #include "build_metadata.hpp"
 #include "comparison.hpp"
@@ -191,28 +192,6 @@ Results cpu_reference(const Data& data) {
     aster::hedge_pnl(data.prices, data.holdings, data.paths, data.intervals,
                      data.rate, result.pnl, result.costs, result.turnover);
     return result;
-}
-
-__global__ void accounting_kernel(const double* prices, const double* holdings,
-                                  std::size_t paths, std::size_t intervals, double rate,
-                                  double* pnl, double* costs, double* turnover) {
-    const std::size_t path = static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
-    if (path >= paths) return;
-    const auto price_offset = path * (intervals + 1);
-    const auto holding_offset = path * intervals;
-    double gain = 0, traded = 0, previous = 0;
-    for (std::size_t t = 0; t < intervals; ++t) {
-        const double holding = holdings[holding_offset + t];
-        const double price = prices[price_offset + t];
-        gain += holding * (prices[price_offset + t + 1] - price);
-        traded += fabs(holding - previous) * price;
-        previous = holding;
-    }
-    traded += fabs(previous) * prices[price_offset + intervals];
-    const double cost = rate * traded;
-    pnl[path] = gain - cost;
-    costs[path] = cost;
-    turnover[path] = traded;
 }
 
 struct Sample { double kernel_event_ms = 0, completed_host_ms = 0, native_cpu_prepared_ms = 0; };

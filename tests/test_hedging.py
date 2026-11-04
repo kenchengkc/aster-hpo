@@ -122,3 +122,38 @@ def test_invalid_market_rejected(kwargs):
 
     with pytest.raises(ValueError):
         Market(**kwargs)
+
+
+def test_objective_backend_is_explicit_serializable_and_lazy():
+    import pickle
+
+    from benchmarks.hedging import HedgingObjective, Market
+
+    objective = HedgingObjective(Market(epochs=1), backend="cuda")
+    assert pickle.loads(pickle.dumps(objective)) == objective
+    with pytest.raises(ValueError, match="backend"):
+        HedgingObjective(backend="automatic")
+
+
+def test_shared_config_validation_preserves_training_constraints():
+    from benchmarks.hedging import validate_config
+
+    config = {"width": 4, "learning_rate": 0.03, "regularization": 0.0001}
+    assert validate_config(config) == (4, 0.03, 0.0001)
+    for field, value in (("width", True), ("learning_rate", 0), ("regularization", -1)):
+        with pytest.raises(ValueError):
+            validate_config({**config, field: value})
+
+
+def test_requested_cuda_does_not_fall_back_to_cpu_when_unavailable():
+    import importlib.util
+
+    from aster_hpo import Replication
+    from benchmarks.hedging import HedgingObjective, Market
+
+    if importlib.util.find_spec("cupy") is not None:
+        pytest.skip("This check covers the optional dependency missing on CPU hosts")
+    config = {"width": 4, "learning_rate": 0.03, "regularization": 0.0001}
+    objective = HedgingObjective(Market(epochs=1, batch_paths=2), backend="cuda")
+    with pytest.raises(RuntimeError, match="CuPy|CUDA|cupy"):
+        objective(config, Replication.create(4, config, 0, "search", True))

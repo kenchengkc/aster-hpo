@@ -10,7 +10,7 @@ from pathlib import Path
 from aster_hpo import ASHA
 
 from .common import environment, validate_seeds
-from .hedging import Market, hedging_pool
+from .hedging import Market, hedging_pool, validate_backend
 
 METHODS = ("serial_full", "parallel_full", "asha", "race")
 
@@ -19,9 +19,25 @@ def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, allow_nan=False).encode()).hexdigest()
 
 
-def source_fingerprint():
-    root = Path(__file__).resolve().parents[1]
-    sources = [*root.glob("src/aster_hpo/*.py"), *root.glob("benchmarks/*.py")]
+def source_fingerprint(*, root=None):
+    root = Path(__file__).resolve().parents[1] if root is None else Path(root)
+    sources = {*root.glob("src/aster_hpo/*.py"), *root.glob("benchmarks/*.py")}
+    for directory in ("cuda", "native/src", "native/include"):
+        sources.update(
+            path
+            for path in (root / directory).rglob("*")
+            if path.is_file()
+            and not any(
+                part in {"build", ".build-local", "__pycache__", ".venv"}
+                for part in path.relative_to(root).parts
+            )
+            and path.suffix in (".cu", ".cuh", ".cpp", ".hpp", ".in")
+        )
+    sources.update(
+        path
+        for path in (root / "cuda/CMakeLists.txt", root / "native/CMakeLists.txt")
+        if path.exists()
+    )
     return digest({str(path.relative_to(root)): path.read_text() for path in sorted(sources)})
 
 
@@ -36,11 +52,17 @@ def freeze_protocol(
     audit_replications=8,
     margin_fraction=0.01,
     scaling_workers=None,
+    backend="numpy",
 ):
+    validate_backend(backend)
+    if backend == "cuda" and workers != 1:
+        raise ValueError("CUDA studies on one GPU require one worker")
     seeds = validate_seeds(range(20) if seeds is None else seeds)
     pilot = Path(pilot)
     pilot_manifest = json.loads((pilot / "manifest.json").read_text())
     pilot_summary = json.loads((pilot / "summary.json").read_text())
+    if pilot_manifest.get("backend", "numpy") != backend:
+        raise ValueError("Pilot backend differs from requested backend")
     if pilot_manifest["kind"] != "financial pilot" or pilot_manifest["seed"] in seeds:
         raise ValueError("Final seeds must be disjoint from the financial pilot")
     market = Market(**pilot_manifest["market"])
@@ -59,15 +81,22 @@ def freeze_protocol(
     if not math.isfinite(margin_fraction) or margin_fraction <= 0:
         raise ValueError("margin_fraction must be finite and positive")
     if scaling_workers is None:
-        scaling_workers = tuple(w for w in (1, 2, 4, 8) if w <= (os.cpu_count() or 1))
+        scaling_workers = (
+            (1,)
+            if backend == "cuda"
+            else tuple(w for w in (1, 2, 4, 8) if w <= (os.cpu_count() or 1))
+        )
     if any(type(w) is not int or w < 1 for w in scaling_workers):
         raise ValueError("Scaling workers must be positive integers")
+    if backend == "cuda" and any(w != 1 for w in scaling_workers):
+        raise ValueError("CUDA studies on one GPU require one worker")
     protocol = {
         "schema_version": 1,
         "kind": "frozen financial comparison",
         "frozen_at": datetime.now(UTC).isoformat(),
         "source_sha256": source_fingerprint(),
         "market": vars(market),
+        "backend": backend,
         "seeds": list(seeds),
         "count": count,
         "workers": workers,

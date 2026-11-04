@@ -22,6 +22,7 @@ dependencies = []
 [project.optional-dependencies]
 dev = ["pytest>=8,<10", "ruff>=0.9,<1", "build>=1.2,<2"]
 benchmark = ["numpy>=1.26,<3", "scipy>=1.11,<2", "matplotlib>=3.9,<4", "threadpoolctl>=3,<4"]
+cuda13 = ["cupy-cuda13x>=14.2,<15"]
 baseline = ["ray[tune]==2.58.0"]
 
 [project.urls]

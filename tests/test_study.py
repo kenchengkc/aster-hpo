@@ -97,3 +97,55 @@ def test_altered_protocol_cannot_resume_an_existing_study(tmp_path):
     protocol.write_text(json.dumps(data))
     with pytest.raises(ValueError, match="protocol"):
         run_study(protocol, tmp_path / "study", resume=True)
+
+
+def test_frozen_protocol_records_backend_and_rejects_ambiguous_gpu_workers(tmp_path):
+    from benchmarks.study import freeze_protocol
+
+    pilot(tmp_path / "pilot")
+    settings = freeze_protocol(
+        tmp_path / "pilot", tmp_path / "numpy.json", seeds=(0, 1), backend="numpy"
+    )
+    assert settings["backend"] == "numpy"
+    with pytest.raises(ValueError, match="backend"):
+        freeze_protocol(tmp_path / "pilot", tmp_path / "bad.json", backend="automatic")
+    with pytest.raises(ValueError, match="one worker"):
+        freeze_protocol(tmp_path / "pilot", tmp_path / "cuda.json", backend="cuda", workers=4)
+
+
+def test_source_fingerprint_detects_cuda_kernel_changes(tmp_path):
+    from benchmarks.protocol import source_fingerprint
+
+    folder = tmp_path / "cuda" / "include"
+    folder.mkdir(parents=True)
+    kernel = folder / "accounting_kernel.cuh"
+    kernel.write_text("// original accounting\n")
+    before = source_fingerprint(root=tmp_path)
+    kernel.write_text("// changed accounting\n")
+    assert source_fingerprint(root=tmp_path) != before
+    build = tmp_path / "cuda" / "CMakeLists.txt"
+    build.write_text("set(strict_float64 ON)\n")
+    before = source_fingerprint(root=tmp_path)
+    build.write_text("set(strict_float64 OFF)\n")
+    assert source_fingerprint(root=tmp_path) != before
+
+
+def test_protocol_rejects_pilot_backend_mismatch(tmp_path):
+    from benchmarks.common import write_json
+    from benchmarks.study import freeze_protocol
+
+    pilot(tmp_path / "pilot")
+    manifest = tmp_path / "pilot" / "manifest.json"
+    write_json(manifest, {**json.loads(manifest.read_text()), "backend": "cuda"})
+    with pytest.raises(ValueError, match="Pilot backend"):
+        freeze_protocol(tmp_path / "pilot", tmp_path / "protocol.json", backend="numpy")
+
+
+def test_source_fingerprint_ignores_generated_cuda_build_sources(tmp_path):
+    from benchmarks.protocol import source_fingerprint
+
+    before = source_fingerprint(root=tmp_path)
+    generated = tmp_path / "cuda/build/CMakeFiles/CompilerIdCUDA"
+    generated.mkdir(parents=True)
+    (generated / "CMakeCUDACompilerId.cu").write_text("// generated compiler probe\n")
+    assert source_fingerprint(root=tmp_path) == before

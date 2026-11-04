@@ -79,7 +79,7 @@ directories = ('native/include', 'native/src', 'native/tests', 'native/benchmark
 paths = [root / name for name in ('native/CMakeLists.txt', 'cuda/CMakeLists.txt', 'cuda/hedge_accounting.cu',
                                   'cuda/build_metadata.hpp.in', 'cuda/run_tests.sh')]
 paths += [p for directory in directories for p in (root / directory).rglob('*')
-          if p.is_file() and p.suffix in ('.cpp', '.hpp', '.cu', '.in', '.sh', '.py')]
+          if p.is_file() and p.suffix in ('.cpp', '.hpp', '.cu', '.cuh', '.in', '.sh', '.py')]
 paths = sorted(set(paths))
 with open(sys.argv[2], 'x') as out:
     json.dump({str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}, out, indent=2)

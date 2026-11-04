@@ -1,4 +1,4 @@
-"""Freeze, execute, resume, and report controlled CPU hedging comparisons."""
+"""Freeze, execute, resume, and report controlled hedging comparisons."""
 
 import argparse
 import json
@@ -12,7 +12,7 @@ from aster_hpo.storage import SQLiteStore
 
 from .common import create_experiment, environment, write_json
 from .financial_report import regenerate
-from .hedging import HedgingObjective, Market, hedging_pool
+from .hedging import HedgingObjective, Market, hedging_pool, validate_backend
 from .protocol import digest, freeze_protocol, source_fingerprint
 
 
@@ -33,7 +33,7 @@ def _partial(database):
 def _campaign(folder, spec, protocol):
     folder.mkdir(parents=True, exist_ok=True)
     market = Market(**protocol["market"])
-    objective = HedgingObjective(market, folder / "metrics")
+    objective = HedgingObjective(market, folder / "metrics", protocol.get("backend", "numpy"))
     settings = {
         "seed": spec["seed"],
         "threads_per_worker": protocol["threads_per_worker"],
@@ -88,12 +88,20 @@ def run_study(protocol_path, output, *, resume=False, progress=False):
         raise ValueError("Protocol source fingerprint differs; freeze a new protocol")
     output = Path(output)
     checksum = digest(protocol)
+    backend = validate_backend(protocol.get("backend", "numpy"))
+    backend_identity = None
+    if backend == "cuda":
+        from .hedging_cuda import device_info
+
+        backend_identity = device_info()
     if resume:
         manifest = json.loads((output / "manifest.json").read_text())
         if manifest["protocol_sha256"] != checksum:
             raise ValueError("Saved protocol differs from requested protocol")
         current = environment()
         previous = manifest["environment"]
+        if manifest.get("backend_identity") != backend_identity:
+            raise ValueError("Resume CUDA backend identity differs")
         for field in ("python", "platform", "machine", "cpu_model"):
             if current[field] != previous[field]:
                 raise ValueError(f"Resume environment differs: {field}")
@@ -126,6 +134,7 @@ def run_study(protocol_path, output, *, resume=False, progress=False):
             "protocol_sha256": checksum,
             "campaigns": campaigns,
             "scaling": scaling,
+            "backend_identity": backend_identity,
         }
         create_experiment(output, manifest)
         manifest = json.loads((output / "manifest.json").read_text())
@@ -147,7 +156,7 @@ def run_study(protocol_path, output, *, resume=False, progress=False):
                     seed=spec["seed"],
                     storage=folder / "study.sqlite",
                     objective_id="hedging-scale:" + checksum,
-                ).optimize(HedgingObjective(Market(**protocol["market"])))
+                ).optimize(HedgingObjective(Market(**protocol["market"]), backend=backend))
                 result.save(folder / "result.json")
             if progress:
                 print(f"Scaling: {spec['id']}", flush=True)
@@ -164,6 +173,7 @@ def main():
     freeze.add_argument("--workers", type=int, default=4)
     freeze.add_argument("--configs", type=int, default=6)
     freeze.add_argument("--audits", type=int, default=8)
+    freeze.add_argument("--backend", choices=("numpy", "cuda"), default="numpy")
     execute = commands.add_parser("run")
     execute.add_argument("--protocol", type=Path, required=True)
     execute.add_argument("--output", type=Path, required=True)
@@ -180,6 +190,7 @@ def main():
             workers=args.workers,
             count=args.configs,
             audit_replications=args.audits,
+            backend=args.backend,
         )
         print(f"Protocol frozen: {args.protocol}")
     elif args.command == "run":

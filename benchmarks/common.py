@@ -34,7 +34,17 @@ def environment():
             return None
 
     versions = {}
-    for name in ("aster-hpo", "numpy", "scipy", "matplotlib", "threadpoolctl", "optuna", "ray"):
+    for name in (
+        "aster-hpo",
+        "numpy",
+        "scipy",
+        "matplotlib",
+        "threadpoolctl",
+        "optuna",
+        "ray",
+        "cupy-cuda12x",
+        "cupy-cuda13x",
+    ):
         try:
             versions[name] = importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError:

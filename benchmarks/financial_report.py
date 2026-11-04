@@ -90,7 +90,7 @@ def regenerate(output):
     write_json(output / "records.json", records)
     write_json(output / "summary.json", report)
     lines = [
-        "# CPU hedging allocation study",
+        f"# {'CUDA' if protocol.get('backend') == 'cuda' else 'CPU'} hedging allocation study",
         "",
         "Fixed candidate and replication caps; endpoint quality versus elapsed search time.",
         "These are synthetic-market results, not live trading performance.",
@@ -139,6 +139,7 @@ def regenerate(output):
             "Search time includes process startup, journal writes, and idle capacity. Audit costs",
             "are reported separately below. Returned objective CPU time excludes coordinator and",
             "startup overhead. Missing attempt cost is explicitly counted in summary.json.",
+            "Objective CPU seconds measure host CPU consumption, not GPU execution cost.",
             "The speedup bootstrap interval resamples whole paired optimizer seeds.",
             "These endpoints are not time-to-target curves or equal-wall-budget comparisons.",
             "",
