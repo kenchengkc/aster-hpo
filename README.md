@@ -8,6 +8,10 @@
 strict NumPy bindings, and a standalone A100 correctness/benchmark package.
 [CUDA simulation and HPO](docs/CUDA_WORKFLOW.md) adds resident neural-hedging training
 and evaluation through the regular search and independent-audit pipeline.
+[Reusable managed workers](docs/WORKER_POOLS.md) keep GPU/CPU processes alive across
+independent searches and audits, with bounded cancellation and fresh objective bindings.
+The [repeated-run comparison package](docs/PERSISTENT_BENCHMARK.md) is ready;
+its performance study awaits a GPU instance.
 
 CUDA training combines operations into fewer kernels: the small objective's Nsight
 profile drops from **10,985 to 361 kernel executions**. Across 42 fresh campaigns,

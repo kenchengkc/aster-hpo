@@ -236,16 +236,21 @@ class Study:
         *,
         budget: RunBudget | None = None,
         cancellation: CancellationToken | None = None,
+        worker_pool=None,
     ) -> StudyResult:
         """Run or resume with a fresh per-invocation allowance.
 
         Wall/caller stops return partial, resumable results. The best trial still
         requires the full scheduler cap. Timed/cancellable runs use spawn even
         with one worker; objectives must then be importable and picklable.
+        An explicit WorkerPool reuses managed processes across sequential calls;
+        its capacity must cover this study and its thread setting must match.
         """
         from .runtime import run
 
-        return run(self, objective, budget=budget, cancellation=cancellation)
+        return run(
+            self, objective, budget=budget, cancellation=cancellation, worker_pool=worker_pool
+        )
 
 
 @dataclass
@@ -276,11 +281,13 @@ def audit(
     objective_id: str | None = None,
     max_retries: int = 1,
     threads_per_worker: int = 1,
+    worker_pool=None,
 ) -> AuditResult:
     """Evaluate a locked configuration in a separate, optionally durable namespace.
 
     Choose sample count in advance. Repeated calls with identical seeds reuse data
     and must not be treated as fresh evidence. A persistent audit resumes work.
+    worker_pool optionally reuses processes from a preceding search or audit.
     """
     _positive_integer(replications, "replications")
     if replications < 2:
@@ -296,7 +303,7 @@ def audit(
         threads_per_worker=threads_per_worker,
     )
     study._phase = "audit"
-    result = study.optimize(objective)
+    result = study.optimize(objective, worker_pool=worker_pool)
     observations = result.trials[0].observations
     for observation in observations:
         if observation.error is not None:

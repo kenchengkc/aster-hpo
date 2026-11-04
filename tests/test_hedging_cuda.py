@@ -17,6 +17,27 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG = {"width": 4, "learning_rate": 0.03, "regularization": 0.0001}
 
 
+class ReadyCudaObjective:
+    """Signal actual child CUDA initialization before a cancellation check."""
+
+    def __init__(self, market, marker):
+        self.market, self.marker = market, marker
+
+    def __call__(self, config, replication):
+        import os
+        import time
+
+        from benchmarks.hedging import HedgingObjective
+        from benchmarks.hedging_cuda import device_info
+
+        device_info()
+        temporary = self.marker.with_suffix(".tmp")
+        temporary.write_text(str(os.getpid()))
+        temporary.replace(self.marker)
+        time.sleep(5)
+        return HedgingObjective(self.market, backend="cuda")(config, replication)
+
+
 def test_cuda_module_imports_without_loading_optional_dependency():
     assert importlib.util.find_spec("benchmarks.hedging_cuda") is not None
     result = subprocess.run(
@@ -298,3 +319,98 @@ def test_cuda_frozen_study_runs_resumes_with_stable_device_identity(gpu, tmp_pat
     assert all(row["failed_runs"] == 0 for row in report["methods"].values())
     assert backend.device_info() == identity
     assert run_study(protocol, tmp_path / "study", resume=True) == report
+
+
+def test_gpu_pool_reuses_context_but_rebinds_objective_and_audit(gpu, tmp_path):
+    import os
+
+    from aster_hpo import FullBudget, Study, WorkerPool, audit
+    from benchmarks.hedging import HedgingObjective, Market
+
+    pids = set()
+    with WorkerPool(workers=1) as pool:
+        for index, cost in enumerate((0.001, 0.01, 0.001)):
+            folder = tmp_path / f"run-{index}"
+            market = Market(epochs=3, batch_paths=32, evaluation_paths=129, transaction_cost=cost)
+            objective = HedgingObjective(market, folder / "metrics", backend="cuda")
+            reference = HedgingObjective(market)
+            result = Study(
+                [CONFIG],
+                scheduler=FullBudget(2),
+                workers=1,
+                seed=71000 + index,
+                storage=folder / "search.sqlite",
+                objective_id=f"gpu-reuse-{index}",
+            ).optimize(objective, worker_pool=pool)
+            assert result.metadata["execution_backend"] == "persistent_processes"
+            assert result.best_trial is not None
+            checked = audit(
+                objective,
+                CONFIG,
+                replications=2,
+                seed=71000 + index,
+                storage=folder / "audit.sqlite",
+                objective_id=f"gpu-reuse-{index}",
+                worker_pool=pool,
+            )
+            for observation in (*result.best_trial.observations, *checked.observations):
+                assert observation.error is None
+                assert observation.loss == pytest.approx(
+                    reference(CONFIG, observation.replication), rel=1e-6, abs=1e-8
+                )
+                pids.add(observation.worker_pid)
+            assert len(list((folder / "metrics").glob("*.json"))) == 4
+    assert len(pids) == 1 and os.getpid() not in pids
+    for pid in pids:
+        with pytest.raises(ProcessLookupError):
+            os.kill(pid, 0)
+
+
+def test_initialized_cuda_worker_is_reaped_on_cancel_then_pool_can_resume(gpu, tmp_path):
+    import os
+    import threading
+    import time
+
+    from aster_hpo import CancellationToken, FullBudget, RunBudget, Study, WorkerPool
+    from benchmarks.hedging import HedgingObjective, Market
+
+    market = Market(epochs=2, batch_paths=16, evaluation_paths=32)
+    marker = tmp_path / "cuda-ready"
+    token = CancellationToken()
+
+    def cancel_when_ready():
+        deadline = time.monotonic() + 15
+        while not marker.exists() and time.monotonic() < deadline:
+            time.sleep(0.01)
+        token.cancel()
+
+    watcher = threading.Thread(target=cancel_when_ready)
+    study = Study(
+        [CONFIG],
+        scheduler=FullBudget(2),
+        workers=1,
+        seed=72,
+        storage=tmp_path / "cancel.sqlite",
+        objective_id="cuda-owned-cancel",
+        max_retries=0,
+    )
+    with WorkerPool(workers=1) as pool:
+        watcher.start()
+        try:
+            stopped = study.optimize(
+                ReadyCudaObjective(market, marker),
+                worker_pool=pool,
+                cancellation=token,
+                budget=RunBudget(max_wall_seconds=20),
+            )
+        finally:
+            watcher.join(timeout=16)
+        assert marker.exists() and not watcher.is_alive()
+        assert stopped.metadata["termination_reason"] == "cancelled"
+        old_pid = int(marker.read_text())
+        with pytest.raises(ProcessLookupError):
+            os.kill(old_pid, 0)
+        resumed = study.optimize(HedgingObjective(market, backend="cuda"), worker_pool=pool)
+        assert resumed.best_trial is not None
+        assert all(o.error is None for o in resumed.best_trial.observations)
+        assert all(o.worker_pid != old_pid for o in resumed.best_trial.observations)

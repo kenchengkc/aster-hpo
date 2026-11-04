@@ -42,6 +42,8 @@ worker startup measurements, broader GPU workloads, Rust replay, and Go orchestr
 remain future work; see the
 [native design](docs/superpowers/specs/2026-11-04-native-performance-design.md).
 
+- [x] Explicit reusable managed workers across independent studies and audits;
+  [repeated GPU/CPU comparison](docs/PERSISTENT_BENCHMARK.md) prepared, measurements pending.
 - [ ] Measured CPU-time budgets and broader system-level resource accounting.
 - [ ] Distributed execution and durable multi-machine coordination.
 - [ ] Schema migrations and a public event-replay API.

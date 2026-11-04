@@ -224,7 +224,7 @@ def _validate_search(search, job, protocol):
     from .hedging import hedging_pool
 
     trials = search["trials"]
-    configs = hedging_pool(job["seed"], protocol["count"])
+    configs = hedging_pool(job.get("pool_seed", job["seed"]), protocol["count"])
     if len(trials) != len(configs):
         raise ValueError("Missing search trial")
     total = 0

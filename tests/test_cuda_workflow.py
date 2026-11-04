@@ -650,3 +650,21 @@ def test_cuda_campaign_records_shared_device_and_distinct_implementation(
     record["backend"]["implementation"] = "wrong"
     with pytest.raises(ValueError, match="implementation"):
         validate_record(record, protocol)
+
+
+def test_search_validation_can_fix_candidates_while_replication_seeds_change(tmp_path):
+    from aster_hpo import FullBudget, Study
+    from benchmarks.cuda_workflow import _read, _validate_search
+    from benchmarks.hedging import HedgingObjective, Market, hedging_pool
+
+    market = Market(epochs=1, batch_paths=4, evaluation_paths=16)
+    result = Study(hedging_pool(71, 2), scheduler=FullBudget(2), seed=72).optimize(
+        HedgingObjective(market)
+    )
+    result.save(tmp_path / "search.json")
+    winner, count = _validate_search(
+        _read(tmp_path / "search.json"),
+        {"seed": 72, "pool_seed": 71, "scheduler": "full"},
+        {"count": 2, "checkpoints": [2]},
+    )
+    assert count == 4 and winner["config"] == result.best_trial.config

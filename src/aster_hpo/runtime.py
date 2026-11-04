@@ -14,7 +14,7 @@ from .control import SessionControl
 from .core import Observation, Replication, ReplicationRace, StudyResult, Trial, _evaluate
 from .schedulers import ASHA, ASHAPolicy, RacePolicy
 from .storage import SQLiteStore
-from .workers import run_parallel
+from .workers import WorkerPool, run_parallel
 
 THREAD_VARIABLES = (
     "OMP_NUM_THREADS",
@@ -189,7 +189,24 @@ class Coordinator:
                 )
 
 
-def run(study, objective, *, budget=None, cancellation=None):
+def run(study, objective, *, budget=None, cancellation=None, worker_pool=None):
+    if worker_pool is None:
+        return _run(study, objective, budget=budget, cancellation=cancellation)
+    if not isinstance(worker_pool, WorkerPool):
+        raise TypeError("worker_pool must be a WorkerPool or None")
+    # Validate/acquire before opening SQLite, so invalid uses create no artifacts.
+    with worker_pool._lease(study) as run_id:
+        return _run(
+            study,
+            objective,
+            budget=budget,
+            cancellation=cancellation,
+            worker_pool=worker_pool,
+            run_id=run_id,
+        )
+
+
+def _run(study, objective, *, budget=None, cancellation=None, worker_pool=None, run_id=None):
     limits = SessionControl(budget, cancellation)
     manifest = {
         "schema_version": 2,
@@ -210,23 +227,29 @@ def run(study, objective, *, budget=None, cancellation=None):
     ):
         coordinator = Coordinator(study, store)
         initial_attempts = store.total_attempts()
-        backend = (
-            "in_process"
-            if study.workers == 1 and not limits.needs_process
-            else "supervised_processes"
-        )
+        if worker_pool is not None:
+            backend = "persistent_processes"
+        else:
+            backend = (
+                "in_process"
+                if study.workers == 1 and not limits.needs_process
+                else "supervised_processes"
+            )
         session_id = store.event(
             "session_start",
             {
                 "budget": asdict(limits.budget),
                 "cancellation_enabled": cancellation is not None,
                 "execution_backend": backend,
+                **(worker_pool._metadata(run_id) if worker_pool is not None else {}),
             },
         )
         reason = "completed"
         try:
             if limits.stop_reason():
                 reason = limits.stop_reason()
+                if worker_pool is not None:
+                    worker_pool._stop(force=True)
             elif backend == "in_process":
                 while coordinator.has_work:
                     if limits.admission_closed:
@@ -239,7 +262,9 @@ def run(study, objective, *, budget=None, cancellation=None):
                     trial, replication, _ = job
                     coordinator.accept(job, _evaluate(objective, trial.config, replication))
             else:
-                reason = run_parallel(coordinator, objective, limits)
+                reason = run_parallel(
+                    coordinator, objective, limits, worker_pool=worker_pool, run_id=run_id
+                )
         except BaseException as exc:
             coordinator.interrupt()
             store.event(
@@ -250,6 +275,7 @@ def run(study, objective, *, budget=None, cancellation=None):
                     "error": f"{type(exc).__name__}: {exc}",
                     "wall_seconds": limits.elapsed,
                     "attempts": store.total_attempts() - initial_attempts,
+                    **(worker_pool._metadata(run_id) if worker_pool is not None else {}),
                 },
             )
             raise
@@ -264,6 +290,7 @@ def run(study, objective, *, budget=None, cancellation=None):
                 "termination_reason": reason,
                 "wall_seconds": session_wall,
                 "attempts": session_attempts,
+                **(worker_pool._metadata(run_id) if worker_pool is not None else {}),
             },
         )
         attempts, events = store.journal()
@@ -290,5 +317,6 @@ def run(study, objective, *, budget=None, cancellation=None):
                 "objective_cpu_accounting_complete": unknown == 0,
                 "native_thread_control": control,
                 "allocated_worker_seconds": snapshot["wall_seconds"] * study.workers,
+                **(worker_pool._metadata(run_id) if worker_pool is not None else {}),
             },
         )

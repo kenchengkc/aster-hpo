@@ -13,6 +13,7 @@ from .core import (
 )
 from .schedulers import ASHA
 from .space import Choice, Float, Int, sample_configs
+from .workers import WorkerPool
 
 __all__ = [
     "ASHA",
@@ -27,6 +28,7 @@ __all__ = [
     "ReplicationRace",
     "Study",
     "StudyResult",
+    "WorkerPool",
     "audit",
     "sample_configs",
 ]

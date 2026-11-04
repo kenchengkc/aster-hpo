@@ -1,5 +1,11 @@
 # CUDA neural hedging and hyperparameter search
 
+To retain an owned CUDA process across multiple searches and audits, use the
+[worker-pool API](WORKER_POOLS.md). The
+[repeated-workflow benchmark package](PERSISTENT_BENCHMARK.md) includes equally
+persistent CPU controls and the already persistent direct GPU path. Its performance
+study has not run because the instance was paused.
+
 On the current A100, combining training operations into fewer kernels reduces
 the small search-plus-audit workflow from 4.62s to 0.92s and the larger one from
 5.26s to 3.60s. Median paired improvements over preserved eager CUDA are 4.96×

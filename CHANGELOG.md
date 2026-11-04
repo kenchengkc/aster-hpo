@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased — Native companion 0.1.0
+## Unreleased
+
+- Add dependency-free `WorkerPool` reuse across `Study.optimize` and `audit`, with
+  unique run tokens, fresh callable binding, fixed thread limits, bounded cleanup,
+  and the existing timeout/cancellation/retry behavior. CPU and GPU objectives use
+  the same owned spawn processes.
+- Prepare a controlled repeated-workflow benchmark with direct, fresh-pool and
+  reused CPU/GPU variants. Performance collection is pending after the GPU instance
+  was paused; no new speedup claim is made. [Runbook](docs/PERSISTENT_BENCHMARK.md).
 
 - Fuse CUDA finite checks, norm/clipping and Adam into one launch per epoch. Small
   training shapes use four kernels for forward, accounting/error, gradients/loss,
