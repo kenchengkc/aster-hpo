@@ -1,0 +1,235 @@
+{
+  "reference": "parallel_full",
+  "methods": {
+    "asha": {
+      "runs": 20,
+      "failed_runs": 0,
+      "mean_audited_loss": 0.0004333744169812589,
+      "median_search_wall_seconds": 2.275052479468286,
+      "mean_objective_cpu_seconds": 7.0518941,
+      "mean_audit_cpu_seconds": 0.9808486499999955,
+      "mean_audit_wall_seconds": 1.0600790685391985,
+      "mean_allocated_worker_seconds": 12.56404571654275,
+      "mean_replications": 38.4,
+      "unmeasured_attempts": 0,
+      "median_speedup": 1.2783998437687714,
+      "speedup_bootstrap_95_interval": [
+        1.0508909231164814,
+        1.6238741792020401
+      ]
+    },
+    "parallel_full": {
+      "runs": 20,
+      "failed_runs": 0,
+      "mean_audited_loss": 0.0004333744169812589,
+      "median_search_wall_seconds": 2.802214478957467,
+      "mean_objective_cpu_seconds": 10.4251983,
+      "mean_audit_cpu_seconds": 0.9237431000000033,
+      "mean_audit_wall_seconds": 0.9475119937327691,
+      "mean_allocated_worker_seconds": 12.02549029137008,
+      "mean_replications": 54,
+      "unmeasured_attempts": 0,
+      "median_speedup": 1.0,
+      "speedup_bootstrap_95_interval": [
+        1.0,
+        1.0
+      ]
+    },
+    "race": {
+      "runs": 20,
+      "failed_runs": 0,
+      "mean_audited_loss": 0.0004333744169812589,
+      "median_search_wall_seconds": 1.8959223330020905,
+      "mean_objective_cpu_seconds": 4.92845405,
+      "mean_audit_cpu_seconds": 0.8723718499999922,
+      "mean_audit_wall_seconds": 0.8836141270818189,
+      "mean_allocated_worker_seconds": 8.072376949619501,
+      "mean_replications": 25.75,
+      "unmeasured_attempts": 0,
+      "median_speedup": 1.4315933745315,
+      "speedup_bootstrap_95_interval": [
+        1.270728346788104,
+        1.8278703279726742
+      ]
+    },
+    "serial_full": {
+      "runs": 20,
+      "failed_runs": 0,
+      "mean_audited_loss": 0.0004333744169812589,
+      "median_search_wall_seconds": 5.770797854056582,
+      "mean_objective_cpu_seconds": 5.924489100000003,
+      "mean_audit_cpu_seconds": 0.828550600000002,
+      "mean_audit_wall_seconds": 0.8348822855856269,
+      "mean_allocated_worker_seconds": 6.005110647762194,
+      "mean_replications": 54,
+      "unmeasured_attempts": 0,
+      "median_speedup": 0.5046353679816309,
+      "speedup_bootstrap_95_interval": [
+        0.48029611701881664,
+        0.5243262440422706
+      ]
+    }
+  },
+  "comparisons": {
+    "asha": {
+      "differences": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "n": 20,
+      "missing": 0,
+      "mean_difference": 0.0,
+      "standard_error": 0.0,
+      "upper_bound": null,
+      "margin": 5.090394628584234e-06,
+      "confidence": 0.95,
+      "status": "degenerate",
+      "analysis": "one-sided Student t bound across independent optimizer seeds"
+    },
+    "race": {
+      "differences": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "n": 20,
+      "missing": 0,
+      "mean_difference": 0.0,
+      "standard_error": 0.0,
+      "upper_bound": null,
+      "margin": 5.090394628584234e-06,
+      "confidence": 0.95,
+      "status": "degenerate",
+      "analysis": "one-sided Student t bound across independent optimizer seeds"
+    },
+    "serial_full": {
+      "differences": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "n": 20,
+      "missing": 0,
+      "mean_difference": 0.0,
+      "standard_error": 0.0,
+      "upper_bound": null,
+      "margin": 5.090394628584234e-06,
+      "confidence": 0.95,
+      "status": "degenerate",
+      "analysis": "one-sided Student t bound across independent optimizer seeds"
+    }
+  },
+  "primary_comparison": "race versus parallel_full",
+  "interpretation": "fixed candidate budget; endpoint quality and search time",
+  "scaling": [
+    {
+      "id": "20000-1",
+      "seed": 20000,
+      "workers": 1,
+      "wall_seconds": 3.6144628750626,
+      "objective_cpu_seconds": 3.599457000000058
+    },
+    {
+      "id": "20000-2",
+      "seed": 20000,
+      "workers": 2,
+      "wall_seconds": 1.9558079577982426,
+      "objective_cpu_seconds": 3.686304
+    },
+    {
+      "id": "20000-4",
+      "seed": 20000,
+      "workers": 4,
+      "wall_seconds": 1.0403259999584407,
+      "objective_cpu_seconds": 3.6906570000000003
+    },
+    {
+      "id": "20000-8",
+      "seed": 20000,
+      "workers": 8,
+      "wall_seconds": 0.8751450411509722,
+      "objective_cpu_seconds": 5.260589
+    },
+    {
+      "id": "20001-1",
+      "seed": 20001,
+      "workers": 1,
+      "wall_seconds": 3.523240583948791,
+      "objective_cpu_seconds": 3.498347999999879
+    },
+    {
+      "id": "20001-2",
+      "seed": 20001,
+      "workers": 2,
+      "wall_seconds": 1.8549477921333164,
+      "objective_cpu_seconds": 3.530210000000001
+    },
+    {
+      "id": "20001-4",
+      "seed": 20001,
+      "workers": 4,
+      "wall_seconds": 0.9923626659438014,
+      "objective_cpu_seconds": 3.5533639999999993
+    },
+    {
+      "id": "20001-8",
+      "seed": 20001,
+      "workers": 8,
+      "wall_seconds": 0.7920879160519689,
+      "objective_cpu_seconds": 4.816217999999999
+    }
+  ],
+  "protocol_sha256": "350f440548c2f241be74e0fcddd1e9ede7fb5f9ef6831f8c6c212bfa39ab349e"
+}

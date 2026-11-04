@@ -1,56 +1,390 @@
 {
-  "schema_version": 1,
-  "recorded_date": "2026-09-16",
-  "purpose": "Single-seed functional smoke comparison; not a performance benchmark or statistical quality guarantee.",
+  "schema_version": 2,
+  "published_date": "2026-11-04",
+  "purpose": "Static evidence index for the CPU replication-allocation study, CUDA launch-fusion study, and pending repeated-workflow benchmark.",
   "source_repository": "https://github.com/kenchengkc/aster-hpo",
-  "source_commit": "6bed07456519de455579f1d09e0504ec1e632920",
-  "command": "python examples/noisy_quadratic.py --workers 2 --configs 16 --seed 17 --output website/evidence/smoke",
-  "test_command": "pytest -q",
-  "tests_passed_at_capture": 37,
-  "workers": 2,
-  "candidate_count": 16,
-  "seed": 17,
-  "audit_replications_per_selected_candidate": 100,
-  "environment": {
-    "schema_version": 1,
-    "package_version": "0.1.0",
-    "python": "3.11.5",
-    "platform": "macOS-26.4-arm64-arm-64bit",
-    "workers": 2,
-    "seed": 17,
-    "shared_scenarios": true,
-    "scheduler": "FullBudget",
-    "scheduler_parameters": {
-      "replications": 27
+  "documentation_snapshot_revision": "5ce06fe7504ae49616df03851d21928825a70749",
+  "studies": [
+    {
+      "id": "cpu-2026-09-24",
+      "status": "measured",
+      "title": "CPU replication allocation",
+      "report": "cpu-2026-09-24/report.txt",
+      "summary": "cpu-2026-09-24/summary.json",
+      "execution_manifest": "cpu-2026-09-24/manifest.json",
+      "frozen_protocol": "cpu-2026-09-24/protocol.json",
+      "provenance": "cpu-2026-09-24/provenance.json",
+      "diagnostic_summary": "cpu-2026-09-24/diagnostic-summary.json",
+      "figure": "cpu-2026-09-24/quality_time.png",
+      "financial_execution_revision": "bef29bfefa518430351dc34970bdac92a4062eb5",
+      "reporting_and_diagnostic_revision": "89e75c6cbe39430461c5b3b7d11feee7062b2436",
+      "protocol_sha256": "350f440548c2f241be74e0fcddd1e9ede7fb5f9ef6831f8c6c212bfa39ab349e",
+      "independent_optimizer_seeds": 20,
+      "financial_campaigns": 80,
+      "primary_comparison": "race versus parallel_full",
+      "primary_result": {
+        "replications_saved_fraction": 0.5231481481481481,
+        "mean_replications_race": 25.75,
+        "mean_replications_parallel_full": 54,
+        "median_paired_search_speedup": 1.4315933745315,
+        "paired_bootstrap_95_interval": [
+          1.270728346788104,
+          1.8278703279726742
+        ],
+        "same_selected_configuration_in_all_seeds": true,
+        "quality_inference_status": "degenerate",
+        "quality_inference_upper_bound": null
+      },
+      "timing_scope": "Search wall time includes worker process startup, journal writes and idle capacity. Independent audits are excluded from search speedups. Returned objective CPU time excludes coordinator and startup overhead.",
+      "limitations": [
+        "One small synthetic hedging workload, six candidates, short replications, one Apple M5 machine.",
+        "Identical observed winners and audits do not establish non-inferiority; zero-variance comparisons are degenerate and have no inferential bound.",
+        "The reporting correction followed the run; original settings and raw outcomes remain preserved in repository archives.",
+        "CPU replication-allocation and CUDA studies use different protocols and machines and are not a paired CPU-versus-GPU comparison."
+      ]
+    },
+    {
+      "id": "cuda-launch-2026-11-04",
+      "status": "measured",
+      "title": "CUDA launch fusion",
+      "report": "cuda-launch-2026-11-04/report.txt",
+      "summary": "cuda-launch-2026-11-04/summary.json",
+      "execution_manifest": "cuda-launch-2026-11-04/manifest.json",
+      "profile_summary": "cuda-launch-2026-11-04/profiles-summary.json",
+      "validation": "cuda-launch-2026-11-04/validation.json",
+      "sanitizer_log": "cuda-launch-2026-11-04/memcheck.log",
+      "figure": "cuda-launch-2026-11-04/launch-performance.png",
+      "executed_source_revision": "0d2e12b",
+      "source_hashes_verified_against_commit": 37,
+      "snapshot_git_metadata_available": false,
+      "protocol_sha256": "65f096c57fe330d8426c02e6884a13df8040cc27ed5e507216632af083abe1a1",
+      "source_snapshot_sha256": "0f38b6aaa0cc8947f4f8cd7d0a4b2f57994aba290e151bae5555b8c7bfbab836",
+      "campaign_processes": 42,
+      "independent_optimizer_seeds": [
+        31000,
+        31001,
+        31002
+      ],
+      "hardware": "NVIDIA A100 PCIe 40GB; CPU and GPU arms run contemporaneously on the same host.",
+      "full_budget_results": [
+        {
+          "workload": "tiny",
+          "scheduler": "full",
+          "training_paths": 128,
+          "evaluation_paths": 2048,
+          "median_workflow_seconds": {
+            "numpy_one_worker": 1.0320737339789048,
+            "numpy_four_workers": 0.742444148985669,
+            "eager_cuda_one_worker": 4.624963153037243,
+            "optimized_cuda_one_worker": 0.9227196740685031
+          },
+          "median_process_seconds": {
+            "numpy_one_worker": 1.1240197179140523,
+            "numpy_four_workers": 0.8459374889498577,
+            "eager_cuda_one_worker": 4.929286330007017,
+            "optimized_cuda_one_worker": 1.1646448139799759
+          },
+          "paired_workflow_speedup_vs_eager": {
+            "median": 4.955440525906745,
+            "minimum": 4.329206206098252,
+            "maximum": 5.063159086385563
+          },
+          "paired_process_speedup_vs_eager": {
+            "median": 4.1818086548957325,
+            "minimum": 3.6059588163512095,
+            "maximum": 4.283023962416522
+          },
+          "paired_workflow_speedup_vs_numpy_one_worker": {
+            "median": 1.1298584077547762,
+            "minimum": 1.026297071155893,
+            "maximum": 1.2243631653253653
+          },
+          "paired_process_speedup_vs_numpy_one_worker": {
+            "median": 0.9766532239663368,
+            "minimum": 0.8956261990077485,
+            "maximum": 1.027212619631797
+          },
+          "paired_workflow_speedup_vs_numpy_four_workers": {
+            "median": 0.8127876298002403,
+            "minimum": 0.7905352855740383,
+            "maximum": 0.8282004907124366
+          },
+          "paired_process_speedup_vs_numpy_four_workers": {
+            "median": 0.7225866521619874,
+            "minimum": 0.7157060658317858,
+            "maximum": 0.7350294329267629
+          }
+        },
+        {
+          "workload": "scaled",
+          "scheduler": "full",
+          "training_paths": 4096,
+          "evaluation_paths": 32768,
+          "median_workflow_seconds": {
+            "numpy_one_worker": 16.71953417500481,
+            "numpy_four_workers": 8.864701617974788,
+            "eager_cuda_one_worker": 5.264167057001032,
+            "optimized_cuda_one_worker": 3.6042462890036404
+          },
+          "median_process_seconds": {
+            "numpy_one_worker": 16.808751752017997,
+            "numpy_four_workers": 8.96980053500738,
+            "eager_cuda_one_worker": 5.5344222619896755,
+            "optimized_cuda_one_worker": 3.8735319189727306
+          },
+          "paired_workflow_speedup_vs_eager": {
+            "median": 1.4605458769734243,
+            "minimum": 1.4139879770120072,
+            "maximum": 1.4773435885160837
+          },
+          "paired_process_speedup_vs_eager": {
+            "median": 1.42877930988043,
+            "minimum": 1.384915760492593,
+            "maximum": 1.454891959860515
+          },
+          "paired_workflow_speedup_vs_numpy_one_worker": {
+            "median": 4.638843418113574,
+            "minimum": 4.575767687470976,
+            "maximum": 5.803211310275428
+          },
+          "paired_process_speedup_vs_numpy_one_worker": {
+            "median": 4.339386405902062,
+            "minimum": 4.279248643355967,
+            "maximum": 5.441303364002552
+          },
+          "paired_workflow_speedup_vs_numpy_four_workers": {
+            "median": 2.5654392598607836,
+            "minimum": 2.358765403449292,
+            "maximum": 3.080078568758485
+          },
+          "paired_process_speedup_vs_numpy_four_workers": {
+            "median": 2.4142545054806597,
+            "minimum": 2.221464472205436,
+            "maximum": 2.900778696985216
+          }
+        }
+      ],
+      "profile_scope": "One warmed width8 objective per shape/implementation, same initialization and shocks. Durations are diagnostics under profiler, not final workflow timings. GPU kernel duration is a sum, not utilization or host wall time.",
+      "profile_kernel_counts": [
+        {
+          "shape": "small",
+          "implementation": "eager",
+          "kernel_executions": 10985
+        },
+        {
+          "shape": "scaled",
+          "implementation": "eager",
+          "kernel_executions": 11126
+        },
+        {
+          "shape": "small",
+          "implementation": "optimized",
+          "kernel_executions": 361
+        },
+        {
+          "shape": "scaled",
+          "implementation": "optimized",
+          "kernel_executions": 5174
+        }
+      ],
+      "timing_scope": "Workflow time includes numerical/backend imports, context setup, allocation, RNG, transfers, simulation, training, evaluation, scheduling, SQLite journals, winner locking, independent audits and result writes. Timing-file publication is excluded. Process time additionally includes interpreter startup, imports, trailer and exit.",
+      "ratio_scope": "Speedups are ratios paired within seed, then summarized by median and min-max; they are not ratios of displayed median durations.",
+      "limitations": [
+        "Three optimizer seeds on one host; descriptive engineering evidence, not confidence intervals, p99 or broad quality guarantees.",
+        "No objective warmup before campaigns; fresh processes retain the ordinary shared disk/compiler cache populated by prior validation and profiles.",
+        "Four CPU workers remain faster for the small workflow. Small process time does not establish a CUDA advantage over one CPU worker.",
+        "Profiler durations are diagnostics, not benchmark speedups. Larger summed GPU kernel time increases despite fewer launches.",
+        "These campaigns use fresh processes, not persistent worker pools; they do not establish worker-reuse performance."
+      ]
+    },
+    {
+      "id": "persistent-worker-workflows",
+      "status": "pending",
+      "title": "Repeated complete workflows with persistent workers",
+      "worker_pool_guide": "worker-pools.txt",
+      "benchmark_protocol": "persistent-benchmark.txt",
+      "performance_results": null,
+      "persistent_worker_speedup_reported": false,
+      "reason": "The rented instance was paused before the repeated-run performance study. The prepared package must be rerun and validated on the next compatible CUDA host.",
+      "planned_comparison": "Direct, fresh-pool and reused-pool NumPy/one-worker and CUDA/one-worker arms, plus fresh/reused NumPy/four-worker controls; two workloads, three sequence roots and three workflows per sequence.",
+      "planned_workflows": 144,
+      "planned_evaluations": 2736,
+      "required_timing_scopes": [
+        "first workflow",
+        "later workflows",
+        "complete sequence including pool shutdown",
+        "parent process"
+      ],
+      "validation_scope": "A prior working snapshot passed 94 A100 integration tests, with two CPU-only checks skipped. The detailed remote log was not copied locally; final packaged GPU validation remains pending. This is functional evidence, not performance evidence."
     }
+  ],
+  "functional_smoke": {
+    "manifest": "smoke/manifest.json",
+    "recorded_date": "2026-09-16",
+    "source_commit": "6bed07456519de455579f1d09e0504ec1e632920",
+    "purpose": "Single-seed functional smoke comparison; not a performance benchmark or statistical quality guarantee.",
+    "preserved_without_modification": true
+  },
+  "distribution": {
+    "reports": "Reports and guides are exact plain-text copies of repository Markdown. Relative Markdown references remain textual; use the explicit local resources in this index for bundled downloads.",
+    "raw_archives": "Large raw archives remain in the source repository and are not duplicated in the static website.",
+    "private_profiler_captures": "Opaque Nsight captures and databases are excluded; only the public aggregated profile summary is bundled.",
+    "checksums": "SHA-256 hashes below cover every bundled file except this index."
   },
   "files": [
     {
+      "path": "cpu-2026-09-24/diagnostic-summary.json",
+      "source_path": "docs/evidence/cpu-2026-09-24/diagnostic-summary.json",
+      "sha256": "def90c480573e29938f7c74df05188cec54872d6e014fa95ac2964347a8eaa60",
+      "bytes": 16202,
+      "copy": "byte-identical"
+    },
+    {
+      "path": "cpu-2026-09-24/manifest.json",
+      "source_path": "docs/evidence/cpu-2026-09-24/manifest.json",
+      "sha256": "447039d693e4e5702fcb76195697481307aee4b7c1c7e41fc43ccc63aba530d2",
+      "bytes": 13983,
+      "copy": "byte-identical"
+    },
+    {
+      "path": "cpu-2026-09-24/protocol.json",
+      "source_path": "docs/evidence/cpu-2026-09-24/protocol.json",
+      "sha256": "2e4c9b8259979a28a1663d923b4dc50a7f275bbbcf14dd0c245c57bbef1873d3",
+      "bytes": 3978,
+      "copy": "byte-identical"
+    },
+    {
+      "path": "cpu-2026-09-24/provenance.json",
+      "source_path": "docs/evidence/cpu-2026-09-24/provenance.json",
+      "sha256": "0eb18167ae58351716a8a3bb4d418227d3ed55691c669d7ef3fd0b48ac774f29",
+      "bytes": 750,
+      "copy": "byte-identical"
+    },
+    {
+      "path": "cpu-2026-09-24/quality_time.png",
+      "source_path": "docs/evidence/cpu-2026-09-24/quality_time.png",
+      "sha256": "0b572a5ac9485b74cbb1f5cb83a8023a08e09a65096fbb80de161128ef6685b3",
+      "bytes": 61260,
+      "copy": "byte-identical"
+    },
+    {
+      "path": "cpu-2026-09-24/report.txt",
+      "source_path": "docs/RESULTS.md",
+      "sha256": "2febee0eefde953e7dce5fc459ce84e197d8fb961027cfe75ee908b743757c6f",
+      "bytes": 9891,
+      "copy": "byte-identical"
+    },
+    {
+      "path": "cpu-2026-09-24/summary.json",
+      "source_path": "docs/evidence/cpu-2026-09-24/summary.json",
+      "sha256": "fcf11c22ff5ac958b5535b3ca55c2aad0d9c8244196b2e3c8cf2896748bc6607",
+      "bytes": 5815,
+      "copy": "byte-identical"
+    },
+    {
+      "path": "cuda-launch-2026-11-04/launch-performance.png",
+      "source_path": "docs/evidence/cuda-launch-2026-11-04/launch-performance.png",
+      "sha256": "183eee98eeaddca35460191c182a914b327c7c6f125d6fa7d47f054c2c996d9d",
+      "bytes": 103329,
+      "copy": "byte-identical"
+    },
+    {
+      "path": "cuda-launch-2026-11-04/manifest.json",
+      "source_path": "docs/evidence/cuda-launch-2026-11-04/manifest.json",
+      "sha256": "742578593d7583e31bf2b2d7e50294c9220064c9504582608b737cc8052a8b68",
+      "bytes": 14476,
+      "copy": "byte-identical"
+    },
+    {
+      "path": "cuda-launch-2026-11-04/memcheck.log",
+      "source_path": "docs/evidence/cuda-launch-2026-11-04/memcheck.log",
+      "sha256": "4d09b6cf434f1a44adde4b26eab0bf5c419aca1a8002ccf2e6da0552657d9968",
+      "bytes": 395,
+      "copy": "byte-identical"
+    },
+    {
+      "path": "cuda-launch-2026-11-04/profiles-summary.json",
+      "source_path": "docs/evidence/cuda-launch-2026-11-04/profiles-summary.json",
+      "sha256": "91c49d53cb797e9b3a793a4ac1a72635550d1b312ac5d089598d1059907ef127",
+      "bytes": 2829,
+      "copy": "byte-identical"
+    },
+    {
+      "path": "cuda-launch-2026-11-04/report.txt",
+      "source_path": "docs/evidence/cuda-launch-2026-11-04/README.md",
+      "sha256": "ce36b22de37c7c9e4b441bf8410ca9910b59fd9562e4926a600b0b0bd884ae21",
+      "bytes": 10910,
+      "copy": "byte-identical"
+    },
+    {
+      "path": "cuda-launch-2026-11-04/summary.json",
+      "source_path": "docs/evidence/cuda-launch-2026-11-04/summary.json",
+      "sha256": "a67c6e75f01a0828d0b2429c4315e5c157b7ffc59b26f9a0da8beb9293c05720",
+      "bytes": 86200,
+      "copy": "byte-identical"
+    },
+    {
+      "path": "cuda-launch-2026-11-04/validation.json",
+      "source_path": "docs/evidence/cuda-launch-2026-11-04/validation.json",
+      "sha256": "fdd5653842e5a3b2b72231e3e875a3eae96c11660c2a0c910c9f094c2d3e159b",
+      "bytes": 2670,
+      "copy": "byte-identical"
+    },
+    {
+      "path": "persistent-benchmark.txt",
+      "source_path": "docs/PERSISTENT_BENCHMARK.md",
+      "sha256": "c33f1ddd784e40375619703285b7dd25ac19a6f2faa9f7c458470a16e9ed71cd",
+      "bytes": 4428,
+      "copy": "byte-identical"
+    },
+    {
       "path": "smoke/full_budget.json",
-      "sha256": "5155ffb8dd9ffc7a2921d5325592c12f37ef80d569d06b7689c63654cc370541"
+      "sha256": "5155ffb8dd9ffc7a2921d5325592c12f37ef80d569d06b7689c63654cc370541",
+      "bytes": 165178,
+      "copy": "preserved smoke artifact",
+      "provenance_manifest": "smoke/manifest.json"
     },
     {
       "path": "smoke/full_budget_audit.json",
-      "sha256": "e7084c610800ff0d6b58d154084057a0d7bdaa809d67c87260426c96fd21e41f"
+      "sha256": "e7084c610800ff0d6b58d154084057a0d7bdaa809d67c87260426c96fd21e41f",
+      "bytes": 32864,
+      "copy": "preserved smoke artifact",
+      "provenance_manifest": "smoke/manifest.json"
+    },
+    {
+      "path": "smoke/manifest.json",
+      "source_path": "website/evidence/manifest.json before this evidence-index update",
+      "sha256": "3baa4f3e883b18f69e7ea49e812c38372eff6be9b740a2c87404496d8415d03c",
+      "bytes": 2070,
+      "copy": "byte-identical preserved smoke manifest"
     },
     {
       "path": "smoke/race.json",
-      "sha256": "bc897d18ac79585c7a75c925d717cd317a790ac2960059776b0bfd3b91d81d8c"
+      "sha256": "bc897d18ac79585c7a75c925d717cd317a790ac2960059776b0bfd3b91d81d8c",
+      "bytes": 33961,
+      "copy": "preserved smoke artifact",
+      "provenance_manifest": "smoke/manifest.json"
     },
     {
       "path": "smoke/race_audit.json",
-      "sha256": "e15266e856ae72750392d456035a5eb33e4244a4732bd7b9180aec560dd308da"
+      "sha256": "e15266e856ae72750392d456035a5eb33e4244a4732bd7b9180aec560dd308da",
+      "bytes": 32886,
+      "copy": "preserved smoke artifact",
+      "provenance_manifest": "smoke/manifest.json"
     },
     {
       "path": "smoke/summary.json",
-      "sha256": "3a0657e579e521304d7352aef5746a3831bf08f6fb65ed38582975e646f311f2"
+      "sha256": "3a0657e579e521304d7352aef5746a3831bf08f6fb65ed38582975e646f311f2",
+      "bytes": 727,
+      "copy": "preserved smoke artifact",
+      "provenance_manifest": "smoke/manifest.json"
+    },
+    {
+      "path": "worker-pools.txt",
+      "source_path": "docs/WORKER_POOLS.md",
+      "sha256": "632739274a6282044630a5fbadb919325a08cab22dcc8b5a393105cca8fee26a",
+      "bytes": 4850,
+      "copy": "byte-identical"
     }
-  ],
-  "limitations": [
-    "One optimizer seed; asynchronous scheduling can change allocation in later runs.",
-    "Objective is inexpensive and process startup dominates search wall time.",
-    "Reported objective CPU seconds exclude coordinator, process startup, and audit.",
-    "No real financial workload, distributed scaling, or non-inferiority study is included.",
-    "Shared audit seeds allow a paired comparison; identical winners produce identical audit results."
   ]
 }

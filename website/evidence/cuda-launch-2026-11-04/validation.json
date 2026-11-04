@@ -1,0 +1,57 @@
+{
+  "executed_source_revision": "0d2e12b",
+  "source_hashes_verified_against_commit": 37,
+  "snapshot_git_metadata_available": false,
+  "eager_training_body_unchanged_from": "76da272",
+  "source_archive_sha256": "e1bc635b70d68c120b4ad17f0ef59a779005c8ca56a5f2ee9cb57c5addf291fe",
+  "published_raw_archive_sha256": "bf59d94cb2ec612f57e75d857c28df5915bde8aa4b25125f4949769da52f4854",
+  "local_tests_passed": 257,
+  "local_gpu_cases_skipped": 40,
+  "a100_integration_tests_passed": 127,
+  "a100_cpu_only_checks_skipped": 2,
+  "memcheck_tests_passed": 42,
+  "memcheck_cpu_only_skipped": 1,
+  "memcheck_study_tests_deselected": 2,
+  "memcheck_api_reporting": "explicit",
+  "memcheck_errors": 0,
+  "memcheck_leaked_bytes": 0,
+  "memcheck_gpu_source_hashes_match_executed_revision": true,
+  "campaigns": 42,
+  "unique_campaign_pids": 42,
+  "finite_json_files_audited": 1017,
+  "sqlite_journals_audited": 84,
+  "search_observations": 594,
+  "audit_observations": 126,
+  "metric_files_audited": 720,
+  "objective_failures": 0,
+  "unsuccessful_attempts": 0,
+  "summary_regenerated_exactly": true,
+  "all_reported_winner_and_allocation_pairs_agree": true,
+  "all_seven_matched_metrics_close": true,
+  "maximum_matched_search_mse_absolute_difference": 2.168404344971009e-18,
+  "maximum_audit_mean_absolute_difference": 1.6263032587282567e-19,
+  "profiler": "NVIDIA Nsight Systems 2026.1.1.0",
+  "profile_kernel_counts_reproduce_from_full_traces": true,
+  "profile_small_kernel_executions": {
+    "eager": 10985,
+    "optimized": 361
+  },
+  "profile_scaled_kernel_executions": {
+    "eager": 11126,
+    "optimized": 5174
+  },
+  "profile_scaled_summed_gpu_kernel_ms": {
+    "eager": 76.427763,
+    "optimized": 81.611149
+  },
+  "profile_scope": "One warm width8 objective,64epochs,perimplementation/shape. Durations under profiling are not workflow benchmark evidence; sum of kernel durations is not utilization.",
+  "published_profile_csv_files": 16,
+  "opaque_profiler_files_published": 0,
+  "opaque_profiler_capture_policy": "Retained privately under ignored local results; exports omit environment metadata.",
+  "benchmark_scope": "Fresh processes and contexts with ordinary shared compiler disk cache. Workflow includes setup and search plus audits; parent process additionally includes interpreter startup and exit. One host,3optimizerseeds,development evidence.",
+  "limitations": [
+    "Small process latency roughly matches one CPU worker; fourCPUworkers remain faster.",
+    "Scaled summed GPU kernel duration increases6.8% in the diagnostic; actual workflow improves1.46x versus eager.",
+    "No p99,empty-JIT-cache,multi-GPU or general financial quality guarantee."
+  ]
+}

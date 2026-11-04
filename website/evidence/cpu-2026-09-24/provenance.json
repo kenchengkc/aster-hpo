@@ -1,0 +1,15 @@
+{
+  "financial_execution_revision": "bef29bfefa518430351dc34970bdac92a4062eb5",
+  "reporting_and_diagnostic_revision": "89e75c6cbe39430461c5b3b7d11feee7062b2436",
+  "post_run_correction": "Zero sample variance now yields degenerate status and no inferential bound. The frozen protocol, campaign outputs, and original analysis remain unchanged.",
+  "threadpoolctl_version_verified_after_run": "3.6.0",
+  "manifest_limitation": "The original environment capture omitted threadpoolctl. This post-run verification is not a pre-run version record; current manifests include it.",
+  "financial_campaigns": 80,
+  "scaling_runs": 8,
+  "diagnostic_campaigns": 640,
+  "archives_exclude": [
+    "SQLite databases",
+    "lock files",
+    "generated plots"
+  ]
+}

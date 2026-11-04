@@ -1,0 +1,719 @@
+{
+  "schema_version": 1,
+  "kind": "financial comparison",
+  "protocol": {
+    "schema_version": 1,
+    "kind": "frozen financial comparison",
+    "frozen_at": "2026-09-24T04:19:08.644025+00:00",
+    "source_sha256": "8ee881b760b0760343c2bd86bb1e475493dd00f1985166d27bc0bf89511f1265",
+    "market": {
+      "spot": 1.0,
+      "strike": 1.0,
+      "volatility": 0.2,
+      "maturity": 1.0,
+      "steps": 12,
+      "transaction_cost": 0.001,
+      "epochs": 256,
+      "batch_paths": 256,
+      "evaluation_paths": 2048
+    },
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "count": 6,
+    "workers": 4,
+    "checkpoints": [
+      3,
+      9
+    ],
+    "reduction_factor": 3,
+    "audit_replications": 8,
+    "threads_per_worker": 1,
+    "quality_margin": 5.090394628584234e-06,
+    "margin_fraction": 0.01,
+    "pilot_seed": 10000,
+    "pilot_reference_loss": 0.0005090394628584234,
+    "pilot_manifest": {
+      "schema_version": 1,
+      "kind": "financial pilot",
+      "market": {
+        "spot": 1.0,
+        "strike": 1.0,
+        "volatility": 0.2,
+        "maturity": 1.0,
+        "steps": 12,
+        "transaction_cost": 0.001,
+        "epochs": 256,
+        "batch_paths": 256,
+        "evaluation_paths": 2048
+      },
+      "seed": 10000,
+      "workers": 2,
+      "count": 6,
+      "checkpoints": [
+        3,
+        9
+      ],
+      "audit_replications": 8,
+      "environment": {
+        "revision": "b886144e0724f01cca20ec838f8934e5409bf81c",
+        "dirty": true,
+        "python": "3.11.5",
+        "platform": "macOS-26.4-arm64-arm-64bit",
+        "machine": "arm64",
+        "cpu_count": 10,
+        "dependencies": {
+          "aster-hpo": "0.1.0",
+          "numpy": "2.4.1",
+          "scipy": "1.17.0",
+          "matplotlib": "3.10.8",
+          "ray": "2.58.0"
+        },
+        "thread_environment": {
+          "OMP_NUM_THREADS": null,
+          "OPENBLAS_NUM_THREADS": null,
+          "MKL_NUM_THREADS": null
+        }
+      }
+    },
+    "pilot_summary": {
+      "full_budget": {
+        "winner": {
+          "learning_rate": 0.051572984344897925,
+          "regularization": 3.2674216878635127e-05,
+          "width": 4
+        },
+        "audit_mean": 0.0005090394628584234,
+        "audit_standard_error": 7.441205849947548e-06,
+        "audit_wall_seconds": 0.6379466659855098,
+        "search_wall_seconds": 2.577917499933392,
+        "objective_cpu_seconds": 4.874622999999996,
+        "replications": 54,
+        "median_replication_seconds": 0.08155104145407677
+      },
+      "race": {
+        "winner": {
+          "learning_rate": 0.051572984344897925,
+          "regularization": 3.2674216878635127e-05,
+          "width": 4
+        },
+        "audit_mean": 0.0005090394628584234,
+        "audit_standard_error": 7.441205849947548e-06,
+        "audit_wall_seconds": 0.6136914170347154,
+        "search_wall_seconds": 1.4220492909662426,
+        "objective_cpu_seconds": 2.6011680000000004,
+        "replications": 30,
+        "median_replication_seconds": 0.08111200004350394
+      }
+    },
+    "methods": [
+      "serial_full",
+      "parallel_full",
+      "asha",
+      "race"
+    ],
+    "confidence": 0.95,
+    "primary_comparison": "race versus parallel_full",
+    "failure_policy": "failed campaigns preclude a blanket non-inferiority claim",
+    "analysis": "paired one-sided Student t bound across optimizer seeds",
+    "scaling_workers": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "scaling_seeds": [
+      20000,
+      20001
+    ],
+    "scaling_count": 12,
+    "scaling_replications": 3,
+    "environment": {
+      "revision": "bef29bfefa518430351dc34970bdac92a4062eb5",
+      "dirty": false,
+      "python": "3.11.5",
+      "platform": "macOS-26.4-arm64-arm-64bit",
+      "machine": "arm64",
+      "cpu_count": 10,
+      "cpu_model": "Apple M5",
+      "dependencies": {
+        "aster-hpo": "0.2.0",
+        "numpy": "2.4.1",
+        "scipy": "1.17.0",
+        "matplotlib": "3.10.8",
+        "ray": "2.58.0"
+      },
+      "thread_environment": {
+        "OMP_NUM_THREADS": null,
+        "OPENBLAS_NUM_THREADS": null,
+        "MKL_NUM_THREADS": null
+      }
+    },
+    "baseline_reference": "Ray 2.58.0 single-bracket stopping ASHA; finite scalar losses"
+  },
+  "protocol_sha256": "350f440548c2f241be74e0fcddd1e9ede7fb5f9ef6831f8c6c212bfa39ab349e",
+  "campaigns": [
+    {
+      "id": "0-asha",
+      "seed": 0,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "0-serial_full",
+      "seed": 0,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "0-parallel_full",
+      "seed": 0,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "0-race",
+      "seed": 0,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "1-race",
+      "seed": 1,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "1-serial_full",
+      "seed": 1,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "1-asha",
+      "seed": 1,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "1-parallel_full",
+      "seed": 1,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "2-parallel_full",
+      "seed": 2,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "2-asha",
+      "seed": 2,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "2-race",
+      "seed": 2,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "2-serial_full",
+      "seed": 2,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "3-race",
+      "seed": 3,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "3-serial_full",
+      "seed": 3,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "3-asha",
+      "seed": 3,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "3-parallel_full",
+      "seed": 3,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "4-asha",
+      "seed": 4,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "4-serial_full",
+      "seed": 4,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "4-race",
+      "seed": 4,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "4-parallel_full",
+      "seed": 4,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "5-serial_full",
+      "seed": 5,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "5-parallel_full",
+      "seed": 5,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "5-race",
+      "seed": 5,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "5-asha",
+      "seed": 5,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "6-race",
+      "seed": 6,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "6-asha",
+      "seed": 6,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "6-parallel_full",
+      "seed": 6,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "6-serial_full",
+      "seed": 6,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "7-race",
+      "seed": 7,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "7-parallel_full",
+      "seed": 7,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "7-serial_full",
+      "seed": 7,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "7-asha",
+      "seed": 7,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "8-serial_full",
+      "seed": 8,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "8-asha",
+      "seed": 8,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "8-race",
+      "seed": 8,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "8-parallel_full",
+      "seed": 8,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "9-serial_full",
+      "seed": 9,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "9-parallel_full",
+      "seed": 9,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "9-asha",
+      "seed": 9,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "9-race",
+      "seed": 9,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "10-race",
+      "seed": 10,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "10-asha",
+      "seed": 10,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "10-parallel_full",
+      "seed": 10,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "10-serial_full",
+      "seed": 10,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "11-serial_full",
+      "seed": 11,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "11-parallel_full",
+      "seed": 11,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "11-asha",
+      "seed": 11,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "11-race",
+      "seed": 11,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "12-serial_full",
+      "seed": 12,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "12-asha",
+      "seed": 12,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "12-parallel_full",
+      "seed": 12,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "12-race",
+      "seed": 12,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "13-race",
+      "seed": 13,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "13-serial_full",
+      "seed": 13,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "13-parallel_full",
+      "seed": 13,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "13-asha",
+      "seed": 13,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "14-parallel_full",
+      "seed": 14,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "14-race",
+      "seed": 14,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "14-asha",
+      "seed": 14,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "14-serial_full",
+      "seed": 14,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "15-race",
+      "seed": 15,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "15-asha",
+      "seed": 15,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "15-serial_full",
+      "seed": 15,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "15-parallel_full",
+      "seed": 15,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "16-serial_full",
+      "seed": 16,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "16-race",
+      "seed": 16,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "16-parallel_full",
+      "seed": 16,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "16-asha",
+      "seed": 16,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "17-serial_full",
+      "seed": 17,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "17-asha",
+      "seed": 17,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "17-parallel_full",
+      "seed": 17,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "17-race",
+      "seed": 17,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "18-asha",
+      "seed": 18,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "18-race",
+      "seed": 18,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "18-serial_full",
+      "seed": 18,
+      "method": "serial_full",
+      "workers": 1
+    },
+    {
+      "id": "18-parallel_full",
+      "seed": 18,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "19-parallel_full",
+      "seed": 19,
+      "method": "parallel_full",
+      "workers": 4
+    },
+    {
+      "id": "19-race",
+      "seed": 19,
+      "method": "race",
+      "workers": 4
+    },
+    {
+      "id": "19-asha",
+      "seed": 19,
+      "method": "asha",
+      "workers": 4
+    },
+    {
+      "id": "19-serial_full",
+      "seed": 19,
+      "method": "serial_full",
+      "workers": 1
+    }
+  ],
+  "scaling": [
+    {
+      "id": "20000-1",
+      "seed": 20000,
+      "workers": 1
+    },
+    {
+      "id": "20000-2",
+      "seed": 20000,
+      "workers": 2
+    },
+    {
+      "id": "20000-4",
+      "seed": 20000,
+      "workers": 4
+    },
+    {
+      "id": "20000-8",
+      "seed": 20000,
+      "workers": 8
+    },
+    {
+      "id": "20001-1",
+      "seed": 20001,
+      "workers": 1
+    },
+    {
+      "id": "20001-2",
+      "seed": 20001,
+      "workers": 2
+    },
+    {
+      "id": "20001-4",
+      "seed": 20001,
+      "workers": 4
+    },
+    {
+      "id": "20001-8",
+      "seed": 20001,
+      "workers": 8
+    }
+  ],
+  "environment": {
+    "revision": "bef29bfefa518430351dc34970bdac92a4062eb5",
+    "dirty": false,
+    "python": "3.11.5",
+    "platform": "macOS-26.4-arm64-arm-64bit",
+    "machine": "arm64",
+    "cpu_count": 10,
+    "cpu_model": "Apple M5",
+    "dependencies": {
+      "aster-hpo": "0.2.0",
+      "numpy": "2.4.1",
+      "scipy": "1.17.0",
+      "matplotlib": "3.10.8",
+      "ray": "2.58.0"
+    },
+    "thread_environment": {
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null
+    }
+  }
+}

@@ -1,0 +1,7 @@
+========= COMPUTE-SANITIZER
+.s.........................................                              [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_hedging_cuda.py:37: CuPy is installed
+42 passed, 1 skipped, 2 deselected in 83.22s (0:01:23)
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= ERROR SUMMARY: 0 errors

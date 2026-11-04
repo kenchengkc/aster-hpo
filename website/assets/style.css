@@ -465,3 +465,246 @@ footer > div {
   color: var(--blue);
   padding-left: 0;
 }
+
+/* Current research and systems evidence. */
+.eyebrow,
+.study-label,
+.flow-label,
+.status-label {
+  color: var(--blue);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.eyebrow {
+  margin-bottom: 18px;
+}
+.overview h1 {
+  max-width: 1000px;
+  font-size: clamp(2.25rem, 4.4vw, 3.4rem);
+  letter-spacing: -0.035em;
+}
+.principles {
+  gap: 32px;
+}
+.principles > div {
+  border-top: 2px solid #dce3ec;
+  padding-top: 22px;
+}
+.evidence-section {
+  padding-top: 35px;
+}
+.case-study {
+  border: 1px solid #d7dfe8;
+  border-radius: 6px;
+  padding: 32px;
+  margin: 30px 0;
+}
+.case-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.study-meta,
+.measurement-note,
+figcaption,
+.small-note {
+  color: #525d6b;
+  font-size: 0.9rem;
+}
+.case-study > h3 {
+  font-size: 1.6rem;
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 30px 0;
+  padding: 24px 0;
+  border-top: 1px solid #dce3ec;
+  border-bottom: 1px solid #dce3ec;
+}
+.metrics dt {
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  color: #253e5b;
+}
+.metrics dd {
+  font-size: 0.88rem;
+  margin-top: 10px;
+}
+.table-wrap {
+  overflow-x: auto;
+  margin-bottom: 18px;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+caption {
+  text-align: left;
+  font-size: 0.85rem;
+  color: #525d6b;
+  margin-bottom: 12px;
+}
+th,
+td {
+  padding: 13px 14px;
+  border-bottom: 1px solid #dce3ec;
+}
+thead th {
+  background: #edf1f5;
+  vertical-align: bottom;
+}
+td {
+  white-space: nowrap;
+}
+.highlight-row {
+  background: #f1f6f5;
+}
+.study-figure {
+  margin: 28px 0;
+}
+.study-figure img {
+  width: 100%;
+  display: block;
+}
+.study-figure figcaption {
+  margin-top: 14px;
+}
+.boundary-note {
+  background: var(--pale);
+  border-left: 3px solid var(--blue);
+  padding: 20px 22px;
+  font-size: 0.93rem;
+  margin: 26px 0;
+}
+.result-details h4 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+.step-number {
+  display: block;
+  color: #5f7187;
+  font-size: 0.8rem;
+  margin-bottom: 12px;
+}
+.device-flow {
+  display: grid;
+  grid-template-columns: 1fr auto 1.5fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  margin: 28px 0 40px;
+  padding: 24px;
+  border: 1px solid #d7dfe8;
+  border-radius: 6px;
+}
+.device-flow > div {
+  min-width: 0;
+}
+.device-flow h3 {
+  font-size: 1rem;
+  margin-top: 10px;
+}
+.device-flow p {
+  font-size: 0.88rem;
+  margin-bottom: 0;
+}
+.device-resident {
+  padding: 22px;
+  background: #edf3f8;
+  border-radius: 4px;
+}
+.flow-arrow {
+  color: var(--blue);
+  font-size: 1.4rem;
+}
+.pending-study {
+  background: #fff8e9;
+  border: 1px solid #d3b57c;
+  border-left: 5px solid #9a681b;
+  padding: 30px;
+  border-radius: 4px;
+  margin: 30px 0;
+}
+.status-label {
+  color: #754b0b;
+  display: inline-block;
+  padding: 5px 10px;
+  background: #f7e5bd;
+  margin-bottom: 16px;
+}
+.pending-study h3 {
+  font-size: 1.5rem;
+}
+.setup-details {
+  border-top: 1px solid #dce3ec;
+  padding-top: 22px;
+  margin-top: 26px;
+}
+.setup-details pre {
+  background: var(--pale);
+  margin-bottom: 20px;
+}
+.table-wrap:focus-visible {
+  outline: 3px solid #e49c22;
+  outline-offset: 3px;
+}
+@media (max-width: 1000px) {
+  .masthead {
+    gap: 20px;
+  }
+  .masthead nav {
+    gap: 16px;
+  }
+  .device-flow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .flow-arrow {
+    transform: rotate(90deg);
+    justify-self: center;
+    line-height: 1;
+  }
+}
+@media (max-width: 800px) {
+  .case-study {
+    padding: 22px;
+  }
+  .metrics {
+    gap: 18px;
+  }
+  .metrics dt {
+    font-size: 1.85rem;
+  }
+}
+@media (max-width: 500px) {
+  .case-study {
+    padding: 20px 16px;
+    margin-inline: -8px;
+  }
+  .metrics {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+  .metrics > div {
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+  }
+  .metrics dd {
+    margin: 0;
+  }
+  .pending-study,
+  .device-flow {
+    padding: 22px;
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-09-16",
+  "purpose": "Single-seed functional smoke comparison; not a performance benchmark or statistical quality guarantee.",
+  "source_repository": "https://github.com/kenchengkc/aster-hpo",
+  "source_commit": "6bed07456519de455579f1d09e0504ec1e632920",
+  "command": "python examples/noisy_quadratic.py --workers 2 --configs 16 --seed 17 --output website/evidence/smoke",
+  "test_command": "pytest -q",
+  "tests_passed_at_capture": 37,
+  "workers": 2,
+  "candidate_count": 16,
+  "seed": 17,
+  "audit_replications_per_selected_candidate": 100,
+  "environment": {
+    "schema_version": 1,
+    "package_version": "0.1.0",
+    "python": "3.11.5",
+    "platform": "macOS-26.4-arm64-arm-64bit",
+    "workers": 2,
+    "seed": 17,
+    "shared_scenarios": true,
+    "scheduler": "FullBudget",
+    "scheduler_parameters": {
+      "replications": 27
+    }
+  },
+  "files": [
+    {
+      "path": "smoke/full_budget.json",
+      "sha256": "5155ffb8dd9ffc7a2921d5325592c12f37ef80d569d06b7689c63654cc370541"
+    },
+    {
+      "path": "smoke/full_budget_audit.json",
+      "sha256": "e7084c610800ff0d6b58d154084057a0d7bdaa809d67c87260426c96fd21e41f"
+    },
+    {
+      "path": "smoke/race.json",
+      "sha256": "bc897d18ac79585c7a75c925d717cd317a790ac2960059776b0bfd3b91d81d8c"
+    },
+    {
+      "path": "smoke/race_audit.json",
+      "sha256": "e15266e856ae72750392d456035a5eb33e4244a4732bd7b9180aec560dd308da"
+    },
+    {
+      "path": "smoke/summary.json",
+      "sha256": "3a0657e579e521304d7352aef5746a3831bf08f6fb65ed38582975e646f311f2"
+    }
+  ],
+  "limitations": [
+    "One optimizer seed; asynchronous scheduling can change allocation in later runs.",
+    "Objective is inexpensive and process startup dominates search wall time.",
+    "Reported objective CPU seconds exclude coordinator, process startup, and audit.",
+    "No real financial workload, distributed scaling, or non-inferiority study is included.",
+    "Shared audit seeds allow a paired comparison; identical winners produce identical audit results."
+  ]
+}

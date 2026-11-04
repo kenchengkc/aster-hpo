@@ -1,0 +1,79 @@
+{
+  "executed_source_revision": "0d2e12b",
+  "profiler": "NVIDIA Nsight Systems 2026.1.1.0",
+  "scope": "One warmed width8 objective per shape/implementation, same initialization and shocks. Durations are diagnostics under profiler, not final workflow timings. GPU kernel duration is a sum, not utilization or host wall time.",
+  "profiles": [
+    {
+      "implementation": "eager",
+      "shape": "small",
+      "kernel_executions": 10985,
+      "summed_gpu_kernel_ms": 37.735098,
+      "profiled_objective_ms": 275.31877695582807,
+      "driver_kernel_launch_calls": 10275,
+      "driver_kernel_launch_api_ms": 58.331267,
+      "metrics": {
+        "mse": 0.0005529214900186438,
+        "bias": -0.002510701194003649,
+        "error_q05": -0.03892738898988397,
+        "error_q50": -0.004598214204654859,
+        "error_q95": 0.038113594059302654,
+        "mean_transaction_cost": 0.002070761227734909,
+        "mean_turnover": 2.070761227734909
+      }
+    },
+    {
+      "implementation": "eager",
+      "shape": "scaled",
+      "kernel_executions": 11126,
+      "summed_gpu_kernel_ms": 76.427763,
+      "profiled_objective_ms": 282.58413495495915,
+      "driver_kernel_launch_calls": 10339,
+      "driver_kernel_launch_api_ms": 52.371705,
+      "metrics": {
+        "mse": 0.000534637865199368,
+        "bias": -0.0019428682063598016,
+        "error_q05": -0.03880802312538688,
+        "error_q50": -0.003265116001566093,
+        "error_q95": 0.03796059621761459,
+        "mean_transaction_cost": 0.0020764130821052124,
+        "mean_turnover": 2.076413082105212
+      }
+    },
+    {
+      "implementation": "optimized",
+      "shape": "small",
+      "kernel_executions": 361,
+      "summed_gpu_kernel_ms": 4.045315,
+      "profiled_objective_ms": 11.501759989187121,
+      "driver_kernel_launch_calls": 355,
+      "driver_kernel_launch_api_ms": 1.929118,
+      "metrics": {
+        "mse": 0.0005529214900186438,
+        "bias": -0.002510701194003649,
+        "error_q05": -0.038927388989883946,
+        "error_q50": -0.004598214204654866,
+        "error_q95": 0.038113594059302654,
+        "mean_transaction_cost": 0.002070761227734909,
+        "mean_turnover": 2.0707612277349092
+      }
+    },
+    {
+      "implementation": "optimized",
+      "shape": "scaled",
+      "kernel_executions": 5174,
+      "summed_gpu_kernel_ms": 81.611149,
+      "profiled_objective_ms": 201.89991302322596,
+      "driver_kernel_launch_calls": 4643,
+      "driver_kernel_launch_api_ms": 28.642044,
+      "metrics": {
+        "mse": 0.000534637865199368,
+        "bias": -0.0019428682063598016,
+        "error_q05": -0.03880802312538688,
+        "error_q50": -0.003265116001566093,
+        "error_q95": 0.03796059621761459,
+        "mean_transaction_cost": 0.0020764130821052124,
+        "mean_turnover": 2.076413082105212
+      }
+    }
+  ]
+}
