@@ -51,7 +51,7 @@ inside this benchmark process and restores it afterward.
 Fresh subprocess records measure cold API startup separately from warmed calls.
 The `--sessions` option means measurement rounds in one process; repeat the whole
 command into new output directories for independent process sessions. Warm method
-order is randomized. Native streaming samples retain zero durations when updates
+order alternates between forward and reverse order. Native streaming samples retain zero durations when updates
 fall below timer resolution; those samples are not replaced or discarded. Derived
 rates with zero elapsed time are unavailable, not infinite throughput. Do not
 interpret very small sample sets as reliable p99 estimates, or subtract timer

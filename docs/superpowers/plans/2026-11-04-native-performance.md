@@ -65,12 +65,12 @@
 **Consumes:** Task 1 core/target and Task 2 Python interface. Independent benchmark/CUDA work may begin once these signatures are fixed.
 **Produces:** standalone CPU benchmark; NumPy/native API and whole-objective report; A100 (`sm_80`) correctness/benchmark executable and repeatable remote command.
 
-- [ ] Add real smoke checks for benchmark JSON, positive sample counts/durations, numerical checksums, no-overwrite behavior, and failing correctness checks. Observe missing tools before implementation.
-- [ ] Implement streaming event samples and batch timings with warmup/validation boundaries, consumed results, compiler/source metadata, and raw records.
-- [ ] Prepare a standalone CUDA float64 path-major kernel with reusable device buffers, CPU-reference comparisons, adverse dimensions, checked launch settings, CUDA event and completed host timings; record cold setup separately. A small smoke mode precedes larger benchmarks.
-- [ ] Add a shell runner for environment inventory, build, correctness, optional Compute Sanitizer, and exported JSON. Preserve nonzero failures and existing output directories. Do not claim GPU validation before running it on NVIDIA hardware.
+- [x] Add real smoke checks for benchmark JSON, positive sample counts/durations, numerical checksums, no-overwrite behavior, and failing correctness checks. Observe missing tools before implementation.
+- [x] Implement streaming event samples and batch timings with warmup/validation boundaries, consumed results, compiler/source metadata, and raw records.
+- [x] Prepare a standalone CUDA float64 path-major kernel with reusable device buffers, CPU-reference comparisons, adverse dimensions, checked launch settings, CUDA event and completed host timings; record cold setup separately. A small smoke mode precedes larger benchmarks.
+- [x] Add a shell runner for environment inventory, build, correctness, optional Compute Sanitizer, and exported JSON. Preserve nonzero failures and existing output directories. Do not claim GPU validation before running it on NVIDIA hardware.
 - [ ] Run CPU-side tests and packaging locally; run the CUDA suite once the user supplies SSH access. Use the dedicated SSH key outside the repository and preserve host-key checking.
-- [ ] Add focused native CI and honest installation/measurement instructions. Request one fresh whole-branch review, resolve important findings with regressions, and commit tested artifacts.
+- [x] Add focused native CI and honest installation/measurement instructions. Request one fresh whole-branch review, resolve important findings with regressions, and commit tested artifacts.
 
 ## Authorization and execution
 
@@ -79,3 +79,17 @@ the C++ foundation and prepare the CUDA test package. This also authorizes creat
 the requested dedicated SSH key. The owner has rented an A100 PCIe 40GB instance;
 connection details are pending. No additional instance or paid resource will be
 created. The proposed CUDA launch-autotuning study remains a later experiment.
+
+## Verification checkpoint
+
+CPU foundation and CUDA package preparation are complete. Local combined tests:
+164 passed; native Release and UBSan CTests passed; both wheel/sdist builds passed;
+core-only and companion installations passed outside the checkout. A short native/API/
+whole-objective report was generated with raw inputs and no new speedup claim.
+A fresh final reviewer found no Critical or Important defects. Its documentation
+accuracy note was corrected: method order alternates forward/reverse.
+
+The remaining hardware-dependent check is CUDA compilation/execution/Compute
+Sanitizer and Linux ASan on the rented A100 host after the owner supplies SSH
+connection details. AppleClang 15's local ASan runtime aborts even for an empty
+program before user code executes; this is recorded as unavailable, not passing.
