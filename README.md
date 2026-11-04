@@ -9,12 +9,16 @@ strict NumPy bindings, and a standalone A100 correctness/benchmark package.
 [CUDA simulation and HPO](docs/CUDA_WORKFLOW.md) adds resident neural-hedging training
 and evaluation through the regular search and independent-audit pipeline.
 
-On one A100, full-budget float64 neural-hedging search plus winner audit took
-**18.41s → 5.44s** at 4,096 training / 32,768 evaluation paths: **3.38× median paired
-speedup** versus one NumPy worker, **1.58×** versus four. Setup, transfers, training,
-evaluation, scheduling, and journal writes are included. Paired winners agree and
-matched losses pass the declared numerical check. The original small workload is
-slower on CUDA; NumPy remains the default. [30-campaign protocol, raw results, and scope →](docs/evidence/cuda-workflow-2026-11-04/README.md)
+CUDA training combines operations into fewer kernels: the small objective's Nsight
+profile drops from **10,985 to 361 kernel executions**. Across 42 fresh campaigns,
+full-budget search plus audit falls **4.62s → 0.92s** on the small workload and
+**5.26s → 3.60s** on the larger one: **4.96× / 1.46× median paired improvements**
+over the previous CUDA implementation. Larger-workload speedups versus NumPy are
+**4.64× with one CPU worker / 2.57× with four**. Setup, transfers, training, evaluation,
+scheduling, and journal writes are included; matched financial metrics pass the
+declared check. Four CPU workers still win on the small workload; including
+interpreter startup puts small CUDA roughly level with one CPU worker. NumPy remains
+the default. [Profiles, complete-workflow results, and scope →](docs/evidence/cuda-launch-2026-11-04/README.md)
 
 [![CI](https://github.com/kenchengkc/aster-hpo/actions/workflows/ci.yml/badge.svg)](https://github.com/kenchengkc/aster-hpo/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)

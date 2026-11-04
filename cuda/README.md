@@ -112,7 +112,7 @@ Source files do not contain remote access details or credentials.
 
 For the actual resident simulation, neural training, evaluation, and HPO objective,
 use the [CUDA workflow guide](../docs/CUDA_WORKFLOW.md). Its
-[full-workflow measurements](../docs/evidence/cuda-workflow-2026-11-04/README.md)
+[full-workflow measurements](../docs/evidence/cuda-launch-2026-11-04/README.md)
 include search and independent winner audits; the accounting sweep below is a
 separate fixed-input workload.
 

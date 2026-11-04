@@ -2,6 +2,14 @@
 
 ## Unreleased — Native companion 0.1.0
 
+- Fuse CUDA finite checks, norm/clipping and Adam into one launch per epoch. Small
+  training shapes use four kernels for forward, accounting/error, gradients/loss,
+  and optimizer; larger shapes retain CuPy gradients. Preserve `cuda_eager` as the
+  original reference and add opt-in contemporaneous 42-campaign comparisons.
+- Profile 96.7% fewer kernel executions in the small objective. Complete small
+  search-plus-audit workflows improve 4.96× over previous CUDA; larger workflows
+  improve 1.46×. Four-worker CPU remains faster on the small workload. All paired
+  financial checks pass. [Launch and workflow evidence](docs/evidence/cuda-launch-2026-11-04/README.md).
 - Integrate optional resident CUDA simulation, explicit neural-hedging gradients,
   Adam, and evaluation with the regular HPO objective; share the existing accounting
   kernel across NVCC and CuPy. Add explicit backend selection and CUDA-aware resume

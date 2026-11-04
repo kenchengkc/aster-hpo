@@ -7,8 +7,11 @@ turnover, including opening and liquidation, on fixed input arrays.
 
 The [CUDA workflow guide](CUDA_WORKFLOW.md) integrates the same kernel with resident
 simulation, neural training, evaluation, and regular HPO search. Its
-[30-campaign A100 comparison](evidence/cuda-workflow-2026-11-04/README.md) measures
-the complete search-plus-audit workflow, including setup and transfers.
+[42-campaign launch-fusion comparison](evidence/cuda-launch-2026-11-04/README.md)
+measures the complete search-plus-audit workflow, including setup and transfers,
+against the preserved eager implementation and CPU controls. The
+[initial integration comparison](evidence/cuda-workflow-2026-11-04/README.md)
+remains archived separately.
 
 ## Install and check the CPU foundation
 

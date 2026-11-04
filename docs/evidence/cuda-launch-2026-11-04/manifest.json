@@ -1,0 +1,485 @@
+{
+  "schema_version": 1,
+  "frozen_at": "2026-11-04T08:42:34.820807+00:00",
+  "protocol": {
+    "schema_version": 1,
+    "kind": "CUDA whole-workflow development comparison",
+    "markets": {
+      "tiny": {
+        "spot": 1.0,
+        "strike": 1.0,
+        "volatility": 0.2,
+        "maturity": 1.0,
+        "steps": 12,
+        "transaction_cost": 0.001,
+        "epochs": 64,
+        "batch_paths": 128,
+        "evaluation_paths": 2048
+      },
+      "scaled": {
+        "spot": 1.0,
+        "strike": 1.0,
+        "volatility": 0.2,
+        "maturity": 1.0,
+        "steps": 12,
+        "transaction_cost": 0.001,
+        "epochs": 64,
+        "batch_paths": 4096,
+        "evaluation_paths": 32768
+      }
+    },
+    "seeds": [
+      31000,
+      31001,
+      31002
+    ],
+    "count": 4,
+    "checkpoints": [
+      2,
+      4
+    ],
+    "audit_replications": 3,
+    "threads_per_worker": 1,
+    "closeness": {
+      "rtol": 1e-06,
+      "atol": 1e-08
+    },
+    "warmup_objective_calls": 0,
+    "cache_scope": "Fresh interpreter and CUDA context per campaign; ordinary shared disk/compiler caches are retained, including kernels populated by prior correctness validation. Fresh process does not mean empty JIT cache. No explicit warmup or cache purge.",
+    "interpretation": "Descriptive paired development comparison; no p99 or quality guarantee",
+    "include_eager": true
+  },
+  "protocol_sha256": "65f096c57fe330d8426c02e6884a13df8040cc27ed5e507216632af083abe1a1",
+  "source": {
+    "sha256": "0f38b6aaa0cc8947f4f8cd7d0a4b2f57994aba290e151bae5555b8c7bfbab836",
+    "files": {
+      "benchmarks/__init__.py": "aafc3754aef47cc1bca13e9cd748513796585bc932ad23dea191cec8fa9432a4",
+      "benchmarks/analysis.py": "7332e500ce8639fab3f34578319e54ca26f7dab879326fbb2bcdbc8a815851f2",
+      "benchmarks/common.py": "707b5198a5e09348d8b93d2009e268a466cbf93879b3762e1ffe7f54361009a4",
+      "benchmarks/cuda_workflow.py": "0109f8e96a1155e7cb25de292f9f27d220cb79b4d8e7f08e7b0c1571e2e0d6ec",
+      "benchmarks/diagnostics.py": "768d0aedbb78a0627d62b0a8c189f31f746a59ec64ef525db6656a97af07f8fd",
+      "benchmarks/financial_report.py": "031d6fc7a3d2abeba2da2499035aa8c8fc9518592f052ef8e06a5e42e8c4ff49",
+      "benchmarks/hedging.py": "4a8a98dc66758b4bf3eb52a7693fb6e1f0c951ed7e6b281f36c9fa7f423e7f41",
+      "benchmarks/hedging_cuda.py": "f22ddb62a29fb8d9f528adbea1d6ec2ffa3e820fb802b1a0ade8de41712459fa",
+      "benchmarks/hedging_cuda_fused.py": "961e5096e1fa8b13d866fd2b3bf6bfbc77bbdd9abbbe58c7a947c7ce5571a86d",
+      "benchmarks/native_performance.py": "01073803bb1d4cc69ac2fcc61e40298289186d188f4dc70c83b91fb424599ede",
+      "benchmarks/protocol.py": "9e3f920fecb3f8a5d2ebc24273e0b167cc29599654cad12dbb172c6b1bd5f56c",
+      "benchmarks/study.py": "31849b6f0d1b7b553976cc710a040d92eee416f49e5a915ccab433ac3ee6ef52",
+      "benchmarks/study_plots.py": "4d49d4a985ab7544c568736abb7d506072041f6117511c1b343867ef763ad264",
+      "benchmarks/synthetic.py": "d513bcb432acde0d56ef94bda9c1114ebe62594ed4ecf862cb74cf095118021e",
+      "cuda/CMakeLists.txt": "2035e23ae3ab670a308e9b756ff58a2b91e855033be55604c696f8cd2419386c",
+      "cuda/build_metadata.hpp.in": "c67d1f632f5e3ddc048091c7b7e4f74b3915a8dadef803f3d0441404603922c7",
+      "cuda/hedge_accounting.cu": "4088bab5d24887fb13383fe220982e891e6b190b70c3359442f5cf22f86c109b",
+      "cuda/include/accounting_kernel.cuh": "7d190f977165979e3b6e71fe68dcd007091b4562012176a8612281103f434f46",
+      "cuda/include/comparison.hpp": "27d9af3d5168a2ee7a8476b984bfb814b3b8b28d38d8b40a25b6445ff3c718d3",
+      "cuda/include/hedging_training.cuh": "442941b492ad51979f9c1092985c7159488c0bc5db5fcc2f914f095b854cf4df",
+      "cuda/tests/test_comparison.cpp": "abdf44a6b7b4fdbf80dd9d199a55ee31a3b5685af884cf85a9a97d81f3ec74ec",
+      "native/CMakeLists.txt": "d386d21d6a51884cdd30fa04087796ad94af24d222167fecb39aed8a8a4f92da",
+      "native/benchmarks/accounting_bench.cpp": "efe7cc6d4c353c21dbe8bb02e3e776c10691ab1d98f0cc22f376a5faf0cc684c",
+      "native/include/aster/accounting.hpp": "dc5396220dc31a9eb5b92fb305d1c8f77df6a849f503936a6f0107f19ef2a37b",
+      "native/src/accounting.cpp": "b560f92c32c12cc3f7082370d76a7f5cc78f294e709de0cebcd8b01e9ca36025",
+      "native/src/bindings.cpp": "7e2bdd102f3a4863c5b82c8ad0c4b9d5c586915eb69e99277d469eba327fedfd",
+      "native/tests/test_accounting.cpp": "65e957bc8382180beacc1055c17c2103b3c3fb7963ff934000c7ce18080da4f4",
+      "pyproject.toml": "555ec168c0a4d7b040f4f0a0d138ea6b1697482b65178be55415777b4a51253d",
+      "src/aster_hpo/__init__.py": "bde451958ef91552b290b65ceb7a5a6f58dc471fa566d8f97a91aeda679a2fd1",
+      "src/aster_hpo/_version.py": "56b5e91c3bb77ab933c25fd65eba883419bdc5691cc94cb9dc840e8f4e3674eb",
+      "src/aster_hpo/control.py": "f4abde14d76ad5e198e7aa11de45ad0063b903c1388c600b2186801de6d63324",
+      "src/aster_hpo/core.py": "b9fc49f230b3cc8de9f6b4463a1d8514688e850b1e6d5aecdbaf2f16a87cf0d5",
+      "src/aster_hpo/runtime.py": "7004eae3e8d597b84b612ae8aedc2111b3264c84b314bf32963211f0b1079564",
+      "src/aster_hpo/schedulers.py": "814894e5d5d802850baf0addc12120d83e766bb9802b25b5453df7f96c19ab40",
+      "src/aster_hpo/space.py": "f00ea59ff5a238ce0b5e10722379f25711335cd96a786708e3af8e07345042d1",
+      "src/aster_hpo/storage.py": "e0ec034e69b3e56d73c737b590099201a6fbb8101ccbc5595cdb3be4512a86a6",
+      "src/aster_hpo/workers.py": "bfb637f1ef0b716693a88a2b126dbffa89189cdacf21f9a863bac5433342e68b"
+    }
+  },
+  "environment": {
+    "revision": null,
+    "dirty": null,
+    "python": "3.12.3",
+    "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "cpu_count": 128,
+    "cpu_model": "x86_64",
+    "dependencies": {
+      "numpy": "2.5.4",
+      "scipy": "1.18.1",
+      "threadpoolctl": "3.7.0",
+      "cupy-cuda13x": "14.2.0"
+    },
+    "thread_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": null
+    },
+    "backend_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": null,
+      "VECLIB_MAXIMUM_THREADS": null,
+      "NUMEXPR_NUM_THREADS": null,
+      "CUDA_VISIBLE_DEVICES": null,
+      "CUDA_DEVICE_ORDER": null,
+      "CUDA_HOME": "/usr/local/cuda",
+      "CUDA_PATH": null,
+      "CUPY_CACHE_DIR": null,
+      "CUPY_ACCELERATORS": null,
+      "CUPY_CUDA_COMPILE_WITH_DEBUG": null,
+      "CUPY_CACHE_IN_MEMORY": null,
+      "CUDA_CACHE_PATH": null,
+      "CUDA_CACHE_DISABLE": null
+    },
+    "cupy_disk_cache": {
+      "path": "/root/.cupy/kernel_cache",
+      "exists": true,
+      "files_at_snapshot": 74,
+      "scope": "Inherited shared disk cache, possibly populated by correctness validation"
+    },
+    "executable": "/workspace/aster-cuda-workflow-20261104/venv/bin/python"
+  },
+  "jobs": [
+    {
+      "id": "tiny-31000-numpy-full-w1",
+      "workload": "tiny",
+      "seed": 31000,
+      "backend": "numpy",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31000-numpy-full-w1",
+      "workload": "scaled",
+      "seed": 31000,
+      "backend": "numpy",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31000-cuda-full-w1",
+      "workload": "tiny",
+      "seed": 31000,
+      "backend": "cuda",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31000-cuda-full-w1",
+      "workload": "scaled",
+      "seed": 31000,
+      "backend": "cuda",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31000-cuda_eager-race-w1",
+      "workload": "tiny",
+      "seed": 31000,
+      "backend": "cuda_eager",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31000-cuda_eager-race-w1",
+      "workload": "scaled",
+      "seed": 31000,
+      "backend": "cuda_eager",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31000-numpy-race-w1",
+      "workload": "tiny",
+      "seed": 31000,
+      "backend": "numpy",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31000-numpy-race-w1",
+      "workload": "scaled",
+      "seed": 31000,
+      "backend": "numpy",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31000-cuda_eager-full-w1",
+      "workload": "tiny",
+      "seed": 31000,
+      "backend": "cuda_eager",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31000-cuda_eager-full-w1",
+      "workload": "scaled",
+      "seed": 31000,
+      "backend": "cuda_eager",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31000-numpy-full-w4",
+      "workload": "tiny",
+      "seed": 31000,
+      "backend": "numpy",
+      "scheduler": "full",
+      "workers": 4
+    },
+    {
+      "id": "scaled-31000-numpy-full-w4",
+      "workload": "scaled",
+      "seed": 31000,
+      "backend": "numpy",
+      "scheduler": "full",
+      "workers": 4
+    },
+    {
+      "id": "tiny-31000-cuda-race-w1",
+      "workload": "tiny",
+      "seed": 31000,
+      "backend": "cuda",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31000-cuda-race-w1",
+      "workload": "scaled",
+      "seed": 31000,
+      "backend": "cuda",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31001-cuda_eager-full-w1",
+      "workload": "scaled",
+      "seed": 31001,
+      "backend": "cuda_eager",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31001-cuda_eager-full-w1",
+      "workload": "tiny",
+      "seed": 31001,
+      "backend": "cuda_eager",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31001-cuda_eager-race-w1",
+      "workload": "scaled",
+      "seed": 31001,
+      "backend": "cuda_eager",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31001-cuda_eager-race-w1",
+      "workload": "tiny",
+      "seed": 31001,
+      "backend": "cuda_eager",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31001-cuda-race-w1",
+      "workload": "scaled",
+      "seed": 31001,
+      "backend": "cuda",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31001-cuda-race-w1",
+      "workload": "tiny",
+      "seed": 31001,
+      "backend": "cuda",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31001-numpy-full-w4",
+      "workload": "scaled",
+      "seed": 31001,
+      "backend": "numpy",
+      "scheduler": "full",
+      "workers": 4
+    },
+    {
+      "id": "tiny-31001-numpy-full-w4",
+      "workload": "tiny",
+      "seed": 31001,
+      "backend": "numpy",
+      "scheduler": "full",
+      "workers": 4
+    },
+    {
+      "id": "scaled-31001-numpy-race-w1",
+      "workload": "scaled",
+      "seed": 31001,
+      "backend": "numpy",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31001-numpy-race-w1",
+      "workload": "tiny",
+      "seed": 31001,
+      "backend": "numpy",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31001-cuda-full-w1",
+      "workload": "scaled",
+      "seed": 31001,
+      "backend": "cuda",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31001-cuda-full-w1",
+      "workload": "tiny",
+      "seed": 31001,
+      "backend": "cuda",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31001-numpy-full-w1",
+      "workload": "scaled",
+      "seed": 31001,
+      "backend": "numpy",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31001-numpy-full-w1",
+      "workload": "tiny",
+      "seed": 31001,
+      "backend": "numpy",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31002-numpy-full-w1",
+      "workload": "tiny",
+      "seed": 31002,
+      "backend": "numpy",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31002-numpy-full-w1",
+      "workload": "scaled",
+      "seed": 31002,
+      "backend": "numpy",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31002-numpy-race-w1",
+      "workload": "tiny",
+      "seed": 31002,
+      "backend": "numpy",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31002-numpy-race-w1",
+      "workload": "scaled",
+      "seed": 31002,
+      "backend": "numpy",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31002-cuda_eager-race-w1",
+      "workload": "tiny",
+      "seed": 31002,
+      "backend": "cuda_eager",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31002-cuda_eager-race-w1",
+      "workload": "scaled",
+      "seed": 31002,
+      "backend": "cuda_eager",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31002-cuda-race-w1",
+      "workload": "tiny",
+      "seed": 31002,
+      "backend": "cuda",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31002-cuda-race-w1",
+      "workload": "scaled",
+      "seed": 31002,
+      "backend": "cuda",
+      "scheduler": "race",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31002-cuda_eager-full-w1",
+      "workload": "tiny",
+      "seed": 31002,
+      "backend": "cuda_eager",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31002-cuda_eager-full-w1",
+      "workload": "scaled",
+      "seed": 31002,
+      "backend": "cuda_eager",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31002-cuda-full-w1",
+      "workload": "tiny",
+      "seed": 31002,
+      "backend": "cuda",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "scaled-31002-cuda-full-w1",
+      "workload": "scaled",
+      "seed": 31002,
+      "backend": "cuda",
+      "scheduler": "full",
+      "workers": 1
+    },
+    {
+      "id": "tiny-31002-numpy-full-w4",
+      "workload": "tiny",
+      "seed": 31002,
+      "backend": "numpy",
+      "scheduler": "full",
+      "workers": 4
+    },
+    {
+      "id": "scaled-31002-numpy-full-w4",
+      "workload": "scaled",
+      "seed": 31002,
+      "backend": "numpy",
+      "scheduler": "full",
+      "workers": 4
+    }
+  ],
+  "timing": "Manifest, protocol, source hashes, environment and order frozen before campaigns",
+  "child_thread_environment": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1"
+  }
+}

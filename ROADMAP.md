@@ -35,8 +35,11 @@ amortize input copies and readback/synchronization. Full GPU training,
 evaluation, and HPO integration now run through the optional
 [CUDA hedging backend](docs/CUDA_WORKFLOW.md), with
 [full-workflow A100 evidence](docs/evidence/cuda-workflow-2026-11-04/README.md).
-Kernel fusion/profiling, kernel-setting optimization studies, broader GPU workloads,
-Rust replay, and Go orchestration remain future work; see the
+[Profiling and launch fusion](docs/evidence/cuda-launch-2026-11-04/README.md) now
+reduce overhead with four small-batch kernels per epoch and a fused optimizer.
+Broader large-batch fusion, kernel-setting optimization studies, persistent GPU
+worker startup measurements, broader GPU workloads, Rust replay, and Go orchestration
+remain future work; see the
 [native design](docs/superpowers/specs/2026-11-04-native-performance-design.md).
 
 - [ ] Measured CPU-time budgets and broader system-level resource accounting.

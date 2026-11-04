@@ -1,14 +1,25 @@
 # CUDA neural hedging and hyperparameter search
 
-On the current A100, the larger full-budget search-plus-audit workflow runs in
-5.44s versus 18.41s for one NumPy worker and 8.65s for four. Median paired speedups
-are 3.38× and 1.58× respectively. The original small workload favors CPU.
-[Results, quality checks, raw evidence, and timing scope](evidence/cuda-workflow-2026-11-04/README.md).
+On the current A100, combining training operations into fewer kernels reduces
+the small search-plus-audit workflow from 4.62s to 0.92s and the larger one from
+5.26s to 3.60s. Median paired improvements over preserved eager CUDA are 4.96×
+and 1.46×. Four CPU workers still favor the small workload; including interpreter
+startup puts small CUDA roughly level with one CPU worker.
+[Latest profiles and workflow evidence](evidence/cuda-launch-2026-11-04/README.md).
+The [initial integration study](evidence/cuda-workflow-2026-11-04/README.md)
+records the previous implementation separately.
 
 The optional CUDA backend runs the existing neural-hedging simulation, explicit
 gradients, Adam training, and policy evaluation with resident float64 GPU arrays.
 It launches the same accounting kernel used by the standalone CUDA executable.
 The default backend remains NumPy.
+
+`cuda` uses a fused optimizer for every shape. Training with at most 512 paths and
+width at most 64 additionally uses fused forward, accounting/error, and gradient/loss
+kernels, giving four launches per epoch. Other shapes retain the CuPy/cuBLAS gradient
+path. These bounds were fixed before the comparative benchmark. Workspaces belong
+to each training call; no live array pointers are cached globally. `cuda_eager`
+selects the original trainer for numerical and performance comparisons.
 
 ## Install and run
 
@@ -82,6 +93,7 @@ arithmetic and explicit gradient convention at zero trades.
 
 ```bash
 python -m benchmarks.cuda_workflow run --output results/cuda-workflow
+python -m benchmarks.cuda_workflow run --include-eager --output results/cuda-launch-comparison
 ```
 
 The collector freezes two workloads and three optimizer seeds before launching
@@ -91,6 +103,10 @@ NumPy and CUDA with full-budget and replication-racing schedulers, plus a separa
 four-worker CPU full-budget control. Initial setup, search, audit, transfers,
 completed device work, and artifact writes are included in the workflow boundary;
 process startup/import time is reported separately by the parent process.
+`--include-eager` adds 12 original-CUDA campaigns, giving 42 processes and direct
+paired eager/optimized comparisons. All seven matched financial metrics are checked
+for these comparisons and the fixed-budget CPU controls. Different valid winners
+retain their own independent audits and are reported explicitly.
 
 Fresh processes use the normal shared CuPy disk compilation cache, which correctness
 validation may already populate. This measures a new process and context, without
