@@ -1,75 +1,192 @@
 # Aster
 
-**Parallel hyperparameter optimization for noisy simulations, with adaptive replication and recoverable experiments.**
-
-[Results and evidence](docs/RESULTS.md) · [Reproduce the study](docs/BENCHMARKING.md) · [Runtime guarantees](docs/RUNTIME.md) · [Roadmap](ROADMAP.md)
-
-[Native CPU and CUDA tools](docs/NATIVE.md): optional C++20 batch/streaming accounting,
-strict NumPy bindings, and a standalone A100 correctness/benchmark package.
-[CUDA simulation and HPO](docs/CUDA_WORKFLOW.md) adds resident neural-hedging training
-and evaluation through the regular search and independent-audit pipeline.
-[Reusable managed workers](docs/WORKER_POOLS.md) keep GPU/CPU processes alive across
-independent searches and audits, with bounded cancellation and fresh objective bindings.
-The [repeated-run comparison package](docs/PERSISTENT_BENCHMARK.md) is ready;
-its performance study awaits a GPU instance.
-
-CUDA training combines operations into fewer kernels: the small objective's Nsight
-profile drops from **10,985 to 361 kernel executions**. Across 42 fresh campaigns,
-full-budget search plus audit falls **4.62s → 0.92s** on the small workload and
-**5.26s → 3.60s** on the larger one: **4.96× / 1.46× median paired improvements**
-over the previous CUDA implementation. Larger-workload speedups versus NumPy are
-**4.64× with one CPU worker / 2.57× with four**. Setup, transfers, training, evaluation,
-scheduling, and journal writes are included; matched financial metrics pass the
-declared check. Four CPU workers still win on the small workload; including
-interpreter startup puts small CUDA roughly level with one CPU worker. NumPy remains
-the default. [Profiles, complete-workflow results, and scope →](docs/evidence/cuda-launch-2026-11-04/README.md)
+Aster is a Python library for parallel hyperparameter optimization of stochastic
+simulations. It combines adaptive replication, recoverable experiment execution,
+and independent evaluation of selected configurations. Optional C++20 and CUDA
+components provide native accounting and GPU execution for neural hedging with
+transaction costs.
 
 [![CI](https://github.com/kenchengkc/aster-hpo/actions/workflows/ci.yml/badge.svg)](https://github.com/kenchengkc/aster-hpo/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+[Project website](https://aster-hpo.vercel.app/) · [CPU study](docs/RESULTS.md) · [CUDA study](docs/evidence/cuda-launch-2026-11-04/README.md) · [Runtime guarantees](docs/RUNTIME.md) · [Roadmap](ROADMAP.md)
 
 Aster allocates repeated evaluations across a frozen pool of configurations. It runs
 simulations in parallel and stops allocating work to candidates whose matched outcomes
 look worse than their peers. Independent training seeds capture initialization noise;
 shared scenario seeds support paired comparisons of exogenous simulation noise.
 
-In a **20-seed CPU neural-hedging study**, replication racing used **52.3% fewer
-replications** and achieved a **1.43× median paired search speedup** versus full-budget
-search with the same four workers. Both methods selected the same configuration in
-20/20 runs, giving identical independent audit outcomes. This is observed agreement
-on one synthetic market using the recorded v0.2 runtime; the zero-variance comparison
-does **not** establish a general quality-preservation guarantee.
-[Protocol, raw evidence, limitations →](docs/RESULTS.md)
+## Implementation status
+
+The current development version is **0.3.0**. The Python core has no required runtime
+dependencies. Numerical libraries, the C++ companion, CUDA, plotting tools, and
+reference-baseline packages are optional.
+
+| Component | Status | Implementation |
+| --- | --- | --- |
+| Search and replication allocation | Implemented | Typed candidate sampling, `FullBudget`, single-bracket stopping `ASHA`, and heuristic `ReplicationRace` with matched-prefix comparisons. |
+| Recoverable execution | Implemented | Coordinator-owned SQLite journals, resume, seed-preserving retries, duplicate/stale-result rejection, and native thread controls. |
+| Resource controls | Implemented | Per-invocation wall/attempt budgets, evaluation timeouts, caller cancellation, and bounded cleanup of owned workers. |
+| C++20 accounting | Implemented and validated | Float64 batch accounting, allocating and preallocated NumPy bindings, and a streaming ledger. |
+| CUDA simulation and training | Implemented and benchmarked | Resident simulation, policy training, evaluation, and independent audits through the regular HPO pipeline; fused kernels reduce launch overhead. |
+| Persistent worker pools | Implemented; **performance study pending** | Managed process reuse across searches and audits. The repeated-workflow benchmark package is prepared, but no comparative performance results are available. |
+
+## C++20 and CUDA backends
+
+### Native accounting
+
+The optional `aster_hpo_native` companion calculates hedge P&L, transaction costs,
+and turnover, including opening, rebalancing, and liquidation. `hedge_pnl` allocates
+NumPy output arrays; `hedge_pnl_into` writes to caller-provided arrays. `Ledger`
+provides chronological accounting without heap allocation during successful native
+updates; Python bindings and returned Python objects have their own overhead.
+
+Bindings require aligned, C-contiguous NumPy float64 inputs and reject incompatible
+layouts or dtypes without implicit conversion. They validate output-buffer overlap
+and release the Python interpreter lock during native work. The companion is
+separate from the optimization core and from the NumPy reference used in the
+CPU/CUDA workflow comparison below.
+
+The [native API guide](native/README.md) documents ownership and error handling.
+The [measurement guide](docs/NATIVE.md) distinguishes prepared kernels, checked
+native calls, Python calls, streaming updates, and complete objectives. Component
+timings do not establish a C++ speedup for the complete HPO workflow.
+
+### Resident CUDA execution
+
+The optional CuPy/CUDA backend runs price simulation, neural-policy training, and
+policy evaluation with resident float64 arrays. Matched NumPy random shocks and
+initialization are uploaded once per objective; prices, positions, gradients, optimizer state,
+and per-call scratch buffers remain on the device. Final scalar metrics return to
+the coordinator for journaling and selection.
+
+The optimized `cuda` trainer combines finite checks, gradient-norm calculation,
+clipping, and Adam into one kernel per epoch. Batches with at most 512 training
+paths and policy width at most 64 additionally combine forward evaluation,
+accounting/error, and gradients/loss, giving four training kernels per epoch.
+Larger shapes retain CuPy/cuBLAS gradients. The previous trainer remains available
+as `cuda_eager` for numerical and performance comparisons. NumPy is the default
+backend; single-GPU experiments use one objective worker.
+
+See the [CUDA workflow guide](docs/CUDA_WORKFLOW.md) for integration with `Study`
+and `audit`, and the [standalone CUDA package](cuda/README.md) for accounting
+correctness checks, Compute Sanitizer runs, and transfer measurements.
+
+## Benchmark results
+
+### CPU replication allocation
+
+In the September 2026 study on an Apple M5, replication racing used **52.3% fewer
+replications** and achieved a **1.43× median paired search speedup** relative to
+full-budget search with the same four workers. The comparison used 20 optimizer
+seeds, six candidate configurations per seed, and a cap of nine replications.
+Search timing includes worker startup and journal writes; independent audits are
+excluded from the speedup.
+
+All methods selected the same configuration within each seed, producing identical
+independent audit outcomes. This is observed agreement on one synthetic market.
+The zero-variance paired comparison has no inferential bound and does not establish
+a general quality-preservation or non-inferiority guarantee. Measurements use the
+recorded v0.2 runtime, before persistent worker pools.
 
 ![Fixed-budget hedging quality and search time](docs/evidence/cpu-2026-09-24/quality_time.png)
 
-## Upgrade progress
+The [CPU report](docs/RESULTS.md) includes the timing definitions, corrected quality
+analysis, raw evidence, and limitations. [Reproduction instructions](docs/BENCHMARKING.md)
+provide the frozen protocol.
 
-**Current development version: 0.3.0.** The original six-step research/runtime
-upgrade is implemented. The subsequent resource-control phase is also complete;
-broader benchmarking and scaling work remains on the [roadmap](ROADMAP.md).
+### Complete CPU/CUDA optimization workflow
 
-| Upgrade | Status | Delivered |
-| --- | --- | --- |
-| 1. Scheduler correctness | Complete | Matched-prefix comparisons reconsidered when peers finish; already running pruned work retains its outcome and cost. |
-| 2. Noisy-simulation diagnostics | Complete | Heteroscedastic, near-tie, and heavy-tail cases, candidate-order checks, and shared/independent scenario comparisons. |
-| 3. Recoverable local execution | Complete | Coordinator-owned SQLite journal, resume, bounded retries, duplicate/stale-result rejection, native thread controls, and attempt/worker telemetry. |
-| 4. CPU financial workload | Complete | NumPy neural hedging with transaction costs, verified cash flows and gradients, and separate training/evaluation paths. |
-| 5. Allocation and quality study | Initial study complete | `FullBudget`, single-bracket stopping `ASHA`, and heuristic `ReplicationRace`; locked winners and independent audits across 20 optimizer seeds. [Evidence](docs/RESULTS.md). |
-| 6. Package, documentation, and review | Complete | Installable package, runnable examples, technical report, raw artifacts, figures, and regression tests. |
-| Resource controls (v0.3) | Complete | Per-invocation wall/attempt budgets, evaluation timeouts, caller cancellation, and supervised worker cleanup. [Runtime contract](docs/RUNTIME.md#resource-limits-in-v03). |
-| Native performance foundation | CPU and A100 validated | C++20 accounting and streaming ledger, optional Python companion, and separate native/API/objective measurements. [Guide](docs/NATIVE.md) · [A100 checks and timing limits](docs/evidence/a100-2026-11-04/README.md). |
+The November 2026 comparison ran **42 fresh campaign processes** on one A100 PCIe
+40 GB host, using three optimizer seeds and both full-budget and replication-racing
+schedulers. The table reports **full-budget search plus independent audits**.
+Each full-budget search evaluates four candidates with four replications each;
+the selected configuration receives three independent audit replications. All CPU workers use one BLAS thread,
+and audits use one worker.
 
-The core has no required dependencies; numerical, plotting, and reference-baseline
-packages are optional. Replications use stable seeds, with disjoint search and audit
-namespaces. CI is configured for Linux/macOS and Python 3.11–3.13.
+| Workload | NumPy, 1 worker (s) | NumPy, 4 workers (s) | Eager CUDA, 1 worker (s) | Optimized CUDA, 1 worker (s) |
+| --- | ---: | ---: | ---: | ---: |
+| Small: 128 training / 2,048 evaluation paths | 1.032 | 0.742 | 4.625 | 0.923 |
+| Larger: 4,096 training / 32,768 evaluation paths | 16.720 | 8.865 | 5.264 | 3.604 |
+
+Both workloads use 64 training epochs and 12 trading intervals. Times are medians
+across seeds. Speedups are calculated within each seed before taking the median,
+so they need not equal ratios of the displayed times.
+
+Optimized CUDA improves on the eager trainer by **4.96×** for the small workflow
+and **1.46×** for the larger one. The larger workflow is **4.64× faster than one
+NumPy worker** and **2.57× faster than four NumPy workers**. Four CPU workers are
+faster on the small workload.
+
+Workflow timing includes backend/context setup, numerical imports, host random-number
+generation, transfers, simulation, training, evaluation, scheduling, SQLite journals,
+winner selection, independent audits, and result writes. Campaigns have no objective
+warmup, but share a compiler cache already populated by validation. The parent
+process separately measures interpreter startup and exit: small optimized CUDA
+then takes 1.165 s versus 1.124 s for one CPU worker, which is roughly parity.
+These workflow results do not measure repeated use of a persistent worker pool.
+
+A separate warmed Nsight diagnostic records **10,985 → 361 kernel executions** for
+one small width-8 objective, a **96.7% reduction**. These counts describe launch
+behavior; workflow speedups come from the unprofiled comparison above.
+
+Across 594 accepted search evaluations and 126 audits, no objective failed. All
+seven matched financial metrics passed `rtol=1e-6, atol=1e-8`, and the reported
+winner/allocation pairs agreed. Three seeds on one host provide descriptive
+engineering evidence without a general hardware, financial-quality, or tail-latency
+guarantee.
+
+![CUDA kernel counts and complete workflow timings](docs/evidence/cuda-launch-2026-11-04/launch-performance.png)
+
+The [CUDA report](docs/evidence/cuda-launch-2026-11-04/README.md) records source
+revision `0d2e12b`, environment versions, process timings, validation, and reproduction
+commands. [Workflow results](docs/evidence/cuda-launch-2026-11-04/summary.json) and
+[profile counters](docs/evidence/cuda-launch-2026-11-04/profiles-summary.json) are
+available as JSON.
+
+### Standalone CUDA accounting
+
+A separate A100 sensitivity experiment reused fixed price/holding inputs across
+32 transaction-cost operations over 65,536 paths. Completed-session time decreased
+from **26.41 ms to 4.42 ms**, a **5.97× median paired speedup** across three process
+sessions. Timing includes input upload, all kernels, all result downloads, and
+synchronization; GPU context and reusable-buffer setup are excluded.
+
+This experiment measures accounting input reuse, rather than training, HPO, or
+persistent-worker performance. The single-operation case was approximately unchanged
+or slightly slower. The [resident accounting report](docs/evidence/cuda-resident-2026-11-04/README.md)
+contains the complete workload matrix and timing boundaries.
+
+## Persistent workers: performance study pending
+
+**The `WorkerPool` API is implemented. The repeated-workflow performance study has
+not run, and no persistent-worker speedup is reported.**
+
+`Study.optimize(..., worker_pool=pool)` and `audit(..., worker_pool=pool)` can reuse
+healthy owned processes across independent invocations. CUDA contexts, compiled
+kernels, and allocator caches remain available; each hedging evaluation creates
+fresh model parameters, random paths, and optimizer state. Each invocation receives
+a fresh objective binding, and cancellation/timeouts retain the managed cleanup
+contract.
+
+Unbounded one-worker calls already run in the caller and retain CUDA caches within
+that interpreter. The prepared comparison therefore includes direct execution,
+fresh pools, and reused pools for CPU and CUDA, with four-worker CPU controls.
+It reports the first workflow, later workflows, and complete sequence cost including
+shutdown separately. Final packaged GPU validation must also be rerun on the next
+compatible host.
+
+The [worker-pool guide](docs/WORKER_POOLS.md) documents the API and lifecycle rules.
+The [pending benchmark protocol](docs/PERSISTENT_BENCHMARK.md) specifies 48 coordinator
+processes, each running three fresh search-and-audit workflows, for 144 planned
+workflows. These are planned measurements, not completed results.
 
 ## Quick start
 
-Requires Python 3.11+. Run these commands from a repository checkout:
+Python 3.11 or later is required. Run these commands from a source checkout containing the
+0.3 runtime and the benchmark modules:
 
 ```bash
-git clone https://github.com/kenchengkc/aster-hpo.git
-cd aster-hpo
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev,benchmark]'
@@ -84,6 +201,35 @@ resumes the same SQLite study; [recorded exports](docs/evidence/runtime-2026-09-
 show committed observations preserved across sessions. The hedging example is a disjoint
 pilot; follow the [benchmark protocol](docs/BENCHMARKING.md) to freeze and execute a comparison.
 Research modules live in the checkout; the installable wheel contains the core library.
+
+### Optional native and CUDA installation
+
+The C++ companion requires a C++20 compiler and CMake 3.20+. Install it from the
+same source checkout:
+
+```bash
+python -m pip install ./native
+```
+
+On an NVIDIA development host with CUDA 13, install the CUDA dependencies and run
+the financial pilot with one objective worker:
+
+```bash
+python -m pip install -e '.[benchmark,cuda13]'
+python -m examples.hedging --backend cuda --workers 1 --configs 4 \
+  --batch-paths 4096 --evaluation-paths 32768 \
+  --output results/hedging-cuda-pilot
+```
+
+Use a fresh output directory. This pilot is separate from the comparative study.
+The A100 evidence used CUDA 13.2 and CuPy 14.2.0; see the
+[CUDA setup guide](docs/CUDA_WORKFLOW.md#install-and-run) for other compatible setups.
+To run the frozen CPU/eager-CUDA/optimized-CUDA comparison:
+
+```bash
+python -m benchmarks.cuda_workflow run --include-eager \
+  --output results/cuda-launch-comparison
+```
 
 ## Library usage
 
@@ -206,26 +352,27 @@ python -m pip install -e '.[baseline]'
 python -m pytest tests/test_asha.py -q
 ```
 
-### Remaining upgrades
+### Remaining work
 
-1. **Keep workers busy as candidates are pruned:** support bounded concurrent
-   replications per candidate while preserving checkpoint decision boundaries.
-2. **Compare complete external workflows:** benchmark Ray Tune and Optuna TPE,
-   separating proposer, scheduler, and runtime differences. Current Ray coverage
-   validates ASHA decisions only; see [baseline scope](docs/BASELINES.md).
-3. **Broaden the research evidence:** prespecified equal-wall-budget and equal-compute
-   studies, larger candidate pools, harder rankings, additional hardware, and financial
-   stress tests.
-4. **Extend resource accounting and execution:** measured CPU-time budgets and durable
-   multi-machine coordination.
-5. **Refresh public presentation:** update the project website with the current
-   runtime, financial evidence, and reproducibility instructions.
+1. **Persistent-worker performance study:** run the prepared CPU/CUDA comparison
+   on one compatible host, including fresh and reused pools, direct execution,
+   first-run latency, and complete sequence cost.
+2. **Concurrent replications per candidate:** support bounded concurrency while
+   preserving checkpoint decision boundaries as candidates are pruned.
+3. **External workflow comparisons:** benchmark Ray Tune and Optuna TPE, accounting
+   for proposer, scheduler, and runtime differences. Current Ray coverage validates
+   ASHA decisions only; see [baseline scope](docs/BASELINES.md).
+4. **Broader financial and scaling studies:** evaluate larger candidate pools,
+   harder rankings, additional hardware, and financial stress cases under
+   prespecified wall-time and compute budgets.
+5. **Resource accounting and distributed execution:** add measured CPU-time budgets
+   and durable multi-machine coordination.
 
-These are remaining directions, not implemented features or promised release dates.
-The [roadmap](ROADMAP.md) lists additional runtime and research extensions.
-[DESIGN.md](DESIGN.md) retains the broader target architecture. The existing
-[project website](https://aster-hpo.vercel.app) presents an earlier synthetic smoke
-snapshot; the repository report above is the current evidence.
+The [roadmap](ROADMAP.md) lists further runtime and research work;
+[DESIGN.md](DESIGN.md) describes the broader target architecture. The
+[project website](https://aster-hpo.vercel.app/) presents the current features,
+architecture, and recorded CPU/CUDA evidence, with persistent-worker performance
+marked as pending.
 
 Research foundations: [ASHA](https://arxiv.org/abs/1810.05934),
 [common random numbers](https://arxiv.org/abs/1910.09259),
