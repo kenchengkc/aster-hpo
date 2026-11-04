@@ -179,6 +179,12 @@ and complete hyperparameter-optimization runtime. It measures fixed-input reuse;
 it does not establish gains for a workload that changes prices or holdings on
 every call.
 
+The [A100 session report](../docs/evidence/cuda-resident-2026-11-04/README.md)
+records the fixed 36-process protocol, raw results, correctness checks, and
+reproduction commands. At 65,536 paths and 32 operations, the primary session
+falls from 26.41ms to 4.42ms (5.97× median paired process speedup). K=1 remains
+approximately unchanged.
+
 ## Host-only checks
 
 These need neither CUDA nor the optional Python extension:

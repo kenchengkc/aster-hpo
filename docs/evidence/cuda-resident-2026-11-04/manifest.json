@@ -1,0 +1,245 @@
+{
+  "schema_version": 1,
+  "kind": "resident accounting process-session comparison",
+  "source_revision": "6cb9805",
+  "source_sha256": {
+    "cuda/CMakeLists.txt": "2035e23ae3ab670a308e9b756ff58a2b91e855033be55604c696f8cd2419386c",
+    "cuda/benchmark_pipeline.py": "e1ca5b25292811a9df633e3e9eb38d254cd13412cb4302b726cb30564da33551",
+    "cuda/build_metadata.hpp.in": "c67d1f632f5e3ddc048091c7b7e4f74b3915a8dadef803f3d0441404603922c7",
+    "cuda/hedge_accounting.cu": "d6b88bda7284f656a8d0c3cb7d11050706e69f9f6047e8bd5d4524a3817cc3ca",
+    "cuda/include/comparison.hpp": "27d9af3d5168a2ee7a8476b984bfb814b3b8b28d38d8b40a25b6445ff3c718d3",
+    "cuda/run_tests.sh": "2b144e0ce78b08380ce63e1bbd19517ec2667c5e6069f84f7f43b15d6178765c",
+    "cuda/tests/check_cli.py": "d64fb3dec1e406705856bb79233da0f68b1030cad80fc636f8d099e94ee1e6c8",
+    "cuda/tests/check_results.py": "3fd5a12083554c56fa654c981b92f5e574df9000ef8eb7351c6f6a0ceb52888c",
+    "cuda/tests/test_comparison.cpp": "abdf44a6b7b4fdbf80dd9d199a55ee31a3b5685af884cf85a9a97d81f3ec74ec",
+    "cuda/tests/test_pipeline_report.py": "e1588c1177bf876e823734e26bca7fc6bcc04c196ff5d837773e28b63d3f309e",
+    "cuda/tests/test_runner.py": "8d0a064de8287352d8ec8b0827aeaf23840190380180066b9069e674f5ebeff4",
+    "native/CMakeLists.txt": "d386d21d6a51884cdd30fa04087796ad94af24d222167fecb39aed8a8a4f92da",
+    "native/benchmarks/accounting_bench.cpp": "efe7cc6d4c353c21dbe8bb02e3e776c10691ab1d98f0cc22f376a5faf0cc684c",
+    "native/include/aster/accounting.hpp": "dc5396220dc31a9eb5b92fb305d1c8f77df6a849f503936a6f0107f19ef2a37b",
+    "native/pyproject.toml": "7f8dcb528cda81ee31b906a5f75c36edae35498edc7771bc70406a0ab3f79cc4",
+    "native/python/aster_hpo_native/__init__.py": "3fcfb58fbe45b9cb4b7ddc66fe16eb6c05d164d53882f7b27c337d01f2f38738",
+    "native/src/accounting.cpp": "b560f92c32c12cc3f7082370d76a7f5cc78f294e709de0cebcd8b01e9ca36025",
+    "native/src/bindings.cpp": "7e2bdd102f3a4863c5b82c8ad0c4b9d5c586915eb69e99277d469eba327fedfd",
+    "native/tests/test_accounting.cpp": "65e957bc8382180beacc1055c17c2103b3c3fb7963ff934000c7ce18080da4f4",
+    "native/tests/test_python.py": "6d64dff3118b5adecbaf2a3ff3d311bf932e688ff21ae3b8aef9d92a6b7bc52c"
+  },
+  "binary_sha256": "54274299dbd7765e79e73e593d0f66470716eecff7c2fdbb0d677f0cccd80c5c",
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+  "settings": {
+    "binary": "../validation/build/aster_cuda",
+    "output": "../pipeline-benchmark-001",
+    "paths": [
+      1,
+      256,
+      2048,
+      65536
+    ],
+    "operations": [
+      1,
+      8,
+      32
+    ],
+    "sessions": 3,
+    "repeats": 15,
+    "warmups": 5,
+    "intervals": 12,
+    "block_size": 128,
+    "seed": 1729,
+    "device": 0,
+    "source_revision": "6cb9805",
+    "timeout": 180
+  },
+  "job_order": [
+    [
+      65536,
+      32,
+      0
+    ],
+    [
+      2048,
+      1,
+      1
+    ],
+    [
+      65536,
+      32,
+      2
+    ],
+    [
+      1,
+      32,
+      2
+    ],
+    [
+      65536,
+      8,
+      0
+    ],
+    [
+      2048,
+      1,
+      0
+    ],
+    [
+      1,
+      32,
+      1
+    ],
+    [
+      1,
+      8,
+      0
+    ],
+    [
+      2048,
+      1,
+      2
+    ],
+    [
+      2048,
+      8,
+      2
+    ],
+    [
+      2048,
+      8,
+      1
+    ],
+    [
+      256,
+      8,
+      1
+    ],
+    [
+      65536,
+      8,
+      1
+    ],
+    [
+      2048,
+      32,
+      1
+    ],
+    [
+      65536,
+      1,
+      1
+    ],
+    [
+      256,
+      8,
+      0
+    ],
+    [
+      2048,
+      32,
+      0
+    ],
+    [
+      256,
+      8,
+      2
+    ],
+    [
+      1,
+      1,
+      0
+    ],
+    [
+      256,
+      32,
+      0
+    ],
+    [
+      256,
+      32,
+      2
+    ],
+    [
+      1,
+      8,
+      1
+    ],
+    [
+      1,
+      32,
+      0
+    ],
+    [
+      65536,
+      32,
+      1
+    ],
+    [
+      256,
+      1,
+      2
+    ],
+    [
+      256,
+      32,
+      1
+    ],
+    [
+      256,
+      1,
+      0
+    ],
+    [
+      65536,
+      1,
+      0
+    ],
+    [
+      1,
+      8,
+      2
+    ],
+    [
+      1,
+      1,
+      1
+    ],
+    [
+      2048,
+      8,
+      0
+    ],
+    [
+      256,
+      1,
+      1
+    ],
+    [
+      65536,
+      1,
+      2
+    ],
+    [
+      65536,
+      8,
+      2
+    ],
+    [
+      2048,
+      32,
+      2
+    ],
+    [
+      1,
+      1,
+      2
+    ]
+  ],
+  "primary_boundary": "initial H2D upload, all K arithmetic kernels, all K outputs D2H, synchronization; capacity allocation excluded",
+  "repeated_boundary": "already uploaded inputs, all K kernels and all K outputs D2H, synchronization; initial upload excluded",
+  "outputs": "all three per-path arrays for every operation; unchanged arithmetic",
+  "limitations": [
+    "fixed-input cost sensitivity workload, not GPU training or complete HPO",
+    "one host; three process sessions are not a broad hardware study",
+    "CPU reference does not cache common accounting terms",
+    "residency also batches output copies and reduces synchronization"
+  ]
+}

@@ -1,0 +1,578 @@
+{
+  "schema_version": 1,
+  "primary_comparison": "resident_session versus copy_per_call",
+  "aggregation": "median of process medians; median/range of paired per-process ratios",
+  "measurements": [
+    {
+      "paths": 1,
+      "intervals": 12,
+      "operations": 1,
+      "process_sessions": 3,
+      "per_process": [
+        {
+          "session": 0,
+          "medians_ms": {
+            "copy_per_call": 0.03635,
+            "resident_session": 0.035498,
+            "resident_preloaded": 0.032904,
+            "native_cpu_sequence": 6e-05
+          },
+          "paired_session_speedup": 1.0240013521888556
+        },
+        {
+          "session": 1,
+          "medians_ms": {
+            "copy_per_call": 0.036801,
+            "resident_session": 0.03653,
+            "resident_preloaded": 0.033184,
+            "native_cpu_sequence": 6e-05
+          },
+          "paired_session_speedup": 1.0074185600875993
+        },
+        {
+          "session": 2,
+          "medians_ms": {
+            "copy_per_call": 0.037122,
+            "resident_session": 0.037272,
+            "resident_preloaded": 0.033906,
+            "native_cpu_sequence": 6e-05
+          },
+          "paired_session_speedup": 0.9959755312298777
+        }
+      ],
+      "copy_per_call_median_ms": 0.036801,
+      "resident_session_median_ms": 0.03653,
+      "resident_preloaded_median_ms": 0.033184,
+      "native_cpu_sequence_median_ms": 6e-05,
+      "paired_session_speedup_median": 1.0074185600875993,
+      "paired_session_speedup_range": [
+        0.9959755312298777,
+        1.0240013521888556
+      ]
+    },
+    {
+      "paths": 1,
+      "intervals": 12,
+      "operations": 8,
+      "process_sessions": 3,
+      "per_process": [
+        {
+          "session": 0,
+          "medians_ms": {
+            "copy_per_call": 0.312244,
+            "resident_session": 0.071378,
+            "resident_preloaded": 0.067661,
+            "native_cpu_sequence": 0.000201
+          },
+          "paired_session_speedup": 4.374513155313963
+        },
+        {
+          "session": 1,
+          "medians_ms": {
+            "copy_per_call": 0.275313,
+            "resident_session": 0.05734,
+            "resident_preloaded": 0.054315,
+            "native_cpu_sequence": 0.00017
+          },
+          "paired_session_speedup": 4.801412626438785
+        },
+        {
+          "session": 2,
+          "medians_ms": {
+            "copy_per_call": 0.286444,
+            "resident_session": 0.066879,
+            "resident_preloaded": 0.063543,
+            "native_cpu_sequence": 0.00017
+          },
+          "paired_session_speedup": 4.283018585804213
+        }
+      ],
+      "copy_per_call_median_ms": 0.286444,
+      "resident_session_median_ms": 0.066879,
+      "resident_preloaded_median_ms": 0.063543,
+      "native_cpu_sequence_median_ms": 0.00017,
+      "paired_session_speedup_median": 4.374513155313963,
+      "paired_session_speedup_range": [
+        4.283018585804213,
+        4.801412626438785
+      ]
+    },
+    {
+      "paths": 1,
+      "intervals": 12,
+      "operations": 32,
+      "process_sessions": 3,
+      "per_process": [
+        {
+          "session": 2,
+          "medians_ms": {
+            "copy_per_call": 1.256851,
+            "resident_session": 0.214234,
+            "resident_preloaded": 0.211469,
+            "native_cpu_sequence": 0.000521
+          },
+          "paired_session_speedup": 5.866720501881121
+        },
+        {
+          "session": 1,
+          "medians_ms": {
+            "copy_per_call": 1.221833,
+            "resident_session": 0.185679,
+            "resident_preloaded": 0.181982,
+            "native_cpu_sequence": 0.000591
+          },
+          "paired_session_speedup": 6.5803510359275945
+        },
+        {
+          "session": 0,
+          "medians_ms": {
+            "copy_per_call": 1.117953,
+            "resident_session": 0.138628,
+            "resident_preloaded": 0.135793,
+            "native_cpu_sequence": 0.000521
+          },
+          "paired_session_speedup": 8.064409787344548
+        }
+      ],
+      "copy_per_call_median_ms": 1.221833,
+      "resident_session_median_ms": 0.185679,
+      "resident_preloaded_median_ms": 0.181982,
+      "native_cpu_sequence_median_ms": 0.000521,
+      "paired_session_speedup_median": 6.5803510359275945,
+      "paired_session_speedup_range": [
+        5.866720501881121,
+        8.064409787344548
+      ]
+    },
+    {
+      "paths": 256,
+      "intervals": 12,
+      "operations": 1,
+      "process_sessions": 3,
+      "per_process": [
+        {
+          "session": 2,
+          "medians_ms": {
+            "copy_per_call": 0.043985,
+            "resident_session": 0.043895,
+            "resident_preloaded": 0.036451,
+            "native_cpu_sequence": 0.002565
+          },
+          "paired_session_speedup": 1.0020503474199796
+        },
+        {
+          "session": 0,
+          "medians_ms": {
+            "copy_per_call": 0.045036,
+            "resident_session": 0.045318,
+            "resident_preloaded": 0.037222,
+            "native_cpu_sequence": 0.002555
+          },
+          "paired_session_speedup": 0.9937773070303191
+        },
+        {
+          "session": 1,
+          "medians_ms": {
+            "copy_per_call": 0.042392,
+            "resident_session": 0.041811,
+            "resident_preloaded": 0.033936,
+            "native_cpu_sequence": 0.002565
+          },
+          "paired_session_speedup": 1.013895864724594
+        }
+      ],
+      "copy_per_call_median_ms": 0.043985,
+      "resident_session_median_ms": 0.043895,
+      "resident_preloaded_median_ms": 0.036451,
+      "native_cpu_sequence_median_ms": 0.002565,
+      "paired_session_speedup_median": 1.0020503474199796,
+      "paired_session_speedup_range": [
+        0.9937773070303191,
+        1.013895864724594
+      ]
+    },
+    {
+      "paths": 256,
+      "intervals": 12,
+      "operations": 8,
+      "process_sessions": 3,
+      "per_process": [
+        {
+          "session": 1,
+          "medians_ms": {
+            "copy_per_call": 0.338785,
+            "resident_session": 0.086307,
+            "resident_preloaded": 0.080416,
+            "native_cpu_sequence": 0.022824
+          },
+          "paired_session_speedup": 3.9253478860347366
+        },
+        {
+          "session": 0,
+          "medians_ms": {
+            "copy_per_call": 0.335379,
+            "resident_session": 0.085285,
+            "resident_preloaded": 0.071709,
+            "native_cpu_sequence": 0.022844
+          },
+          "paired_session_speedup": 3.932450020519435
+        },
+        {
+          "session": 2,
+          "medians_ms": {
+            "copy_per_call": 0.322293,
+            "resident_session": 0.082399,
+            "resident_preloaded": 0.076628,
+            "native_cpu_sequence": 0.020079
+          },
+          "paired_session_speedup": 3.911370283619947
+        }
+      ],
+      "copy_per_call_median_ms": 0.335379,
+      "resident_session_median_ms": 0.085285,
+      "resident_preloaded_median_ms": 0.076628,
+      "native_cpu_sequence_median_ms": 0.022824,
+      "paired_session_speedup_median": 3.9253478860347366,
+      "paired_session_speedup_range": [
+        3.911370283619947,
+        3.932450020519435
+      ]
+    },
+    {
+      "paths": 256,
+      "intervals": 12,
+      "operations": 32,
+      "process_sessions": 3,
+      "per_process": [
+        {
+          "session": 0,
+          "medians_ms": {
+            "copy_per_call": 1.214839,
+            "resident_session": 0.185889,
+            "resident_preloaded": 0.173886,
+            "native_cpu_sequence": 0.080195
+          },
+          "paired_session_speedup": 6.535292567069595
+        },
+        {
+          "session": 2,
+          "medians_ms": {
+            "copy_per_call": 1.281058,
+            "resident_session": 0.18561,
+            "resident_preloaded": 0.179246,
+            "native_cpu_sequence": 0.079654
+          },
+          "paired_session_speedup": 6.901880286622489
+        },
+        {
+          "session": 1,
+          "medians_ms": {
+            "copy_per_call": 1.407211,
+            "resident_session": 0.241307,
+            "resident_preloaded": 0.233561,
+            "native_cpu_sequence": 0.080235
+          },
+          "paired_session_speedup": 5.831621129929923
+        }
+      ],
+      "copy_per_call_median_ms": 1.281058,
+      "resident_session_median_ms": 0.185889,
+      "resident_preloaded_median_ms": 0.179246,
+      "native_cpu_sequence_median_ms": 0.080195,
+      "paired_session_speedup_median": 6.535292567069595,
+      "paired_session_speedup_range": [
+        5.831621129929923,
+        6.901880286622489
+      ]
+    },
+    {
+      "paths": 2048,
+      "intervals": 12,
+      "operations": 1,
+      "process_sessions": 3,
+      "per_process": [
+        {
+          "session": 1,
+          "medians_ms": {
+            "copy_per_call": 0.083261,
+            "resident_session": 0.083702,
+            "resident_preloaded": 0.045478,
+            "native_cpu_sequence": 0.020088
+          },
+          "paired_session_speedup": 0.9947313086903539
+        },
+        {
+          "session": 0,
+          "medians_ms": {
+            "copy_per_call": 0.07798,
+            "resident_session": 0.078512,
+            "resident_preloaded": 0.044416,
+            "native_cpu_sequence": 0.022813
+          },
+          "paired_session_speedup": 0.9932239657631954
+        },
+        {
+          "session": 2,
+          "medians_ms": {
+            "copy_per_call": 0.073862,
+            "resident_session": 0.074755,
+            "resident_preloaded": 0.042292,
+            "native_cpu_sequence": 0.022734
+          },
+          "paired_session_speedup": 0.9880543107484449
+        }
+      ],
+      "copy_per_call_median_ms": 0.07798,
+      "resident_session_median_ms": 0.078512,
+      "resident_preloaded_median_ms": 0.044416,
+      "native_cpu_sequence_median_ms": 0.022734,
+      "paired_session_speedup_median": 0.9932239657631954,
+      "paired_session_speedup_range": [
+        0.9880543107484449,
+        0.9947313086903539
+      ]
+    },
+    {
+      "paths": 2048,
+      "intervals": 12,
+      "operations": 8,
+      "process_sessions": 3,
+      "per_process": [
+        {
+          "session": 2,
+          "medians_ms": {
+            "copy_per_call": 0.594269,
+            "resident_session": 0.146222,
+            "resident_preloaded": 0.115043,
+            "native_cpu_sequence": 0.181861
+          },
+          "paired_session_speedup": 4.064155872577315
+        },
+        {
+          "session": 1,
+          "medians_ms": {
+            "copy_per_call": 0.593328,
+            "resident_session": 0.147015,
+            "resident_preloaded": 0.115103,
+            "native_cpu_sequence": 0.181821
+          },
+          "paired_session_speedup": 4.03583307825732
+        },
+        {
+          "session": 0,
+          "medians_ms": {
+            "copy_per_call": 0.624598,
+            "resident_session": 0.140241,
+            "resident_preloaded": 0.103831,
+            "native_cpu_sequence": 0.159669
+          },
+          "paired_session_speedup": 4.453747477556492
+        }
+      ],
+      "copy_per_call_median_ms": 0.594269,
+      "resident_session_median_ms": 0.146222,
+      "resident_preloaded_median_ms": 0.115043,
+      "native_cpu_sequence_median_ms": 0.181821,
+      "paired_session_speedup_median": 4.064155872577315,
+      "paired_session_speedup_range": [
+        4.03583307825732,
+        4.453747477556492
+      ]
+    },
+    {
+      "paths": 2048,
+      "intervals": 12,
+      "operations": 32,
+      "process_sessions": 3,
+      "per_process": [
+        {
+          "session": 1,
+          "medians_ms": {
+            "copy_per_call": 2.360957,
+            "resident_session": 0.384283,
+            "resident_preloaded": 0.345979,
+            "native_cpu_sequence": 0.736515
+          },
+          "paired_session_speedup": 6.143797669946368
+        },
+        {
+          "session": 0,
+          "medians_ms": {
+            "copy_per_call": 2.328924,
+            "resident_session": 0.374675,
+            "resident_preloaded": 0.341931,
+            "native_cpu_sequence": 0.725994
+          },
+          "paired_session_speedup": 6.215851070928139
+        },
+        {
+          "session": 2,
+          "medians_ms": {
+            "copy_per_call": 2.286211,
+            "resident_session": 0.359916,
+            "resident_preloaded": 0.322795,
+            "native_cpu_sequence": 0.643194
+          },
+          "paired_session_speedup": 6.352068260371865
+        }
+      ],
+      "copy_per_call_median_ms": 2.328924,
+      "resident_session_median_ms": 0.374675,
+      "resident_preloaded_median_ms": 0.341931,
+      "native_cpu_sequence_median_ms": 0.725994,
+      "paired_session_speedup_median": 6.215851070928139,
+      "paired_session_speedup_range": [
+        6.143797669946368,
+        6.352068260371865
+      ]
+    },
+    {
+      "paths": 65536,
+      "intervals": 12,
+      "operations": 1,
+      "process_sessions": 3,
+      "per_process": [
+        {
+          "session": 1,
+          "medians_ms": {
+            "copy_per_call": 0.831227,
+            "resident_session": 0.845185,
+            "resident_preloaded": 0.186901,
+            "native_cpu_sequence": 0.740522
+          },
+          "paired_session_speedup": 0.9834852724551431
+        },
+        {
+          "session": 0,
+          "medians_ms": {
+            "copy_per_call": 0.802913,
+            "resident_session": 0.804837,
+            "resident_preloaded": 0.172353,
+            "native_cpu_sequence": 0.643293
+          },
+          "paired_session_speedup": 0.9976094538397215
+        },
+        {
+          "session": 2,
+          "medians_ms": {
+            "copy_per_call": 0.7966,
+            "resident_session": 0.79629,
+            "resident_preloaded": 0.168345,
+            "native_cpu_sequence": 0.642332
+          },
+          "paired_session_speedup": 1.00038930540381
+        }
+      ],
+      "copy_per_call_median_ms": 0.802913,
+      "resident_session_median_ms": 0.804837,
+      "resident_preloaded_median_ms": 0.172353,
+      "native_cpu_sequence_median_ms": 0.643293,
+      "paired_session_speedup_median": 0.9976094538397215,
+      "paired_session_speedup_range": [
+        0.9834852724551431,
+        1.00038930540381
+      ]
+    },
+    {
+      "paths": 65536,
+      "intervals": 12,
+      "operations": 8,
+      "process_sessions": 3,
+      "per_process": [
+        {
+          "session": 0,
+          "medians_ms": {
+            "copy_per_call": 7.356928,
+            "resident_session": 1.816854,
+            "resident_preloaded": 1.11201,
+            "native_cpu_sequence": 6.077754
+          },
+          "paired_session_speedup": 4.049267580113757
+        },
+        {
+          "session": 1,
+          "medians_ms": {
+            "copy_per_call": 6.991621,
+            "resident_session": 1.820291,
+            "resident_preloaded": 1.074527,
+            "native_cpu_sequence": 6.088846
+          },
+          "paired_session_speedup": 3.8409358723412903
+        },
+        {
+          "session": 2,
+          "medians_ms": {
+            "copy_per_call": 6.518827,
+            "resident_session": 1.570607,
+            "resident_preloaded": 0.955067,
+            "native_cpu_sequence": 5.239312
+          },
+          "paired_session_speedup": 4.150514418947578
+        }
+      ],
+      "copy_per_call_median_ms": 6.991621,
+      "resident_session_median_ms": 1.816854,
+      "resident_preloaded_median_ms": 1.074527,
+      "native_cpu_sequence_median_ms": 6.077754,
+      "paired_session_speedup_median": 4.049267580113757,
+      "paired_session_speedup_range": [
+        3.8409358723412903,
+        4.150514418947578
+      ]
+    },
+    {
+      "paths": 65536,
+      "intervals": 12,
+      "operations": 32,
+      "process_sessions": 3,
+      "per_process": [
+        {
+          "session": 0,
+          "medians_ms": {
+            "copy_per_call": 26.408633,
+            "resident_session": 4.421862,
+            "resident_preloaded": 3.456525,
+            "native_cpu_sequence": 20.707918
+          },
+          "paired_session_speedup": 5.972287918528439
+        },
+        {
+          "session": 2,
+          "medians_ms": {
+            "copy_per_call": 26.663967,
+            "resident_session": 4.577613,
+            "resident_preloaded": 3.388604,
+            "native_cpu_sequence": 20.762164
+          },
+          "paired_session_speedup": 5.82486265221634
+        },
+        {
+          "session": 1,
+          "medians_ms": {
+            "copy_per_call": 25.762693,
+            "resident_session": 4.003423,
+            "resident_preloaded": 3.41244,
+            "native_cpu_sequence": 20.640607
+          },
+          "paired_session_speedup": 6.435166356390519
+        }
+      ],
+      "copy_per_call_median_ms": 26.408633,
+      "resident_session_median_ms": 4.421862,
+      "resident_preloaded_median_ms": 3.41244,
+      "native_cpu_sequence_median_ms": 20.707918,
+      "paired_session_speedup_median": 5.972287918528439,
+      "paired_session_speedup_range": [
+        5.82486265221634,
+        6.435166356390519
+      ]
+    }
+  ],
+  "records": 36,
+  "limitations": [
+    "fixed-input cost sensitivity workload, not GPU training or complete HPO",
+    "one host; three process sessions are not a broad hardware study",
+    "CPU reference does not cache common accounting terms",
+    "residency also batches output copies and reduces synchronization"
+  ]
+}

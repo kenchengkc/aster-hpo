@@ -92,6 +92,25 @@ The CUDA package is a standalone correctness/performance tool, not a GPU neural
 training backend or the later kernel-setting optimization study. Current CPU
 financial timing evidence remains specific to its original recorded implementation.
 
+### Resident accounting sessions
+
+`--mode pipeline --operations K` retains inputs across K cost-rate operations and
+returns all three arrays for every operation. It compares copy-per-call execution,
+an upload-once session with bulk readback, and a separately labeled preloaded-input
+path. Context/capacity setup is outside these completed-session timings.
+
+```bash
+python3 cuda/benchmark_pipeline.py --binary build/cuda/aster_cuda \
+  --output results/resident-sessions --paths 1 256 2048 65536 \
+  --operations 1 8 32 --sessions 3 --repeats 15 --warmups 5
+```
+
+The [resident run](evidence/cuda-resident-2026-11-04/README.md) reduced the
+65,536-path/32-operation session from 26.41ms to 4.42ms, with a 5.97× median paired
+process speedup. Initial upload and every result download are included. K=1 is
+approximately unchanged. The workload measures accounting data reuse; inputs that
+change require a new upload.
+
 ## Build and verification scope
 
 Build the native package with `python -m build native --outdir dist/native`.

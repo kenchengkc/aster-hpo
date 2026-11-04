@@ -1,0 +1,15 @@
+{
+  "executed_source_revision": "6cb9805",
+  "revalidation_revision": "3f2da2b",
+  "records_revalidated_after_collector_hardening": 36,
+  "process_sessions_per_setting": 3,
+  "measured_sample_sets": 540,
+  "correctness_cases": 117,
+  "default_memcheck_errors": 0,
+  "pipeline_memcheck_errors": 0,
+  "memcheck_leaked_bytes": 0,
+  "maximum_operation_count_tested": 256,
+  "raw_archive_sha256": "e64d8e2ef580417675b289addbe277e28333cacb59dc22ebc2b0edd5d89f309b",
+  "revalidation_note": "Exact integer 12*paths*operations*repeats comparisons; summaries regenerated from raw records in manifest job order. Collector hardening does not change GPU code or metrics.",
+  "scope": "Completed accounting sessions with reusable capacity. Context setup, allocation, host input creation and output checks excluded; primary timings include initial upload and all outputs downloaded."
+}

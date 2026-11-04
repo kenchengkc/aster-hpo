@@ -2,6 +2,14 @@
 
 ## Unreleased — Native companion 0.1.0
 
+- Add resident CUDA accounting sessions with K retained outputs, reload/lifecycle
+  checks, requested-copy counters, and bulk all-output readback.
+- Benchmark equal-work GPU paths across 36 fresh processes. The 65,536-path/K32
+  setting records a 5.97× median paired session speedup, including initial upload
+  and all output downloads with reusable capacity. [Results and scope](docs/evidence/cuda-resident-2026-11-04/README.md).
+- Extend correctness to 117 cases and verify resident execution with Compute
+  Sanitizer, preserving original modes and historical evidence.
+
 - Add optional C++20 batch hedge accounting and a streaming ledger, with finite-input,
   overflow, overlap, and closed-state checks and opening/liquidation transaction costs.
 - Add an independently installable NumPy companion with strict array validation,

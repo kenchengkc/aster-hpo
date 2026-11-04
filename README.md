@@ -7,6 +7,12 @@
 [Native CPU and CUDA tools](docs/NATIVE.md): optional C++20 batch/streaming accounting,
 strict NumPy bindings, and a standalone A100 correctness/benchmark package.
 
+On one A100, a float64 accounting session with 65,536 paths and 32 operations took
+**26.41ms → 4.42ms** with resident inputs and batched result readback: **5.97× median
+paired speedup** across three process runs. Initial upload and all output downloads
+are included; GPU context/capacity setup is excluded. This measures an accounting
+session. [Protocol, raw records, and scope →](docs/evidence/cuda-resident-2026-11-04/README.md)
+
 [![CI](https://github.com/kenchengkc/aster-hpo/actions/workflows/ci.yml/badge.svg)](https://github.com/kenchengkc/aster-hpo/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
