@@ -41,11 +41,11 @@
 **Files:** `native/include/aster/accounting.hpp`, `native/src/accounting.cpp`, `native/tests/test_accounting.cpp`, `native/CMakeLists.txt`.
 **Produces:** all shared C++ interfaces and target above.
 
-- [ ] Write native tests for literal P&L `0.089`, cost `0.011`, turnover `1.1`; streaming equivalence; shorts/zero costs; empty batches; invalid sizes, overflow/overlap, nonfinite arithmetic, immutable failed updates, terminal/reset behavior, and no allocations on successful updates.
-- [ ] Compile the tests before implementation; confirm the missing accounting header/API is the failure.
-- [ ] Implement checked entry points and a fused scalar loop with fixed-size ledger state. Validate before mutation and detect nonfinite results.
-- [ ] Build Release with CMake and run CTest; build ASan/UBSan and rerun native tests.
-- [ ] Commit the verified standalone component.
+- [x] Write native tests for literal P&L `0.089`, cost `0.011`, turnover `1.1`; streaming equivalence; shorts/zero costs; empty batches; invalid sizes, overflow/overlap, nonfinite arithmetic, immutable failed updates, terminal/reset behavior, and no allocations on successful updates.
+- [x] Compile the tests before implementation; confirm the missing accounting header/API is the failure.
+- [x] Implement checked entry points and a fused scalar loop with fixed-size ledger state. Validate before mutation and detect nonfinite results.
+- [x] Build Release with CMake and run CTest; build ASan/UBSan and rerun native tests.
+- [x] Commit the verified standalone component.
 
 ## Task 2: Optional Python package and numerical parity
 
@@ -53,11 +53,11 @@
 **Consumes:** Task 1 core/target.
 **Produces:** companion wheel `aster-hpo-native`, version `0.1.0`, import/API above.
 
-- [ ] Write tests before the package exists: hand-calculated outputs, identical-input NumPy parity across sizes, cancellation fixtures, strict dtype/layout/shape/writable checks, overlap, read-only inputs, owned outputs, ledger errors, nonfinite input/output, and preallocated operation.
-- [ ] Run the tests; confirm the missing companion import is the failure.
-- [ ] Add nanobind bindings with explicit array constraints and GIL release only during pure native work; keep Python validation and ownership explicit.
-- [ ] Build/install the wheel and run the Python tests, core suite, and standalone native tests.
-- [ ] Check fresh installed core-only and companion environments outside the checkout; commit the package.
+- [x] Write tests before the package exists: hand-calculated outputs, identical-input NumPy parity across sizes, cancellation fixtures, strict dtype/layout/shape/writable checks, overlap, read-only inputs, owned outputs, ledger errors, nonfinite input/output, and preallocated operation.
+- [x] Run the tests; confirm the missing companion import is the failure.
+- [x] Add nanobind bindings with explicit array constraints and GIL release only during pure native work; keep Python validation and ownership explicit.
+- [x] Build/install the wheel and run the Python tests, core suite, and standalone native tests.
+- [x] Check fresh installed core-only and companion environments outside the checkout; commit the package.
 
 ## Task 3: Measurement tools and CUDA test package
 

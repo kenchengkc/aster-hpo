@@ -1,7 +1,7 @@
 # Native performance foundation and GPU direction
 
 Date: 2026-11-04
-Status: proposed design for review; implementation has not started.
+Status: approved for implementation on 2026-11-04.
 Base: `065020f` (Python package 0.3.0).
 
 ## Intent and agreed direction
@@ -10,14 +10,14 @@ Develop Aster into a stronger quant developer portfolio through measured latency
 memory use, numerical correctness, and CPU/GPU performance engineering. Keep Python
 for experiments, allocation, seeds, recovery, audits, and analysis. The project owner
 accepted the proposed profiling and C++20 batch/streaming foundation and confirmed
-access to an NVIDIA GPU, locally or remotely. The NVIDIA model and access method
-have not been identified. Local inspection found an Apple M5 with Clang, without
-CMake or a CUDA toolkit.
+access to an NVIDIA GPU, locally or remotely. The owner subsequently rented an
+A100 PCIe 40GB and requested a dedicated SSH key; connection details stay outside
+the repository. Local inspection found an Apple M5 with Clang, without a CUDA
+toolkit. Native build dependencies are installed in the project environment.
 
-This document specifies the CPU foundation. CUDA and additional languages are
-follow-on directions, not features included in the first implementation. Language,
-binding, API, and experimental choices below are proposed engineering decisions;
-they do not imply the owner has reviewed this written design.
+This document specifies the CPU foundation. On approval, the owner also requested
+preparation of the standalone CUDA test package described below. GPU neural training,
+launch autotuning, and additional language consumers remain follow-on directions.
 
 ## Approaches and scope
 
@@ -185,7 +185,13 @@ batch/streaming benchmarks, and reproducible measurements, including neutral or
 negative outcomes. A speedup is not an acceptance condition. A whole-objective
 claim requires a separate measured comparison at that boundary.
 
-## NVIDIA CUDA follow-on (proposed, separate milestone)
+## Standalone NVIDIA CUDA package and follow-on integration
+
+The first CUDA deliverable is a standalone correctness/measurement executable,
+not a GPU training backend. Its path-major float64 accounting uses reusable device
+buffers, the same CPU-reference inputs/outputs, completed CUDA-event/host timings,
+exclusive evidence directories, and Compute Sanitizer checks on the A100. Remote
+execution requires the owner's SSH details. No additional instance is provisioned.
 
 Start with device-resident batch hedge accounting, reusing explicit NumPy/C++ inputs
 and all three outputs. Reuse device buffers and one GPU-owning process. Do not
@@ -239,8 +245,8 @@ the repository's language count.
 
 ## Review and handoff
 
-The agreed next direction is the CPU foundation. Review this written contract
-before creating its implementation plan. CUDA, Rust, Go, and the C ABI retain the
-separate scopes described above. Builder-level choices such as internal file names,
+The owner approved this written design and authorized the CPU foundation and CUDA
+test package. Rust, Go, the C ABI, GPU training, and launch autotuning retain their
+separate future scopes. Builder-level choices such as internal file names,
 test framework, benchmark harness, and packaging release mechanics may be settled
 during planning without changing the numerical or measurement contract.

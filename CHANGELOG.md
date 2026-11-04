@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased — Native companion 0.1.0
+
+- Add optional C++20 batch hedge accounting and a streaming ledger, with finite-input,
+  overflow, overlap, and closed-state checks and opening/liquidation transaction costs.
+- Add an independently installable NumPy companion with strict array validation,
+  caller-owned output buffers, and native build metadata.
+- Add separate prepared/checked native, Python API, and complete-objective measurement
+  tools, preserving timer-resolution zeros and unavailable derived rates.
+- Prepare an A100 CUDA correctness/benchmark runner with reusable buffers, CPU-reference
+  comparisons, completed device/host timings, and explicit Compute Sanitizer status.
+  Actual GPU validation requires running the package on NVIDIA hardware.
+- Configure native Release and Linux sanitizer CI; keep the core dependency-free.
+
 ## 0.3.0 — Resource budgets and cancellation
 
 - Add `RunBudget` and thread-safe `CancellationToken` controls on `Study.optimize`.

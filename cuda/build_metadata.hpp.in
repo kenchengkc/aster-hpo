@@ -1,0 +1,8 @@
+#pragma once
+inline constexpr const char* build_cuda_compiler = R"meta(@CMAKE_CUDA_COMPILER_ID@ @CMAKE_CUDA_COMPILER_VERSION@)meta";
+inline constexpr const char* build_host_compiler = R"meta(@CMAKE_CXX_COMPILER_ID@ @CMAKE_CXX_COMPILER_VERSION@)meta";
+inline constexpr const char* build_cuda_architectures = R"meta(@CMAKE_CUDA_ARCHITECTURES@)meta";
+inline constexpr const char* build_cuda_flags = R"meta(@ASTER_CUDA_FLAGS@)meta";
+inline constexpr const char* build_cuda_user_flags = R"meta(@CMAKE_CUDA_FLAGS@ @CMAKE_CUDA_FLAGS_RELEASE@)meta";
+inline constexpr const char* build_host_user_flags = R"meta(@CMAKE_CXX_FLAGS@ @CMAKE_CXX_FLAGS_RELEASE@)meta";
+inline constexpr const char* build_type = R"meta(@CMAKE_BUILD_TYPE@)meta";
