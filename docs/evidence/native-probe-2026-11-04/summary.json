@@ -1,0 +1,135 @@
+{
+  "interpretation": "development profiling probe; not a performance benchmark",
+  "revision": "065020f3f6d98edffdb7c49fc8a896bf365e72ed",
+  "python": "3.11.5",
+  "machine": "arm64",
+  "market": {
+    "spot": 1.0,
+    "strike": 1.0,
+    "volatility": 0.2,
+    "maturity": 1.0,
+    "steps": 12,
+    "transaction_cost": 0.001,
+    "epochs": 256,
+    "batch_paths": 256,
+    "evaluation_paths": 2048
+  },
+  "thread_limit": 1,
+  "native_threadpools": [],
+  "samples": [
+    {
+      "config": {
+        "width": 4,
+        "learning_rate": 0.03,
+        "regularization": 0.0001
+      },
+      "replication": {
+        "index": 0,
+        "scenario_seed": 2246624708443361928,
+        "training_seed": 1300057551856131075,
+        "phase": "pilot"
+      },
+      "wall_seconds": [
+        0.08237470802851021,
+        0.07902737497352064,
+        0.07854920881800354
+      ],
+      "median_wall_seconds": 0.07902737497352064,
+      "loss": 0.0005378788289673003
+    },
+    {
+      "config": {
+        "width": 8,
+        "learning_rate": 0.03,
+        "regularization": 0.0001
+      },
+      "replication": {
+        "index": 0,
+        "scenario_seed": 2246624708443361928,
+        "training_seed": 17005562634239687513,
+        "phase": "pilot"
+      },
+      "wall_seconds": [
+        0.0875071668997407,
+        0.08858550013974309,
+        0.11847345810383558
+      ],
+      "median_wall_seconds": 0.08858550013974309,
+      "loss": 0.0005178957714139561
+    },
+    {
+      "config": {
+        "width": 16,
+        "learning_rate": 0.03,
+        "regularization": 0.0001
+      },
+      "replication": {
+        "index": 0,
+        "scenario_seed": 2246624708443361928,
+        "training_seed": 11687638837019151512,
+        "phase": "pilot"
+      },
+      "wall_seconds": [
+        0.15155004197731614,
+        0.12902404181659222,
+        0.12376133305951953
+      ],
+      "median_wall_seconds": 0.12902404181659222,
+      "loss": 0.0004986820150663001
+    }
+  ],
+  "profiled_config": {
+    "width": 8,
+    "learning_rate": 0.03,
+    "regularization": 0.0001
+  },
+  "profiled_loss": 0.0005178957714139561,
+  "profile_total_seconds": 0.10892404200000001,
+  "selected_profile_entries": [
+    {
+      "function": "simulate_paths",
+      "calls": 257,
+      "internal_seconds": 0.006820327,
+      "cumulative_seconds": 0.007775335,
+      "cumulative_fraction": 0.07138309281618468
+    },
+    {
+      "function": "hedge_pnl",
+      "calls": 257,
+      "internal_seconds": 0.002310594,
+      "cumulative_seconds": 0.0069129560000000005,
+      "cumulative_fraction": 0.06346584163668843
+    },
+    {
+      "function": "_forward",
+      "calls": 257,
+      "internal_seconds": 0.039385671000000004,
+      "cumulative_seconds": 0.042203925,
+      "cumulative_fraction": 0.3874619801567775
+    },
+    {
+      "function": "loss_and_gradient",
+      "calls": 256,
+      "internal_seconds": 0.025275243000000003,
+      "cumulative_seconds": 0.086789871,
+      "cumulative_fraction": 0.7967926034180773
+    },
+    {
+      "function": "train_policy",
+      "calls": 1,
+      "internal_seconds": 0.008150279,
+      "cumulative_seconds": 0.106535375,
+      "cumulative_fraction": 0.9780703418993576
+    }
+  ],
+  "caveats": [
+    "3 warmed repeats per width are development observations, not an uncertainty study",
+    "Cumulative times overlap and must not be summed",
+    "Profiling overhead changes timing; use unprofiled runs for actual comparisons"
+  ],
+  "cpu_model": "Apple M5",
+  "platform": "macOS-26.4-arm64-arm-64bit",
+  "numpy_version": "2.4.1",
+  "source_sha256": "2059cf9d3556a9545361d681e64a3d226dfa26f384bae26a5d01c4c772f82d55",
+  "dirty_at_execution": false
+}
