@@ -7,7 +7,7 @@
     <title>Aster — Simulation optimization in Python, C++ and CUDA</title>
     <meta
       name="description"
-      content="Reproducible hyperparameter optimization for stochastic simulations. Explore Aster's Python runtime, C++20 accounting, resident CUDA training, and measured CPU/A100 workflows."
+      content="Aster provides reproducible hyperparameter optimization for stochastic simulations, with a Python runtime, C++20 accounting, resident CUDA training, and measured CPU/A100 workflows."
     />
     <link href="https://aster-hpo.vercel.app/" rel="canonical" />
     <meta content="https://aster-hpo.vercel.app/" property="og:url" />
@@ -16,7 +16,7 @@
       property="og:title"
     />
     <meta
-      content="From adaptive replication to fused GPU kernels: measured neural-hedging workflows, recoverable experiments, and independent winner audits."
+      content="Aster combines adaptive replication and CUDA kernels with recoverable experiment execution and independent audits for neural-hedging optimization."
       property="og:description"
     />
     <meta content="website" property="og:type" />
@@ -50,31 +50,30 @@
             Stochastic simulation · Systems engineering · Quantitative research
           </p>
           <h1 id="overview-title">
-            Spend less time searching.<br />Measure what you preserve.
+            Parallel hyperparameter optimization for stochastic simulations
           </h1>
           <p class="lead">
             Aster is an open-source hyperparameter optimization library for
             noisy simulations. It combines adaptive replication, a recoverable
-            Python runtime, C++20 accounting, and resident CUDA training. The
-            test case: neural hedging with transaction costs.
+            Python runtime, C++20 accounting, and resident CUDA training. Its
+            financial benchmark tunes neural hedging policies with transaction
+            costs.
           </p>
           <p class="research-byline">
             By Ken Cheng · Python / C++20 / CUDA · MIT license · Research
             software
           </p>
           <div class="intro-actions">
-            <a class="button" href="#evidence">Explore the measurements</a
+            <a class="button" href="#evidence">View benchmark results</a
             ><a href="#architecture"
-              >See the architecture <span aria-hidden="true">↓</span></a
+              >View architecture <span aria-hidden="true">↓</span></a
             >
           </div>
         </div>
       </section>
       <section aria-labelledby="features-title" id="features">
-        <p class="eyebrow">From allocation to execution</p>
-        <h2 id="features-title">
-          A small core, with performance work at each layer.
-        </h2>
+        <p class="eyebrow">Implementation</p>
+        <h2 id="features-title">Optimization methods and runtime features</h2>
         <dl class="principles">
           <div>
             <dt>Adaptive simulation budgets</dt>
@@ -95,9 +94,9 @@
           <div>
             <dt>Independent winner audits</dt>
             <dd>
-              Lock the selected configuration, then evaluate it with fresh audit
-              seeds. Training, shared market scenarios, and audit randomness use
-              separate namespaces.
+              Aster locks the selected configuration before evaluating it with
+              fresh audit seeds. Training, shared market scenarios, and audit
+              randomness use separate namespaces.
             </dd>
           </div>
           <div>
@@ -131,8 +130,8 @@
         class="evidence-section"
         id="evidence"
       >
-        <p class="eyebrow">Evidence, with boundaries</p>
-        <h2 id="evidence-title">Two studies. Different questions.</h2>
+        <p class="eyebrow">Benchmark results</p>
+        <h2 id="evidence-title">CPU allocation and CUDA performance studies</h2>
         <p class="section-intro">
           The CPU study measures how much work allocation can save. The CUDA
           study measures a complete search-and-audit workflow after reducing
@@ -146,9 +145,7 @@
               >20 optimizer seeds · Apple M5 · September 2026</span
             >
           </div>
-          <h3 id="cpu-title">
-            Use fewer replications; audit the selected policy.
-          </h3>
+          <h3 id="cpu-title">Replication allocation for neural hedging</h3>
           <p>
             A small NumPy network hedges a simulated European call, including
             opening, rebalancing, and liquidation costs. Six candidate
@@ -264,7 +261,7 @@
             >
           </div>
           <h3 id="cuda-title">
-            Make the GPU useful across the whole workflow.
+            CUDA execution of the full optimization workflow
           </h3>
           <p>
             The integrated CUDA backend runs simulation, policy training, and
@@ -333,17 +330,17 @@
           </p>
           <div class="result-details">
             <div>
-              <h4>What is timed</h4>
+              <h4>Workflow timing</h4>
               <p>
-                Backend setup, numerical imports, host random inputs, transfers,
-                simulation, training, evaluation, scheduling, SQLite journals,
-                winner selection, audits, and result writes. Each campaign
-                starts in a fresh process with the ordinary shared compiler
-                cache already populated by validation.
+                Workflow timing includes backend setup, numerical imports, host
+                random inputs, transfers, simulation, training, evaluation,
+                scheduling, SQLite journals, winner selection, audits, and
+                result writes. Each campaign starts in a fresh process with the
+                ordinary shared compiler cache already populated by validation.
               </p>
             </div>
             <div>
-              <h4>Where CPU still wins</h4>
+              <h4>Small-workload CPU comparison</h4>
               <p>
                 Four CPU workers are faster on the small workload. Including
                 interpreter startup and exit gives 1.165 s for small optimized
@@ -424,9 +421,9 @@
         </p>
       </section>
       <section aria-labelledby="architecture-title" id="architecture">
-        <p class="eyebrow">One optimizer, optional numerical backends</p>
+        <p class="eyebrow">Python runtime and numerical backends</p>
         <h2 id="architecture-title">
-          Own the experiment. Keep the hot path close to the data.
+          Execution architecture and GPU data flow
         </h2>
         <p class="section-intro">
           The dependency-free Python core controls allocation, execution, and
@@ -436,16 +433,17 @@
         <ol class="workflow">
           <li>
             <span class="step-number">01</span>
-            <h3>Sample &amp; allocate</h3>
+            <h3>Candidate sampling and replication allocation</h3>
             <p>
-              Build a finite candidate pool. FullBudget, stopping ASHA, or
-              ReplicationRace decides which seeded replication runs next.
+              Sampling produces a finite candidate pool. FullBudget, stopping
+              ASHA, or ReplicationRace decides which seeded replication runs
+              next.
             </p>
             <code>sample_configs() → Study</code>
           </li>
           <li>
             <span class="step-number">02</span>
-            <h3>Journal &amp; dispatch</h3>
+            <h3>Journaling and worker dispatch</h3>
             <p>
               The coordinator commits accepted results to SQLite. Owned spawned
               workers execute attempts; an optional WorkerPool reuses healthy
@@ -455,7 +453,7 @@
           </li>
           <li>
             <span class="step-number">03</span>
-            <h3>Simulate &amp; train</h3>
+            <h3>Simulation and policy training</h3>
             <p>
               The objective runs the NumPy reference or resident CuPy/CUDA
               backend. The C++20 companion separately supports batch accounting
@@ -465,11 +463,11 @@
           </li>
           <li>
             <span class="step-number">04</span>
-            <h3>Lock &amp; audit</h3>
+            <h3>Winner selection and independent audit</h3>
             <p>
-              Freeze the winner before using disjoint audit seeds. Export
-              observations, decisions, timing, failures, and independently
-              evaluated quality.
+              The winner is fixed before evaluation with disjoint audit seeds.
+              Exported results include observations, decisions, timing,
+              failures, and independently evaluated quality.
             </p>
             <code>audit() → inspectable results</code>
           </li>
@@ -499,7 +497,7 @@
           </div>
         </div>
         <div class="technical-notes">
-          <h3>Statistical boundaries</h3>
+          <h3>Statistical limitations</h3>
           <p>
             ReplicationRace uses paired outcomes and a standard-error margin to
             prune candidates. Repeated inspection and adaptive peer selection
@@ -534,8 +532,8 @@
         </details>
       </section>
       <section aria-labelledby="quickstart-title" id="quickstart">
-        <p class="eyebrow">Start with the CPU reference</p>
-        <h2 id="quickstart-title">Run a financial simulation locally.</h2>
+        <p class="eyebrow">Installation and examples</p>
+        <h2 id="quickstart-title">Running the neural-hedging example</h2>
         <p class="section-intro">
           From a source checkout containing the 0.3 runtime, use Python 3.11+
           and install the optional numerical and reporting tools below. The core
@@ -609,8 +607,8 @@ python -m examples.hedging --backend cuda --workers 1 \
         </details>
       </section>
       <section aria-labelledby="roadmap-title" id="roadmap">
-        <p class="eyebrow">Implemented, measured, and still open</p>
-        <h2 id="roadmap-title">Current status</h2>
+        <p class="eyebrow">Development and validation</p>
+        <h2 id="roadmap-title">Completed work and planned studies</h2>
         <div class="pending-study" aria-labelledby="pending-title">
           <span class="status-label">Performance study pending</span>
           <h3 id="pending-title">Persistent GPU workers</h3>
@@ -659,7 +657,7 @@ python -m examples.hedging --backend cuda --workers 1 \
         <div class="agenda-row">
           <span class="agenda-state">Next research</span>
           <div>
-            <h3>Broader workloads and stronger comparisons</h3>
+            <h3>Further performance and financial validation</h3>
             <p>
               Repeated-worker measurements, harder market models, larger GPU
               batches, and matched comparisons with complete external HPO
@@ -669,10 +667,10 @@ python -m examples.hedging --backend cuda --workers 1 \
           </div>
         </div>
         <p class="contribution-note">
-          Interested in scheduling, numerical kernels, or reproducible
-          simulation research?
+          Contributions to scheduling, numerical kernels, and reproducible
+          simulation research are welcome.
           <a href="https://github.com/kenchengkc/aster-hpo"
-            >Explore the repository and contribute ↗</a
+            >Source code and contributions ↗</a
           >
         </p>
       </section>
