@@ -55,7 +55,7 @@ def freeze_protocol(
     backend="numpy",
 ):
     validate_backend(backend)
-    if backend == "cuda" and workers != 1:
+    if backend.startswith("cuda") and workers != 1:
         raise ValueError("CUDA studies on one GPU require one worker")
     seeds = validate_seeds(range(20) if seeds is None else seeds)
     pilot = Path(pilot)
@@ -83,12 +83,12 @@ def freeze_protocol(
     if scaling_workers is None:
         scaling_workers = (
             (1,)
-            if backend == "cuda"
+            if backend.startswith("cuda")
             else tuple(w for w in (1, 2, 4, 8) if w <= (os.cpu_count() or 1))
         )
     if any(type(w) is not int or w < 1 for w in scaling_workers):
         raise ValueError("Scaling workers must be positive integers")
-    if backend == "cuda" and any(w != 1 for w in scaling_workers):
+    if backend.startswith("cuda") and any(w != 1 for w in scaling_workers):
         raise ValueError("CUDA studies on one GPU require one worker")
     protocol = {
         "schema_version": 1,

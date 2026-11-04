@@ -149,3 +149,13 @@ def test_source_fingerprint_ignores_generated_cuda_build_sources(tmp_path):
     generated.mkdir(parents=True)
     (generated / "CMakeCUDACompilerId.cu").write_text("// generated compiler probe\n")
     assert source_fingerprint(root=tmp_path) == before
+
+
+def test_eager_cuda_protocol_requires_one_gpu_worker(tmp_path):
+    from benchmarks.study import freeze_protocol
+
+    pilot(tmp_path / "pilot")
+    with pytest.raises(ValueError, match="one worker"):
+        freeze_protocol(
+            tmp_path / "pilot", tmp_path / "eager.json", backend="cuda_eager", workers=4
+        )

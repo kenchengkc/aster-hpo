@@ -157,3 +157,15 @@ def test_requested_cuda_does_not_fall_back_to_cpu_when_unavailable():
     objective = HedgingObjective(Market(epochs=1, batch_paths=2), backend="cuda")
     with pytest.raises(RuntimeError, match="CuPy|CUDA|cupy"):
         objective(config, Replication.create(4, config, 0, "search", True))
+
+
+def test_eager_cuda_reference_is_explicit_and_serializable():
+    import pickle
+
+    from benchmarks.hedging import HedgingObjective
+
+    objective = HedgingObjective(backend="cuda_eager")
+    assert pickle.loads(pickle.dumps(objective)).backend == "cuda_eager"
+    from benchmarks.hedging_cuda import train_policy_eager
+
+    assert callable(train_policy_eager)

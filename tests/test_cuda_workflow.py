@@ -5,6 +5,7 @@ import json
 import math
 import subprocess
 import sys
+from dataclasses import asdict
 
 import pytest
 
@@ -303,7 +304,7 @@ def test_runner_freezes_manifest_and_starts_a_fresh_process_per_job(tmp_path, mo
     protocol = _protocol()
     one = _job()
     four = {**one, "workers": 4, "id": one["id"].replace("w1", "w4")}
-    monkeypatch.setattr(workflow, "default_protocol", lambda: protocol)
+    monkeypatch.setattr(workflow, "default_protocol", lambda **_: protocol)
     monkeypatch.setattr(workflow, "build_jobs", lambda _: [one, four])
     # This test isolates orchestration; numerical paired summaries are covered above.
     monkeypatch.setattr(
@@ -312,6 +313,15 @@ def test_runner_freezes_manifest_and_starts_a_fresh_process_per_job(tmp_path, mo
         lambda *_: {"full_budget": [], "adaptive": [], "cpu_four_worker_control": []},
     )
     output = tmp_path / "run"
+    execute = workflow.subprocess.run
+
+    def frozen_requests(*args, **kwargs):
+        # Every request is immutable evidence before the first campaign clock starts.
+        if args[0][1:3] == ["-m", "benchmarks.cuda_workflow"]:
+            assert len(list((output / "jobs").glob("*.json"))) == 2
+        return execute(*args, **kwargs)
+
+    monkeypatch.setattr(workflow.subprocess, "run", frozen_requests)
     workflow.run(output)
     manifest = json.loads((output / "manifest.json").read_text())
     records = json.loads((output / "records.json").read_text())
@@ -336,4 +346,307 @@ def test_accepted_attempt_must_match_the_observation_identity(tmp_path):
     _, protocol, record = _run_campaign(tmp_path)
     record["search"]["metadata"]["attempts"][0]["replication"]["training_seed"] += 1
     with pytest.raises(ValueError, match="attempt"):
+        validate_record(record, protocol)
+
+
+def test_eager_comparison_is_opt_in_and_adds_twelve_fresh_campaigns():
+    from benchmarks.cuda_workflow import build_jobs, default_protocol
+
+    original = build_jobs(default_protocol())
+    protocol = default_protocol(include_eager=True)
+    jobs = build_jobs(protocol)
+    assert len(jobs) == len({job["id"] for job in jobs}) == 42
+    assert jobs == build_jobs(protocol)
+    eager = [job for job in jobs if job["backend"] == "cuda_eager"]
+    assert len(eager) == 12
+    assert {(job["workload"], job["scheduler"], job["seed"]) for job in eager} == {
+        (workload, scheduler, seed)
+        for workload in ("tiny", "scaled")
+        for scheduler in ("full", "race")
+        for seed in (31000, 31001, 31002)
+    }
+    assert all(job["workers"] == 1 for job in eager)
+    assert {job["id"] for job in original} == {
+        job["id"] for job in jobs if job["backend"] != "cuda_eager"
+    }
+    assert {job["backend"] for job in jobs[:14]} == {"numpy", "cuda", "cuda_eager"}
+    assert {job["workload"] for job in jobs[:14]} == {"tiny", "scaled"}
+    assert protocol["warmup_objective_calls"] == 0
+
+
+@pytest.mark.parametrize("include_eager", [False, True])
+def test_cli_selects_optional_eager_campaigns(tmp_path, monkeypatch, include_eager):
+    import benchmarks.cuda_workflow as workflow
+
+    output = tmp_path / "output"
+
+    def collect(path, *, progress, include_eager=False):
+        path.mkdir()
+        (path / "selected.json").write_text(json.dumps({"eager": include_eager}))
+
+    monkeypatch.setattr(workflow, "run", collect)
+    args = ["run", "--output", str(output)]
+    if include_eager:
+        args.append("--include-eager")
+    workflow.main(args)
+    assert json.loads((output / "selected.json").read_text()) == {"eager": include_eager}
+
+
+def _optimization_records(original, timings=((31000, 10.0, 2.0),)):
+    records = []
+    for seed, eager_time, optimized_time in timings:
+        for backend, wall in (("cuda_eager", eager_time), ("cuda", optimized_time)):
+            row = copy.deepcopy(original)
+            row["job"].update(seed=seed, backend=backend, id=f"{seed}-{backend}")
+            row["timings"]["workflow_seconds"] = wall
+            row["process_seconds"] = wall + 1.0
+            records.append(row)
+    return records
+
+
+def test_optimization_ratios_are_paired_and_implementation_names_are_accurate(tmp_path):
+    from benchmarks.cuda_workflow import summarize, validate_summary
+
+    _, protocol, original = _run_campaign(tmp_path)
+    records = _optimization_records(original, ((31000, 10.0, 2.0), (31001, 12.0, 4.0)))
+    summary = validate_summary(summarize(records, protocol))
+    group = summary["cuda_optimization"][0]
+    assert group["workflow_speedup"] == {"median": 4.0, "minimum": 3.0, "maximum": 5.0}
+    assert group["process_speedup"]["median"] == pytest.approx((11 / 3 + 13 / 5) / 2)
+    assert group["eager_workflow_seconds"] == {"median": 11.0, "minimum": 10.0, "maximum": 12.0}
+    assert group["optimized_process_seconds"] == {"median": 4.0, "minimum": 3.0, "maximum": 5.0}
+    assert group["matched_losses"]["count"] == 12
+    assert group["matched_metrics"]["count"] == 112
+    assert group["matched_metrics"]["all_close"]
+    assert group["allocation_agreement_count"] == 2
+    assert group["winner_agreement_count"] == 2
+    assert group["pairs"][0]["eager_job"] == "31000-cuda_eager"
+    assert group["pairs"][0]["optimized_job"] == "31000-cuda"
+    assert all(not key.startswith("numpy") for key in group)
+    assert all(not key.startswith("numpy") for row in group["pairs"] for key in row)
+    assert not summary["full_budget"]
+
+
+@pytest.mark.parametrize("workers,category", [(1, "full_budget"), (4, "cpu_four_worker_control")])
+@pytest.mark.parametrize(
+    "metric",
+    ["bias", "error_q05", "error_q50", "error_q95", "mean_transaction_cost", "mean_turnover"],
+)
+def test_eager_protocol_cpu_controls_require_every_matched_financial_metric(
+    tmp_path, workers, category, metric
+):
+    from benchmarks.cuda_workflow import summarize, validate_summary
+
+    _, protocol, cpu = _run_campaign(tmp_path)
+    protocol["include_eager"] = True
+    cpu["job"]["workers"] = workers
+    eager, optimized = _optimization_records(cpu)
+    eager["job"]["workers"] = optimized["job"]["workers"] = 1
+    cpu["metrics"][0]["metrics"][metric] += 0.01
+    summary = summarize([cpu, eager, optimized], protocol)
+    with pytest.raises(ValueError, match="closeness"):
+        validate_summary(summary)
+    assert summary[category][0]["matched_metrics"]["mismatches"] == 1
+
+
+def test_eager_protocol_speedup_definitions_name_the_actual_implementations(tmp_path):
+    from benchmarks.cuda_workflow import summarize
+
+    _, protocol, cpu = _run_campaign(tmp_path)
+    protocol["include_eager"] = True
+    eager, optimized = _optimization_records(cpu)
+    summary = summarize([cpu, eager, optimized], protocol)
+    assert summary["full_budget"][0]["speedup_definition"] == "numpy_seconds / cuda_seconds"
+    assert summary["cuda_optimization"][0]["speedup_definition"] == (
+        "eager_seconds / optimized_seconds"
+    )
+
+
+def _near_tied_optimization_records(original):
+    from aster_hpo import Replication
+
+    records = _optimization_records(original)
+    for winner_id, record in enumerate(records):
+        backend = record["job"]["backend"]
+        record["backend"].update(
+            name=backend, implementation="eager" if winner_id == 0 else "optimized"
+        )
+        record["winner"] = record["search"]["trials"][winner_id]["config"]
+        record["winner_trial_id"] = record["search"]["best_trial_id"] = winner_id
+        losses = {}
+        for trial in record["search"]["trials"]:
+            loss = 1.0 - (5e-9 if winner_id == 1 and trial["id"] == 1 else 0.0)
+            losses[json.dumps(trial["config"], sort_keys=True)] = loss
+            for observation in trial["observations"]:
+                observation["loss"] = loss
+        for observation in record["audit"]["observations"]:
+            index = observation["replication"]["index"]
+            observation["replication"] = asdict(
+                Replication.create(record["job"]["seed"], record["winner"], index, "audit", True)
+            )
+            observation["loss"] = 3.0 + winner_id
+        for attempt in record["audit"]["metadata"]["attempts"]:
+            attempt["replication"] = record["audit"]["observations"][attempt["replication_index"]][
+                "replication"
+            ]
+        for metric in record["metrics"]:
+            metric["backend"] = backend
+            if metric["replication"]["phase"] == "search":
+                metric["metrics"]["mse"] = losses[json.dumps(metric["config"], sort_keys=True)]
+            else:
+                index = metric["replication"]["index"]
+                metric["config"] = record["winner"]
+                metric["replication"] = record["audit"]["observations"][index]["replication"]
+                metric["metrics"]["mse"] = 3.0 + winner_id
+                replication = metric["replication"]
+                metric["file"] = (
+                    f"metrics/audit-{replication['training_seed']:016x}-"
+                    f"{replication['scenario_seed']:016x}-{index}.json"
+                )
+    return records
+
+
+def test_close_searches_can_lock_different_winners_and_report_unmatched_audits(tmp_path):
+    from benchmarks.cuda_workflow import summarize, validate_record, validate_summary
+
+    _, protocol, original = _run_campaign(tmp_path)
+    records = _near_tied_optimization_records(original)
+    for record in records:
+        validate_record(record, protocol)
+    summary = validate_summary(summarize(records, protocol))
+    group = summary["cuda_optimization"][0]
+    assert group["matched_losses"]["all_close"]
+    assert group["matched_metrics"]["count"] == 42
+    assert group["winner_agreement_count"] == 0
+    pair = group["pairs"][0]
+    assert not pair["winner_agreement"]
+    assert pair["eager_unmatched_metric_observations"] == 2
+    assert pair["optimized_unmatched_metric_observations"] == 2
+    assert pair["audit_mean_difference"] == 1.0
+
+
+@pytest.mark.parametrize("phase", ["search", "audit"])
+@pytest.mark.parametrize("both", [False, True])
+def test_fixed_budget_metric_evidence_cannot_be_omitted(tmp_path, phase, both):
+    from benchmarks.cuda_workflow import summarize
+
+    _, protocol, original = _run_campaign(tmp_path)
+    eager, optimized = _optimization_records(original)
+    for record in (eager, optimized) if both else (optimized,):
+        index = next(
+            i for i, row in enumerate(record["metrics"]) if row["replication"]["phase"] == phase
+        )
+        record["metrics"].pop(index)
+    with pytest.raises(ValueError, match="metric"):
+        summarize([eager, optimized], protocol)
+
+
+@pytest.mark.parametrize("phase", ["search", "audit"])
+@pytest.mark.parametrize(
+    "metric",
+    [
+        "mse",
+        "bias",
+        "error_q05",
+        "error_q50",
+        "error_q95",
+        "mean_transaction_cost",
+        "mean_turnover",
+    ],
+)
+def test_optimization_fixed_budget_rejects_each_mismatched_financial_metric(
+    tmp_path, phase, metric
+):
+    from benchmarks.cuda_workflow import summarize, validate_summary
+
+    _, protocol, original = _run_campaign(tmp_path)
+    eager, optimized = _optimization_records(original)
+    row = next(row for row in optimized["metrics"] if row["replication"]["phase"] == phase)
+    row["metrics"][metric] += 0.01
+    summary = summarize([eager, optimized], protocol)
+    assert summary["cuda_optimization"][0]["matched_metrics"]["mismatches"] == 1
+    with pytest.raises(ValueError, match="closeness"):
+        validate_summary(summary)
+
+
+def test_optimization_fixed_budget_rejects_different_search_identities(tmp_path):
+    from benchmarks.cuda_workflow import summarize
+
+    _, protocol, original = _run_campaign(tmp_path)
+    eager, optimized = _optimization_records(original)
+    optimized["search"]["trials"][1]["observations"].pop()
+    with pytest.raises(ValueError, match="identit"):
+        summarize([eager, optimized], protocol)
+
+
+def test_eager_protocol_refuses_missing_eager_campaigns(tmp_path):
+    from benchmarks.cuda_workflow import summarize
+
+    _, protocol, cpu = _run_campaign(tmp_path)
+    protocol["include_eager"] = True
+    optimized = _optimization_records(cpu)[1]
+    with pytest.raises(ValueError, match="paired eager"):
+        summarize([cpu, optimized], protocol)
+
+
+def test_optimization_adaptive_allocation_differences_stay_descriptive(tmp_path):
+    from benchmarks.cuda_workflow import summarize, validate_summary
+
+    _, protocol, original = _run_campaign(tmp_path)
+    eager, optimized = _optimization_records(original)
+    eager["job"]["scheduler"] = optimized["job"]["scheduler"] = "race"
+    optimized["search"]["trials"][1]["observations"].pop()
+    optimized["metrics"].pop(5)
+    summary = validate_summary(summarize([eager, optimized], protocol))
+    group = summary["cuda_optimization"][0]
+    assert group["allocation_agreement_count"] == 0
+    assert group["pairs"][0]["eager_observations"] == 6
+    assert group["pairs"][0]["optimized_observations"] == 5
+    assert group["pairs"][0]["eager_unmatched_observations"] == 1
+    assert group["matched_metrics"]["all_close"]
+
+
+def test_optimization_adaptive_matched_numerics_must_still_be_close(tmp_path):
+    from benchmarks.cuda_workflow import summarize, validate_summary
+
+    _, protocol, original = _run_campaign(tmp_path)
+    eager, optimized = _optimization_records(original)
+    eager["job"]["scheduler"] = optimized["job"]["scheduler"] = "race"
+    optimized["metrics"][0]["metrics"]["bias"] += 0.01
+    summary = summarize([eager, optimized], protocol)
+    assert not summary["cuda_optimization"][0]["matched_metrics"]["all_close"]
+    with pytest.raises(ValueError, match="closeness"):
+        validate_summary(summary)
+
+
+@pytest.mark.parametrize("backend,implementation", [("cuda", "optimized"), ("cuda_eager", "eager")])
+def test_cuda_campaign_records_shared_device_and_distinct_implementation(
+    tmp_path, monkeypatch, backend, implementation
+):
+    from benchmarks import hedging_cuda
+    from benchmarks.cuda_workflow import campaign, source_identity, validate_record
+    from benchmarks.hedging import HedgingObjective
+
+    original_evaluate = HedgingObjective.evaluate
+
+    def cpu_evaluate(self, config, replication):
+        return original_evaluate(HedgingObjective(self.market), config, replication)
+
+    monkeypatch.setattr(HedgingObjective, "evaluate", cpu_evaluate)
+    monkeypatch.setattr(hedging_cuda, "device_info", lambda: {"device_name": "test device"})
+    monkeypatch.setattr(hedging_cuda, "synchronize", lambda: None)
+    protocol = _protocol()
+    record = campaign(
+        {
+            "job": {**_job(), "backend": backend},
+            "protocol": protocol,
+            "source": source_identity(),
+            "folder": str(tmp_path / backend),
+        }
+    )
+    assert record["backend"]["device"] == {"device_name": "test device"}
+    assert record["backend"]["implementation"] == implementation
+    assert all(row["backend"] == backend for row in record["metrics"])
+    record["backend"]["implementation"] = "wrong"
+    with pytest.raises(ValueError, match="implementation"):
         validate_record(record, protocol)

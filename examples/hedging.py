@@ -21,9 +21,9 @@ def main():
     parser.add_argument("--epochs", type=int, default=64)
     parser.add_argument("--batch-paths", type=int, default=128)
     parser.add_argument("--evaluation-paths", type=int, default=2048)
-    parser.add_argument("--backend", choices=("numpy", "cuda"), default="numpy")
+    parser.add_argument("--backend", choices=("numpy", "cuda", "cuda_eager"), default="numpy")
     args = parser.parse_args()
-    if args.backend == "cuda" and args.workers != 1:
+    if args.backend.startswith("cuda") and args.workers != 1:
         parser.error("CUDA on one GPU requires --workers 1")
     market = Market(
         epochs=args.epochs, batch_paths=args.batch_paths, evaluation_paths=args.evaluation_paths

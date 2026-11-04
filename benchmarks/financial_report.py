@@ -90,7 +90,8 @@ def regenerate(output):
     write_json(output / "records.json", records)
     write_json(output / "summary.json", report)
     lines = [
-        f"# {'CUDA' if protocol.get('backend') == 'cuda' else 'CPU'} hedging allocation study",
+        f"# {'CUDA' if protocol.get('backend', 'numpy').startswith('cuda') else 'CPU'} "
+        "hedging allocation study",
         "",
         "Fixed candidate and replication caps; endpoint quality versus elapsed search time.",
         "These are synthetic-market results, not live trading performance.",

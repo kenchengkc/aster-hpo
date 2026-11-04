@@ -203,7 +203,7 @@ def loss_and_gradient(parameters, paths, market, *, regularization):
     return _loss_and_gradient(cp, parameters, paths, market, regularization)
 
 
-def train_policy(config, replication, market):
+def train_policy_eager(config, replication, market):
     from .hedging import initialize, validate_config
 
     width, learning_rate, regularization = validate_config(config)
@@ -245,6 +245,56 @@ def train_policy(config, replication, market):
     return parameters
 
 
+def train_policy(config, replication, market):
+    """Train with per-call buffers and fused CUDA kernels, retaining eager as reference."""
+    from .hedging import initialize, validate_config
+
+    width, learning_rate, regularization = validate_config(config)
+    cp = _cupy()
+    from .hedging_cuda_fused import TrainingWorkspace, update
+
+    initialization, training = np.random.SeedSequence(replication.training_seed).spawn(2)
+    parameters = {
+        name: cp.asarray(value)
+        for name, value in initialize(width, np.random.default_rng(initialization)).items()
+    }
+    shocks = np.random.default_rng(training).standard_normal(
+        (market.epochs, market.batch_paths, market.steps),
+    )
+    all_paths = _paths_from_shocks(cp, shocks, market)
+    first = {name: cp.zeros_like(value) for name, value in parameters.items()}
+    second = {name: cp.zeros_like(value) for name, value in parameters.items()}
+    finite = cp.ones((), dtype=cp.bool_)
+    workspace = (
+        TrainingWorkspace(cp, market.batch_paths, market.steps, width)
+        if market.batch_paths <= 512 and width <= 64
+        else None
+    )
+    for epoch in range(1, market.epochs + 1):
+        if workspace is not None:
+            loss, gradients = workspace.compute(
+                parameters, all_paths[epoch - 1], market, regularization
+            )
+        else:
+            loss, gradients = _loss_and_gradient(
+                cp, parameters, all_paths[epoch - 1], market, regularization
+            )
+        update(
+            parameters,
+            gradients,
+            first,
+            second,
+            loss,
+            finite,
+            learning_rate=learning_rate,
+            epoch=epoch,
+        )
+    finite &= _finite(cp, parameters.values())
+    if not bool(finite):
+        raise FloatingPointError("Non-finite training outcome")
+    return parameters
+
+
 def evaluate_policy(parameters, paths, market):
     from .hedging import call_price
 
@@ -271,8 +321,9 @@ def evaluate_policy(parameters, paths, market):
     return dict(zip(names, map(float, values), strict=True))
 
 
-def evaluate(config, replication, market):
-    parameters = train_policy(config, replication, market)
+def evaluate(config, replication, market, *, eager=False):
+    trainer = train_policy_eager if eager else train_policy
+    parameters = trainer(config, replication, market)
     cp = _cupy()
     shocks = np.random.default_rng(replication.scenario_seed).standard_normal(
         (market.evaluation_paths, market.steps),

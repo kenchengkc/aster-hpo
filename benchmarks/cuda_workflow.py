@@ -1,7 +1,8 @@
 """Cold, fresh-process hedging search and independent-audit development comparison.
 
 Run ``python -m benchmarks.cuda_workflow run --output NEW_DIRECTORY`` from the
-source checkout. No objective warmup is performed. The 30 campaigns use the real
+source checkout. Add ``--include-eager`` to compare the preserved CUDA trainer.
+No objective warmup is performed. The 30 campaigns (42 with eager) use the real
 Study runtime and retain their SQLite journals, locked winner, and every metric.
 CUDA is optional until an explicitly selected CUDA campaign initializes it.
 """
@@ -77,12 +78,12 @@ def source_identity():
     return {"sha256": _digest(files), "files": files}
 
 
-def default_protocol():
+def default_protocol(*, include_eager=False):
     # The numerical module is imported only when freezing or inside the timed child.
     from .hedging import Market
 
     tiny = asdict(Market())
-    return {
+    protocol = {
         "schema_version": 1,
         "kind": "CUDA whole-workflow development comparison",
         "markets": {
@@ -103,6 +104,9 @@ def default_protocol():
         ),
         "interpretation": "Descriptive paired development comparison; no p99 or quality guarantee",
     }
+    if include_eager:
+        protocol["include_eager"] = True
+    return protocol
 
 
 def build_jobs(protocol):
@@ -114,6 +118,8 @@ def build_jobs(protocol):
         ("cuda", "race", 1),
         ("numpy", "full", 4),
     ]
+    if protocol.get("include_eager", False):
+        variants.extend([("cuda_eager", "full", 1), ("cuda_eager", "race", 1)])
     jobs = []
     for seed in protocol["seeds"]:
         order = list(variants)
@@ -298,6 +304,10 @@ def validate_record(record, protocol, *, folder=None):
             raise ValueError("Campaign protocol identity differs")
         if record["backend"]["name"] != job["backend"]:
             raise ValueError("Campaign backend identity differs")
+        if job["backend"] in ("cuda", "cuda_eager"):
+            implementation = "eager" if job["backend"] == "cuda_eager" else "optimized"
+            if record["backend"].get("implementation") != implementation:
+                raise ValueError("Campaign CUDA implementation identity differs")
         winner, count = _validate_search(record["search"], job, protocol)
         if record["winner"] != winner["config"] or record["winner_trial_id"] != winner["id"]:
             raise ValueError("Locked winner differs from completed search")
@@ -401,10 +411,11 @@ def campaign(request):
             pass
 
         backend = {"name": job["backend"]}
-        if job["backend"] == "cuda":
+        if job["backend"] in ("cuda", "cuda_eager"):
             from . import hedging_cuda
 
             backend["device"] = hedging_cuda.device_info()
+            backend["implementation"] = "eager" if job["backend"] == "cuda_eager" else "optimized"
             synchronize = hedging_cuda.synchronize
         elif job["backend"] != "numpy":
             raise ValueError(f"Unknown backend: {job['backend']}")
@@ -531,15 +542,16 @@ def campaign(request):
         raise
 
 
+def _identity(config, replication):
+    return (
+        _digest(config),
+        *(replication[key] for key in ("index", "scenario_seed", "training_seed", "phase")),
+    )
+
+
 def _losses(record):
     return {
-        (
-            _digest(trial["config"]),
-            *tuple(
-                observation["replication"][key]
-                for key in ("index", "scenario_seed", "training_seed", "phase")
-            ),
-        ): observation["loss"]
+        _identity(trial["config"], observation["replication"]): observation["loss"]
         for trial in record["search"]["trials"]
         for observation in trial["observations"]
     }
@@ -549,72 +561,132 @@ def _range(values):
     return {"median": statistics.median(values), "minimum": min(values), "maximum": max(values)}
 
 
-def _compare_pairs(pairs, protocol, *, adaptive):
+def _close(a, b, protocol):
+    return (
+        math.isfinite(a)
+        and math.isfinite(b)
+        and abs(a - b) <= protocol["closeness"]["atol"] + protocol["closeness"]["rtol"] * abs(a)
+    )
+
+
+def _compare_pairs(
+    pairs, protocol, *, adaptive, reference_label="numpy", candidate_label="cuda", metrics=False
+):
     rows, mismatches, matched = [], [], 0
-    for cpu, gpu in pairs:
-        a, b = _losses(cpu), _losses(gpu)
+    metric_mismatches, metric_count, metric_observations = [], 0, 0
+    for reference, candidate in pairs:
+        a, b = _losses(reference), _losses(candidate)
         keys = a.keys() & b.keys()
         if not adaptive and a.keys() != b.keys():
             raise ValueError("Full-budget matched observation identities differ")
         failures = [
             {
                 "identity": list(key),
-                "numpy_loss": a[key],
-                "cuda_loss": b[key],
+                f"{reference_label}_loss": a[key],
+                f"{candidate_label}_loss": b[key],
                 "absolute_difference": abs(a[key] - b[key]),
             }
             for key in sorted(keys)
-            if abs(a[key] - b[key])
-            > (protocol["closeness"]["atol"] + protocol["closeness"]["rtol"] * abs(a[key]))
+            if not _close(a[key], b[key], protocol)
         ]
-        mismatches.extend({"seed": cpu["job"]["seed"], **failure} for failure in failures)
+        mismatches.extend({"seed": reference["job"]["seed"], **failure} for failure in failures)
         matched += len(keys)
-        audit_a = cpu["audit"]["observations"]
-        audit_b = gpu["audit"]["observations"]
+        audit_a = reference["audit"]["observations"]
+        audit_b = candidate["audit"]["observations"]
         if [(o["replication"]["index"], o["replication"]["scenario_seed"]) for o in audit_a] != [
             (o["replication"]["index"], o["replication"]["scenario_seed"]) for o in audit_b
         ]:
             raise ValueError("Paired audit scenario identities differ")
         audit_mean_a = statistics.mean(o["loss"] for o in audit_a)
         audit_mean_b = statistics.mean(o["loss"] for o in audit_b)
-        rows.append(
-            {
-                "seed": cpu["job"]["seed"],
-                "numpy_job": cpu["job"]["id"],
-                "cuda_job": gpu["job"]["id"],
-                "workflow_speedup": (
-                    cpu["timings"]["workflow_seconds"] / gpu["timings"]["workflow_seconds"]
-                ),
-                "process_speedup": cpu["process_seconds"] / gpu["process_seconds"]
-                if "process_seconds" in cpu and "process_seconds" in gpu
-                else None,
-                "search_speedup": cpu["timings"]["search_seconds"]
-                / gpu["timings"]["search_seconds"],
-                "audit_speedup": cpu["timings"]["audit_seconds"] / gpu["timings"]["audit_seconds"],
-                "numpy_observations": len(a),
-                "cuda_observations": len(b),
-                "matched_observations": len(keys),
-                "numpy_unmatched_observations": len(a.keys() - b.keys()),
-                "cuda_unmatched_observations": len(b.keys() - a.keys()),
-                "winner_agreement": cpu["winner"] == gpu["winner"],
-                "numpy_winner": cpu["winner"],
-                "cuda_winner": gpu["winner"],
-                "numpy_audit_mean": audit_mean_a,
-                "cuda_audit_mean": audit_mean_b,
-                "audit_mean_difference": audit_mean_b - audit_mean_a,
-                "audit_loss_differences": [
-                    b["loss"] - a["loss"] for a, b in zip(audit_a, audit_b, strict=True)
-                ],
-                "maximum_matched_loss_absolute_difference": max(
-                    (abs(a[key] - b[key]) for key in keys), default=None
-                ),
-            }
-        )
+        row = {
+            "seed": reference["job"]["seed"],
+            f"{reference_label}_job": reference["job"]["id"],
+            f"{candidate_label}_job": candidate["job"]["id"],
+            "workflow_speedup": (
+                reference["timings"]["workflow_seconds"] / candidate["timings"]["workflow_seconds"]
+            ),
+            "process_speedup": reference["process_seconds"] / candidate["process_seconds"]
+            if "process_seconds" in reference and "process_seconds" in candidate
+            else None,
+            "search_speedup": reference["timings"]["search_seconds"]
+            / candidate["timings"]["search_seconds"],
+            "audit_speedup": reference["timings"]["audit_seconds"]
+            / candidate["timings"]["audit_seconds"],
+            f"{reference_label}_observations": len(a),
+            f"{candidate_label}_observations": len(b),
+            "matched_observations": len(keys),
+            f"{reference_label}_unmatched_observations": len(a.keys() - b.keys()),
+            f"{candidate_label}_unmatched_observations": len(b.keys() - a.keys()),
+            "winner_agreement": reference["winner"] == candidate["winner"],
+            f"{reference_label}_winner": reference["winner"],
+            f"{candidate_label}_winner": candidate["winner"],
+            f"{reference_label}_audit_mean": audit_mean_a,
+            f"{candidate_label}_audit_mean": audit_mean_b,
+            "audit_mean_difference": audit_mean_b - audit_mean_a,
+            "audit_loss_differences": [
+                b["loss"] - a["loss"] for a, b in zip(audit_a, audit_b, strict=True)
+            ],
+            "maximum_matched_loss_absolute_difference": max(
+                (abs(a[key] - b[key]) for key in keys), default=None
+            ),
+        }
+        if metrics:
+            metric_a, metric_b = (
+                {
+                    _identity(item["config"], item["replication"]): item["metrics"]
+                    for item in record["metrics"]
+                }
+                for record in (reference, candidate)
+            )
+            metric_keys = metric_a.keys() & metric_b.keys()
+            if not adaptive:
+                # Each campaign needs complete metric evidence. Distinct winners can
+                # legitimately have different audit training seeds and identities.
+                for record, saved in ((reference, metric_a), (candidate, metric_b)):
+                    expected = {
+                        _identity(config, observation["replication"])
+                        for config, observation in _observations(record)
+                    }
+                    if saved.keys() != expected:
+                        raise ValueError(
+                            "Full-budget financial metric observation identities differ"
+                        )
+            metric_mismatches.extend(
+                {
+                    "seed": reference["job"]["seed"],
+                    "identity": list(key),
+                    "metric": metric,
+                    f"{reference_label}_value": metric_a[key][metric],
+                    f"{candidate_label}_value": metric_b[key][metric],
+                    "absolute_difference": abs(metric_a[key][metric] - metric_b[key][metric]),
+                }
+                for key in sorted(metric_keys)
+                for metric in sorted(METRICS)
+                if not _close(metric_a[key][metric], metric_b[key][metric], protocol)
+            )
+            metric_observations += len(metric_keys)
+            metric_count += len(metric_keys) * len(METRICS)
+            row.update(
+                allocation_agreement=a.keys() == b.keys(),
+                matched_metric_observations=len(metric_keys),
+                **{
+                    f"{reference_label}_audit_observations": len(audit_a),
+                    f"{candidate_label}_audit_observations": len(audit_b),
+                    f"{reference_label}_unmatched_metric_observations": len(
+                        metric_a.keys() - metric_b.keys()
+                    ),
+                    f"{candidate_label}_unmatched_metric_observations": len(
+                        metric_b.keys() - metric_a.keys()
+                    ),
+                },
+            )
+        rows.append(row)
     result = {
         "workload": pairs[0][0]["job"]["workload"],
         "scheduler": pairs[0][0]["job"]["scheduler"],
-        "numpy_workers": pairs[0][0]["job"]["workers"],
-        "cuda_workers": 1,
+        f"{reference_label}_workers": pairs[0][0]["job"]["workers"],
+        f"{candidate_label}_workers": pairs[0][1]["job"]["workers"],
         "pairs": rows,
         "paired_seeds": [row["seed"] for row in rows],
         "workflow_speedup": _range([row["workflow_speedup"] for row in rows]),
@@ -632,6 +704,30 @@ def _compare_pairs(pairs, protocol, *, adaptive):
     }
     process = [row["process_speedup"] for row in rows if row["process_speedup"] is not None]
     result["process_speedup"] = _range(process) if process else None
+    if metrics:
+        result["matched_metrics"] = {
+            "count": metric_count,
+            "observations": metric_observations,
+            "metrics": sorted(METRICS),
+            "mismatches": len(metric_mismatches),
+            "all_close": not metric_mismatches,
+            "details": metric_mismatches,
+            **protocol["closeness"],
+        }
+        result["allocation_agreement_count"] = sum(row["allocation_agreement"] for row in rows)
+        result["speedup_definition"] = f"{reference_label}_seconds / {candidate_label}_seconds"
+        for position, label in enumerate((reference_label, candidate_label)):
+            result[f"{label}_backend"] = pairs[0][position]["job"]["backend"]
+            for timing in pairs[0][position]["timings"]:
+                result[f"{label}_{timing}"] = _range(
+                    [pair[position]["timings"][timing] for pair in pairs]
+                )
+            durations = [
+                pair[position]["process_seconds"]
+                for pair in pairs
+                if "process_seconds" in pair[position]
+            ]
+            result[f"{label}_process_seconds"] = _range(durations) if durations else None
     return result
 
 
@@ -644,7 +740,12 @@ def summarize(records, protocol):
         if key in index:
             raise ValueError("duplicate campaign identity")
         index[key] = record
-    result = {"full_budget": [], "adaptive": [], "cpu_four_worker_control": []}
+    result = {
+        "full_budget": [],
+        "adaptive": [],
+        "cpu_four_worker_control": [],
+        "cuda_optimization": [],
+    }
     groups = sorted({(key[0], key[1], key[2]) for key in index if key[3] == "numpy"})
     used = set()
     for workload, scheduler, workers in groups:
@@ -666,35 +767,81 @@ def summarize(records, protocol):
             if workers == 4
             else "full_budget"
         )
-        result[category].append(_compare_pairs(pairs, protocol, adaptive=scheduler == "race"))
+        result[category].append(
+            _compare_pairs(
+                pairs,
+                protocol,
+                adaptive=scheduler == "race",
+                metrics=protocol.get("include_eager", False),
+            )
+        )
+    if protocol.get("include_eager", False) or any(key[3] == "cuda_eager" for key in index):
+        groups = sorted({key[:3] for key in index if key[3] in ("cuda", "cuda_eager")})
+        for workload, scheduler, workers in groups:
+            if workers != 1:
+                raise ValueError("CUDA optimization comparison requires one worker")
+            seeds = sorted(
+                {
+                    key[4]
+                    for key in index
+                    if key[:3] == (workload, scheduler, workers)
+                    and key[3] in ("cuda", "cuda_eager")
+                }
+            )
+            pairs = []
+            for seed in seeds:
+                eager_key = workload, scheduler, workers, "cuda_eager", seed
+                optimized_key = workload, scheduler, workers, "cuda", seed
+                if eager_key not in index or optimized_key not in index:
+                    raise ValueError(f"Missing paired eager/optimized CUDA campaign: {eager_key}")
+                pairs.append((index[eager_key], index[optimized_key]))
+                used.update((eager_key, optimized_key))
+            result["cuda_optimization"].append(
+                _compare_pairs(
+                    pairs,
+                    protocol,
+                    adaptive=scheduler == "race",
+                    reference_label="eager",
+                    candidate_label="optimized",
+                    metrics=True,
+                )
+            )
     if used != index.keys():
         raise ValueError("Unpaired campaign records")
     result["interpretation"] = (
         "Ratios are computed within optimizer seed, then summarized by median and range. "
         "Adaptive counts may differ; full-budget matched losses are the equal-work check. "
-        "Audit differences are CUDA minus NumPy for independently evaluated locked winners."
+        "Audit differences are CUDA minus NumPy for CPU controls, and optimized minus eager "
+        "for CUDA optimization, using independently evaluated locked winners. "
+        "Eager-enabled comparisons also check all seven financial metrics on matched identities."
     )
     return result
 
 
 def validate_summary(summary):
-    """Require equal-work numerical agreement; retain adaptive differences as evidence."""
+    """Require fixed-budget CPU and all matched CUDA-implementation numerical agreement."""
     failed = [
         group
         for category in ("full_budget", "cpu_four_worker_control")
         for group in summary[category]
         if not group["matched_losses"]["all_close"]
+        or ("matched_metrics" in group and not group["matched_metrics"]["all_close"])
     ]
+    failed.extend(
+        group
+        for group in summary.get("cuda_optimization", [])
+        if not group["matched_losses"]["all_close"] or not group["matched_metrics"]["all_close"]
+    )
     if failed:
-        raise ValueError("Full-budget matched losses failed the frozen development closeness check")
+        raise ValueError("Matched numerics failed the frozen development closeness check")
     return summary
 
 
-def run(output, *, progress=False):
+def run(output, *, progress=False, include_eager=False):
     output = Path(output).resolve()
     # Preserve even an empty existing destination before imports or any subprocess.
     output.mkdir(parents=True, exist_ok=False)
-    protocol = default_protocol()
+    protocol = default_protocol(include_eager=include_eager)
     source = source_identity()
     jobs = build_jobs(protocol)
     manifest = {
@@ -711,13 +858,17 @@ def run(output, *, progress=False):
         "child_thread_environment": {name: "1" for name in THREAD_VARIABLES},
     }
     write_json(output / "manifest.json", manifest)
+    for job in jobs:
+        folder = output / "campaigns" / job["id"]
+        write_json(
+            output / "jobs" / f"{job['id']}.json",
+            {"job": job, "protocol": protocol, "source": source, "folder": str(folder)},
+        )
     child_env = {**os.environ, **{name: "1" for name in THREAD_VARIABLES}}
     records = []
     for index, job in enumerate(jobs, 1):
         folder = output / "campaigns" / job["id"]
-        request = {"job": job, "protocol": protocol, "source": source, "folder": str(folder)}
         request_path = output / "jobs" / f"{job['id']}.json"
-        write_json(request_path, request)
         command = [
             sys.executable,
             "-m",
@@ -771,6 +922,9 @@ def main(argv=None):
     commands = parser.add_subparsers(dest="command", required=True)
     execute = commands.add_parser("run")
     execute.add_argument("--output", type=Path, required=True)
+    execute.add_argument(
+        "--include-eager", action="store_true", help="Compare preserved CUDA trainer"
+    )
     child = commands.add_parser("campaign", help=argparse.SUPPRESS)
     child.add_argument("--job", type=Path, required=True)
     args = parser.parse_args(argv)
@@ -778,7 +932,7 @@ def main(argv=None):
         if args.command == "campaign":
             campaign(_read(args.job))
         else:
-            run(args.output, progress=True)
+            run(args.output, progress=True, include_eager=args.include_eager)
             print(f"Saved workflow comparison: {args.output.resolve()}")
     except (OSError, ValueError, RuntimeError, AssertionError) as error:
         parser.exit(1, f"Workflow comparison failed: {error}\n")

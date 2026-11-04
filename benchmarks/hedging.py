@@ -140,8 +140,8 @@ def loss_and_gradient(parameters, paths, market, *, regularization):
 
 
 def validate_backend(backend):
-    if not isinstance(backend, str) or backend not in ("numpy", "cuda"):
-        raise ValueError("backend must be 'numpy' or 'cuda'")
+    if not isinstance(backend, str) or backend not in ("numpy", "cuda", "cuda_eager"):
+        raise ValueError("backend must be 'numpy', 'cuda', or 'cuda_eager'")
     return backend
 
 
@@ -213,10 +213,10 @@ class HedgingObjective:
         validate_backend(self.backend)
 
     def evaluate(self, config, replication):
-        if self.backend == "cuda":
+        if self.backend in ("cuda", "cuda_eager"):
             from .hedging_cuda import evaluate
 
-            return evaluate(config, replication, self.market)
+            return evaluate(config, replication, self.market, eager=self.backend == "cuda_eager")
         parameters = train_policy(config, replication, self.market)
         paths = simulate_paths(
             self.market,

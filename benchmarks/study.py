@@ -90,10 +90,10 @@ def run_study(protocol_path, output, *, resume=False, progress=False):
     checksum = digest(protocol)
     backend = validate_backend(protocol.get("backend", "numpy"))
     backend_identity = None
-    if backend == "cuda":
+    if backend.startswith("cuda"):
         from .hedging_cuda import device_info
 
-        backend_identity = device_info()
+        backend_identity = {**device_info(), "implementation": backend}
     if resume:
         manifest = json.loads((output / "manifest.json").read_text())
         if manifest["protocol_sha256"] != checksum:
@@ -173,7 +173,7 @@ def main():
     freeze.add_argument("--workers", type=int, default=4)
     freeze.add_argument("--configs", type=int, default=6)
     freeze.add_argument("--audits", type=int, default=8)
-    freeze.add_argument("--backend", choices=("numpy", "cuda"), default="numpy")
+    freeze.add_argument("--backend", choices=("numpy", "cuda", "cuda_eager"), default="numpy")
     execute = commands.add_parser("run")
     execute.add_argument("--protocol", type=Path, required=True)
     execute.add_argument("--output", type=Path, required=True)
