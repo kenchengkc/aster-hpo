@@ -35,7 +35,8 @@ extension, network service, or additional GPU instance are required.
 
 The runner builds Release for `sm_80`, checks CLI/no-overwrite behavior and the
 numerical comparator, runs hand-checked smoke cases and the complete correctness
-suite, runs Compute Sanitizer memcheck, then records 20 warmed benchmark samples.
+suite (including resident input/output lifecycle and reload checks), runs Compute
+Sanitizer memcheck, then records 20 warmed benchmark samples.
 Only one GPU-owning process runs at a time. Device ordinal `0` means the first
 visible device; the process inventory is saved so other tenants/processes remain
 visible when interpreting timings. This does not establish an otherwise idle GPU.
@@ -106,6 +107,77 @@ hashes, build logs, and explicit sanitizer status. JSON contains the input hash
 (FNV-1a over host-native input bytes and rate), seed, shape, launch settings,
 checksums, errors, and raw durations. Retain this directory when sharing results.
 Source files do not contain remote access details or credentials.
+
+## Resident accounting sessions
+
+`--mode pipeline` runs a transaction-cost sensitivity sweep on fixed prices and
+holdings. `--operations 1..256` selects K distinct rates spanning `[0, 0.01]`;
+K=1 uses `0.01`, and the default is K=8. Every rate invokes the unchanged float64
+accounting kernel. Each method returns **all K operations' three per-path arrays**
+in flat `[operation][path]` order. The CPU comparison recomputes the same K calls;
+it does not measure a CPU algorithm that caches gain and turnover across rates.
+
+```bash
+/tmp/aster-cuda-build/aster_cuda --mode pipeline --paths 65536 --intervals 12 \
+  --operations 32 --block-size 128 --warmups 5 --repeats 15 \
+  --output /tmp/aster-pipeline-001.json
+```
+
+| Pipeline field | Completed timing boundary |
+| --- | --- |
+| `copy_per_call_ms` | K operations, each uploading both inputs, running one kernel, downloading three output arrays, and synchronizing |
+| `resident_session_ms` | One input upload, K kernels writing distinct retained slots, three bulk downloads covering every operation, and one synchronization |
+| `resident_preloaded_ms` | Inputs uploaded and synchronized before timing; K kernels, all output downloads, and synchronization |
+| `native_cpu_sequence_ms` | K prepared native calls and all output writes on one CPU thread |
+
+The primary comparison is `resident_session_ms` against `copy_per_call_ms`.
+Residency, batched output copies, and fewer synchronizations all contribute to the
+change. Pipeline measurements use completed host durations and introduce no CUDA
+event calls within these methods. The older benchmark's `kernel_event_ms` remains
+a separate single-kernel measurement.
+
+All input arrays, output arrays, device slots, and sample storage are allocated
+before warmups and timed sessions. The copy-per-call method writes directly into
+views of its contiguous all-operation host outputs; it performs no extra vector
+copies. Host vectors are pageable, so completed host durations include any driver
+transfer staging. The separate cold fields record runtime/device setup, host
+preparation, device allocation, and the first complete single-operation call on
+the selected shape. These are not a full process startup measurement.
+
+Pipeline JSON uses `schema_version: 2`; smoke, correctness, and the older benchmark
+retain version 1. It records exact `workload.rates`, the input hash, device/build
+identity, all raw `pipeline_samples`, each sample's reproducibly shuffled
+`method_order`, all-output comparisons, and per-method numeric sums and an ordered
+FNV-1a hash of the final checked outputs. The hash covers P&L, then costs, then
+turnover, with operation and path order preserved. Comparisons check every output
+of every measured repeat outside timing, using the same tolerances as the older
+modes. A zero CPU duration from clock quantization is retained; GPU completed
+samples must be positive.
+
+Every sample's `transfers` records actual successful `cudaMemcpyAsync` requests at
+the copy helper. For N paths, T intervals, and K operations, define input bytes
+`I = N * (2*T + 1) * 8` and output bytes `O = K * N * 3 * 8`:
+
+| Method | H2D bytes / calls | D2H bytes / calls |
+| --- | --- | --- |
+| `copy_per_call` | `K*I` / `2*K` | `O` / `3*K` |
+| `resident_session` | `I` / `2` | `O` / `3` |
+| `resident_preloaded` | `0` / `0` inside timing | `O` / `3` |
+
+These counters measure requested copy payloads, not physical PCIe traffic. Input
+changes require an explicit upload even when dimensions stay the same. Upload
+invalidates every old output; launch before upload, invalid rates/slots/shapes,
+incomplete outputs, and repeated readback without a fresh launch are rejected
+before the corresponding CUDA calls.
+
+Default correctness mode exercises the resident paths, so the existing
+`--sanitizer required` runner checks them under Compute Sanitizer too. Cases cover
+K=1 and multiple distinct rates, literal outputs, shorts, cancellation, partial
+blocks, empty batches, changed shapes, and same-shape changed-input reloads.
+This standalone session benchmark excludes Python binding costs, neural training,
+and complete hyperparameter-optimization runtime. It measures fixed-input reuse;
+it does not establish gains for a workload that changes prices or holdings on
+every call.
 
 ## Host-only checks
 

@@ -15,12 +15,31 @@ def run(*args):
 help_result = run("--help")
 assert help_result.returncode == 0, help_result.stderr
 assert "--block-size" in help_result.stdout
+assert "pipeline" in help_result.stdout
+assert "--operations" in help_result.stdout
+for operations in ("1", "256"):
+    result = run("--mode", "pipeline", "--operations", operations, "--help")
+    assert result.returncode == 0, (operations, result.stderr)
 for args in (
     ("--mode", "wrong"),
     ("--block-size", "0"),
     ("--paths", "0"),
     ("--repeats", "0"),
     ("--intervals", "257"),
+    ("--mode", "pipeline", "--operations", "0"),
+    ("--mode", "pipeline", "--operations", "257"),
+    ("--mode", "pipeline", "--operations", "-1"),
+    ("--mode", "pipeline", "--operations", "1x"),
+    (
+        "--mode",
+        "pipeline",
+        "--paths",
+        "72057594037927935",
+        "--intervals",
+        "1",
+        "--operations",
+        "256",
+    ),
     ("--warmups", "-1"),
     ("--paths", "18446744073709551615"),
     ("--paths", "1x"),
