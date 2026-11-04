@@ -1,0 +1,27 @@
+[build-system]
+requires = ["scikit-build-core>=0.10,<1", "nanobind>=2.4,<3"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "aster-hpo-native"
+version = "0.1.0"
+description = "Optional C++20 accounting kernels and streaming ledger for Aster"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "Ken Cheng"}]
+dependencies = ["numpy>=1.26,<3"]
+
+[tool.scikit-build]
+minimum-version = "0.10"
+cmake.version = ">=3.20"
+ninja.version = ">=1.11"
+build-dir = "build/{wheel_tag}"
+wheel.packages = ["python/aster_hpo_native"]
+cmake.build-type = "Release"
+sdist.exclude = ["build/**", "**/__pycache__/**"]
+
+[tool.scikit-build.cmake.define]
+ASTER_BUILD_PYTHON = "ON"
+ASTER_BUILD_TESTS = "OFF"
+ASTER_BUILD_BENCHMARKS = "OFF"
