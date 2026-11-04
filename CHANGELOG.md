@@ -2,6 +2,14 @@
 
 ## Unreleased — Native companion 0.1.0
 
+- Integrate optional resident CUDA simulation, explicit neural-hedging gradients,
+  Adam, and evaluation with the regular HPO objective; share the existing accounting
+  kernel across NVCC and CuPy. Add explicit backend selection and CUDA-aware resume
+  identity while keeping NumPy as the default and the core dependency-free.
+- Record 30 fresh search-plus-audit campaigns on the A100. The larger full-budget
+  workflow runs 3.38× faster than one NumPy worker and 1.58× faster than four;
+  the original small workload remains faster on CPU. All paired winners agree and
+  matched losses pass the fixed numerical check. [Workflow evidence](docs/evidence/cuda-workflow-2026-11-04/README.md).
 - Add resident CUDA accounting sessions with K retained outputs, reload/lifecycle
   checks, requested-copy counters, and bulk all-output readback.
 - Benchmark equal-work GPU paths across 36 fresh processes. The 65,536-path/K32

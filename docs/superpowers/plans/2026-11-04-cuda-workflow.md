@@ -25,25 +25,41 @@ benchmarks/hedging_cuda.py, benchmarks/hedging.py, examples/hedging.py,
 benchmarks/protocol.py, benchmarks/study.py, tests/test_hedging_cuda.py,
 tests/test_hedging.py, tests/test_study.py.
 
-- [ ] Write and observe failures for backend validation/dispatch, shared accounting and numerical GPU tests.
-- [ ] Add shared kernel, resident CUDA simulation/gradients/Adam/evaluation with NumPy seed compatibility.
-- [ ] Add backend selection to objective/example/frozen-study and backend provenance.
-- [ ] Run local regressions and real A100 accounting/gradient/training/Study checks, including spawned evaluation and memcheck.
-- [ ] Commit tested integration.
+- [x] Write and observe failures for backend validation/dispatch, shared accounting and numerical GPU tests.
+- [x] Add shared kernel, resident CUDA simulation/gradients/Adam/evaluation with NumPy seed compatibility.
+- [x] Add backend selection to objective/example/frozen-study and backend provenance.
+- [x] Run local regressions and real A100 accounting/gradient/training/Study checks, including spawned evaluation and memcheck.
+- [x] Commit tested integration.
 
 ## Task 2: Full-workflow benchmark
 
 Files: benchmarks/cuda_workflow.py, tests/test_cuda_workflow.py.
 
-- [ ] Write failing tests for raw record integrity, failed/incomplete observations, timing scope, paired summaries and preserving output directories.
-- [ ] Implement fresh campaign processes using real Study, winner lock, audit and SQLite journals; freeze the spec's protocol before timing.
-- [ ] Record cold setup, search/audit/workflow/process durations, losses, source and GPU identities; use correct paired summaries.
-- [ ] Execute all 30 campaigns on the current A100 host only after numerical checks pass.
-- [ ] Commit collector and archive unedited raw results locally.
+- [x] Write failing tests for raw record integrity, failed/incomplete observations, timing scope, paired summaries and preserving output directories.
+- [x] Implement fresh campaign processes using real Study, winner lock, audit and SQLite journals; freeze the spec's protocol before timing.
+- [x] Record cold setup, search/audit/workflow/process durations, losses, source and GPU identities; use correct paired summaries.
+- [x] Execute all 30 campaigns on the current A100 host only after numerical checks pass.
+- [x] Commit collector and archive unedited raw results locally.
 
 ## Task 3: Review and report
 
-- [ ] Run appropriate full local regression suite, lint/format and real GPU verification.
-- [ ] Request one independent whole-change review, address substantive findings with regressions.
-- [ ] Audit raw results against protocol; report tiny/scaled and CPU four-worker controls, independent audit quality and limitations.
-- [ ] Archive checksummed evidence/plots/reproduction, update README/guides/roadmap/changelog, commit and retain branch.
+- [x] Run appropriate full local regression suite, lint/format and real GPU verification.
+- [x] Request one independent whole-change review, address substantive findings with regressions.
+- [x] Audit raw results against protocol; report tiny/scaled and CPU four-worker controls, independent audit quality and limitations.
+- [x] Archive checksummed evidence/plots/reproduction, update README/guides/roadmap/changelog, commit and retain branch.
+
+## Completion record
+
+- Executed implementation: `f7d5669`; all 35 executed source hashes match.
+- Local: 211 passed, 18 GPU skips. A100: 59 passed, two CPU-only skips.
+- Standalone: 117 cases, default memcheck zero errors/leaked bytes. Integrated:
+  14 accounting/gradient/training tests, explicit API memcheck zero errors/leaked
+  bytes, with preserved default-mode and library-only control logs.
+- All 30 fresh campaigns completed: 428 search + 90 audit observations, no failures.
+  Larger full-budget workflow: 18.414s / 8.646s / 5.443s for NumPy one worker /
+  four workers / CUDA. Paired speedups 3.383× / 1.584×. Original small workload
+  remains faster on CPU. All paired winners and numerical checks agree.
+- Independent code review and complete raw-data audit passed. A minor fingerprint
+  build-directory issue was fixed after a failing regression. No findings remain.
+- [Report and reproducible evidence](../../evidence/cuda-workflow-2026-11-04/README.md).
+  Retain `feat/native-performance`; no merge/push or instance shutdown requested.

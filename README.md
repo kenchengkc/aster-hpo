@@ -6,12 +6,15 @@
 
 [Native CPU and CUDA tools](docs/NATIVE.md): optional C++20 batch/streaming accounting,
 strict NumPy bindings, and a standalone A100 correctness/benchmark package.
+[CUDA simulation and HPO](docs/CUDA_WORKFLOW.md) adds resident neural-hedging training
+and evaluation through the regular search and independent-audit pipeline.
 
-On one A100, a float64 accounting session with 65,536 paths and 32 operations took
-**26.41ms → 4.42ms** with resident inputs and batched result readback: **5.97× median
-paired speedup** across three process runs. Initial upload and all output downloads
-are included; GPU context/capacity setup is excluded. This measures an accounting
-session. [Protocol, raw records, and scope →](docs/evidence/cuda-resident-2026-11-04/README.md)
+On one A100, full-budget float64 neural-hedging search plus winner audit took
+**18.41s → 5.44s** at 4,096 training / 32,768 evaluation paths: **3.38× median paired
+speedup** versus one NumPy worker, **1.58×** versus four. Setup, transfers, training,
+evaluation, scheduling, and journal writes are included. Paired winners agree and
+matched losses pass the declared numerical check. The original small workload is
+slower on CUDA; NumPy remains the default. [30-campaign protocol, raw results, and scope →](docs/evidence/cuda-workflow-2026-11-04/README.md)
 
 [![CI](https://github.com/kenchengkc/aster-hpo/actions/workflows/ci.yml/badge.svg)](https://github.com/kenchengkc/aster-hpo/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)

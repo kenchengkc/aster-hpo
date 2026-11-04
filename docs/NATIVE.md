@@ -5,6 +5,11 @@ standalone CUDA test package. The dependency-free Python optimization core remai
 separate. The first native component calculates hedge P&L, transaction costs, and
 turnover, including opening and liquidation, on fixed input arrays.
 
+The [CUDA workflow guide](CUDA_WORKFLOW.md) integrates the same kernel with resident
+simulation, neural training, evaluation, and regular HPO search. Its
+[30-campaign A100 comparison](evidence/cuda-workflow-2026-11-04/README.md) measures
+the complete search-plus-audit workflow, including setup and transfers.
+
 ## Install and check the CPU foundation
 
 From a repository checkout with Python 3.11+, a C++20 compiler, and CMake:
@@ -88,9 +93,10 @@ ASan/UBSan, and 35 Linux Python companion tests. Its four-size timing sweep repo
 kernel and completed-host times separately; transfers dominate these initial GPU
 calls. The records are development observations, not whole-objective speedup claims.
 
-The CUDA package is a standalone correctness/performance tool, not a GPU neural
-training backend or the later kernel-setting optimization study. Current CPU
-financial timing evidence remains specific to its original recorded implementation.
+The standalone CUDA executable measures accounting correctness/performance. The
+separate optional CuPy backend provides GPU neural training through the shared
+kernel. Current CPU financial timing evidence remains specific to its original
+recorded implementation.
 
 ### Resident accounting sessions
 

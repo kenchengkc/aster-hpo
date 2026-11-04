@@ -1,5 +1,10 @@
 # CUDA neural hedging and hyperparameter search
 
+On the current A100, the larger full-budget search-plus-audit workflow runs in
+5.44s versus 18.41s for one NumPy worker and 8.65s for four. Median paired speedups
+are 3.38× and 1.58× respectively. The original small workload favors CPU.
+[Results, quality checks, raw evidence, and timing scope](evidence/cuda-workflow-2026-11-04/README.md).
+
 The optional CUDA backend runs the existing neural-hedging simulation, explicit
 gradients, Adam training, and policy evaluation with resident float64 GPU arrays.
 It launches the same accounting kernel used by the standalone CUDA executable.

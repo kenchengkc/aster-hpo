@@ -110,6 +110,12 @@ Source files do not contain remote access details or credentials.
 
 ## Resident accounting sessions
 
+For the actual resident simulation, neural training, evaluation, and HPO objective,
+use the [CUDA workflow guide](../docs/CUDA_WORKFLOW.md). Its
+[full-workflow measurements](../docs/evidence/cuda-workflow-2026-11-04/README.md)
+include search and independent winner audits; the accounting sweep below is a
+separate fixed-input workload.
+
 `--mode pipeline` runs a transaction-cost sensitivity sweep on fixed prices and
 holdings. `--operations 1..256` selects K distinct rates spanning `[0, 0.01]`;
 K=1 uses `0.01`, and the default is K=8. Every rate invokes the unchanged float64

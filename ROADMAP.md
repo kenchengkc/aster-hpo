@@ -32,8 +32,12 @@ An [A100 validation run](docs/evidence/a100-2026-11-04/README.md) passed correct
 and memory checks; initial timings expose transfer overhead. Later builds add
 [resident accounting sessions](docs/evidence/cuda-resident-2026-11-04/README.md) to
 amortize input copies and readback/synchronization. Full GPU training,
-kernel-setting optimization studies, Rust replay, and Go orchestration remain future
-work; see the [native design](docs/superpowers/specs/2026-11-04-native-performance-design.md).
+evaluation, and HPO integration now run through the optional
+[CUDA hedging backend](docs/CUDA_WORKFLOW.md), with
+[full-workflow A100 evidence](docs/evidence/cuda-workflow-2026-11-04/README.md).
+Kernel fusion/profiling, kernel-setting optimization studies, broader GPU workloads,
+Rust replay, and Go orchestration remain future work; see the
+[native design](docs/superpowers/specs/2026-11-04-native-performance-design.md).
 
 - [ ] Measured CPU-time budgets and broader system-level resource accounting.
 - [ ] Distributed execution and durable multi-machine coordination.
