@@ -28,7 +28,8 @@ items are research directions, not promised release dates or achieved guarantees
 
 The [native performance foundation](docs/NATIVE.md) adds optional C++20 accounting,
 strict Python bindings, CPU measurement tools, and a standalone CUDA test package.
-GPU performance findings require execution on NVIDIA hardware. Full GPU training,
+An [A100 validation run](docs/evidence/a100-2026-11-04/README.md) passed correctness
+and memory checks; initial timings expose transfer overhead. Full GPU training,
 kernel-setting optimization studies, Rust replay, and Go orchestration remain future
 work; see the [native design](docs/superpowers/specs/2026-11-04-native-performance-design.md).
 

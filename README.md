@@ -40,7 +40,7 @@ broader benchmarking and scaling work remains on the [roadmap](ROADMAP.md).
 | 5. Allocation and quality study | Initial study complete | `FullBudget`, single-bracket stopping `ASHA`, and heuristic `ReplicationRace`; locked winners and independent audits across 20 optimizer seeds. [Evidence](docs/RESULTS.md). |
 | 6. Package, documentation, and review | Complete | Installable package, runnable examples, technical report, raw artifacts, figures, and regression tests. |
 | Resource controls (v0.3) | Complete | Per-invocation wall/attempt budgets, evaluation timeouts, caller cancellation, and supervised worker cleanup. [Runtime contract](docs/RUNTIME.md#resource-limits-in-v03). |
-| Native performance foundation | CPU implementation and CUDA test package | C++20 accounting and streaming ledger, optional Python companion, separate native/API/objective measurements, and GPU validation commands. [Guide](docs/NATIVE.md). |
+| Native performance foundation | CPU and A100 validated | C++20 accounting and streaming ledger, optional Python companion, and separate native/API/objective measurements. [Guide](docs/NATIVE.md) · [A100 checks and timing limits](docs/evidence/a100-2026-11-04/README.md). |
 
 The core has no required dependencies; numerical, plotting, and reference-baseline
 packages are optional. Replications use stable seeds, with disjoint search and audit

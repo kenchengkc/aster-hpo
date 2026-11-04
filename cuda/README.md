@@ -10,6 +10,10 @@ Local Apple hardware cannot compile or run this CUDA package. NVIDIA compilation
 GPU correctness, and Compute Sanitizer results require execution on the rented
 A100. The host-only checks below are separate from GPU validation.
 
+The [recorded A100 run](../docs/evidence/a100-2026-11-04/README.md) compiled and passed
+the CUDA suite and required memcheck on actual hardware. Raw records and limitations
+are preserved there; the small timing sweep does not establish whole-objective speedup.
+
 ## Run on the rented Ubuntu instance
 
 Use an existing CUDA **devel** image containing `nvcc` (CUDA 12.6 or newer), a

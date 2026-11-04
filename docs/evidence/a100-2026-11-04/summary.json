@@ -1,0 +1,76 @@
+{
+  "kind": "development hardware validation; not a prespecified performance study",
+  "source_revision": "880b83c",
+  "source_archive_sha256": "b2db848e9449bfdc9fb73207046e06c376aafee617bc3deadd27f89875b2bfbe",
+  "device": {
+    "ordinal": 0,
+    "name": "NVIDIA A100-PCIE-40GB",
+    "compute_capability": "8.0",
+    "total_memory_bytes": 42436526080,
+    "driver_version": 13040,
+    "runtime_version": 13020
+  },
+  "build": {
+    "cuda_compiler": "NVIDIA 13.2.86",
+    "host_compiler": "GNU 13.3.0",
+    "cuda_architectures": "80",
+    "cuda_flags": "--fmad=false --ftz=false --prec-div=true --prec-sqrt=true; host: -ffp-contract=off -fno-fast-math",
+    "cuda_user_flags": " -O3 -DNDEBUG",
+    "host_user_flags": " -O3 -DNDEBUG",
+    "build_type": "Release",
+    "float_type": "float64",
+    "layout": "path_major"
+  },
+  "validation": {
+    "correctness_cases": 98,
+    "correctness_scalar_comparisons": 22641,
+    "max_aggregate_absolute_error": 1.3877787807814457e-17,
+    "error_note": "Aggregate includes hand-written literal comparisons; not specifically CPU/GPU disagreement",
+    "gpu_memcheck_errors": 0,
+    "gpu_memcheck_leaked_bytes": 0,
+    "native_asan_ubsan_ctest": "passed; compile flags and linked runtimes verified",
+    "linux_python_boundary_tests_passed": 35
+  },
+  "measurements": [
+    {
+      "paths": 1,
+      "intervals": 12,
+      "samples": 30,
+      "native_cpu_prepared_median_us": 0.04,
+      "kernel_event_median_us": 10.239999741315842,
+      "completed_host_median_us": 52.677
+    },
+    {
+      "paths": 256,
+      "intervals": 12,
+      "samples": 30,
+      "native_cpu_prepared_median_us": 2.5155,
+      "kernel_event_median_us": 10.239999741315842,
+      "completed_host_median_us": 56.3995
+    },
+    {
+      "paths": 2048,
+      "intervals": 12,
+      "samples": 30,
+      "native_cpu_prepared_median_us": 19.9685,
+      "kernel_event_median_us": 10.976000223308802,
+      "completed_host_median_us": 74.068
+    },
+    {
+      "paths": 65536,
+      "intervals": 12,
+      "samples": 20,
+      "native_cpu_prepared_median_us": 645.3875,
+      "kernel_event_median_us": 15.455999877303839,
+      "completed_host_median_us": 803.3025
+    }
+  ],
+  "limitations": [
+    "one host and one session",
+    "fixed CPU-then-GPU measurement order",
+    "pageable transfers included only in completed host timings",
+    "CPU clock overhead matters for tiny batches",
+    "no p99, whole-training, quality-preservation, or trading-latency claim"
+  ],
+  "raw_records_sha256": "188785b556c5a7f464b1ba623a297fc6e064c1eca69d9d65a6a2377a48f705ea"
+}

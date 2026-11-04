@@ -82,6 +82,12 @@ Output correctness is checked outside timing. A GPU result requires actual
 execution on NVIDIA hardware; host-only tests do not establish CUDA validation.
 Keep the evidence directory and download it before removing the rented instance.
 
+The [recorded A100 validation](evidence/a100-2026-11-04/README.md) passed 98 CUDA
+correctness cases, Compute Sanitizer memcheck with zero errors/leaks, native Linux
+ASan/UBSan, and 35 Linux Python companion tests. Its four-size timing sweep reports
+kernel and completed-host times separately; transfers dominate these initial GPU
+calls. The records are development observations, not whole-objective speedup claims.
+
 The CUDA package is a standalone correctness/performance tool, not a GPU neural
 training backend or the later kernel-setting optimization study. Current CPU
 financial timing evidence remains specific to its original recorded implementation.

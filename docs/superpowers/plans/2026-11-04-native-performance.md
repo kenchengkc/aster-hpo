@@ -69,7 +69,7 @@
 - [x] Implement streaming event samples and batch timings with warmup/validation boundaries, consumed results, compiler/source metadata, and raw records.
 - [x] Prepare a standalone CUDA float64 path-major kernel with reusable device buffers, CPU-reference comparisons, adverse dimensions, checked launch settings, CUDA event and completed host timings; record cold setup separately. A small smoke mode precedes larger benchmarks.
 - [x] Add a shell runner for environment inventory, build, correctness, optional Compute Sanitizer, and exported JSON. Preserve nonzero failures and existing output directories. Do not claim GPU validation before running it on NVIDIA hardware.
-- [ ] Run CPU-side tests and packaging locally; run the CUDA suite once the user supplies SSH access. Use the dedicated SSH key outside the repository and preserve host-key checking.
+- [x] Run CPU-side tests and packaging locally; run the CUDA suite once the user supplies SSH access. Use the dedicated SSH key outside the repository and preserve host-key checking.
 - [x] Add focused native CI and honest installation/measurement instructions. Request one fresh whole-branch review, resolve important findings with regressions, and commit tested artifacts.
 
 ## Authorization and execution
@@ -89,7 +89,10 @@ whole-objective report was generated with raw inputs and no new speedup claim.
 A fresh final reviewer found no Critical or Important defects. Its documentation
 accuracy note was corrected: method order alternates forward/reverse.
 
-The remaining hardware-dependent check is CUDA compilation/execution/Compute
-Sanitizer and Linux ASan on the rented A100 host after the owner supplies SSH
-connection details. AppleClang 15's local ASan runtime aborts even for an empty
-program before user code executes; this is recorded as unavailable, not passing.
+Hardware validation is complete on the rented A100 host: CUDA 13.2.86/GCC13.3
+compiled the package; all 98 correctness cases and required Compute Sanitizer
+memcheck passed (zero errors/leaked bytes). Native Linux ASan/UBSan and 35 Python
+companion tests passed. Compile flags/linked sanitizer runtimes and raw results
+are archived in docs/evidence/a100-2026-11-04. The local AppleClang ASan startup
+failure remains an environment limitation; Linux validation closes that check.
+Hosted CI execution is not claimed. The instance has not been stopped or destroyed.

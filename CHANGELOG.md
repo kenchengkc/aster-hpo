@@ -10,7 +10,9 @@
   tools, preserving timer-resolution zeros and unavailable derived rates.
 - Prepare an A100 CUDA correctness/benchmark runner with reusable buffers, CPU-reference
   comparisons, completed device/host timings, and explicit Compute Sanitizer status.
-  Actual GPU validation requires running the package on NVIDIA hardware.
+  An A100 run passed 98 correctness cases and Compute Sanitizer memcheck; raw
+  [validation and timing records](docs/evidence/a100-2026-11-04/README.md) are archived.
+  Native Linux ASan/UBSan and 35 Linux companion API tests also passed.
 - Configure native Release and Linux sanitizer CI; keep the core dependency-free.
 
 ## 0.3.0 — Resource budgets and cancellation

@@ -191,7 +191,9 @@ The first CUDA deliverable is a standalone correctness/measurement executable,
 not a GPU training backend. Its path-major float64 accounting uses reusable device
 buffers, the same CPU-reference inputs/outputs, completed CUDA-event/host timings,
 exclusive evidence directories, and Compute Sanitizer checks on the A100. Remote
-execution requires the owner's SSH details. No additional instance is provisioned.
+validation completed on the owner's A100; [records](../../evidence/a100-2026-11-04/README.md)
+preserve correctness, sanitizer outcomes, and timing limits. No additional instance
+was provisioned.
 
 Start with device-resident batch hedge accounting, reusing explicit NumPy/C++ inputs
 and all three outputs. Reuse device buffers and one GPU-owning process. Do not
