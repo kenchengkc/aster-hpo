@@ -92,8 +92,9 @@ def validate_record(record, *, paths, intervals, operations, repeats):
         )
         require(finite(comparison["max_absolute_error"]), "invalid numerical error")
         require(
-            comparison["values_checked"] >= paths * operations * repeats * 9,
-            "insufficient all-output comparisons",
+            type(comparison["values_checked"]) is int
+            and comparison["values_checked"] == paths * operations * repeats * 12,
+            "wrong complete all-method comparison count",
         )
         samples = record["pipeline_samples"]
         require(len(samples) == repeats, "missing completed samples")

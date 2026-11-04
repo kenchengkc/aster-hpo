@@ -50,7 +50,7 @@ def valid_record():
         "comparison": {
             "passed": True,
             "all_operations_checked": True,
-            "values_checked": 120,
+            "values_checked": 96,
             "outputs": ["pnl", "costs", "turnover"],
             "atol": 1e-12,
             "rtol": 1e-10,
@@ -104,6 +104,9 @@ def test_complete_session_summary_uses_process_medians():
         "checksum",
         "comparison_failed",
         "partial_operations",
+        "partial_count",
+        "infinite_count",
+        "float_count",
     ],
 )
 def test_invalid_or_incomparable_records_are_rejected(fault):
@@ -133,8 +136,14 @@ def test_invalid_or_incomparable_records_are_rejected(fault):
         record["checksum"]["resident_session"]["ordered_hash_fnv1a64"] = "ffffffffffffffff"
     elif fault == "comparison_failed":
         record["comparison"]["passed"] = False
-    else:
+    elif fault == "partial_operations":
         record["comparison"]["all_operations_checked"] = False
+    elif fault == "partial_count":
+        record["comparison"]["values_checked"] = 72
+    elif fault == "infinite_count":
+        record["comparison"]["values_checked"] = float("inf")
+    else:
+        record["comparison"]["values_checked"] = 96.0
     with pytest.raises(ValueError):
         collector().validate_record(record, paths=2, intervals=1, operations=2, repeats=2)
 
