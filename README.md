@@ -75,6 +75,12 @@ python -m examples.hedging --backend cuda --workers 1 --configs 4 --output resul
 | 128 / 2,048 | 1.032 s | 0.742 s | 4.625 s | 0.923 s |
 | 4,096 / 32,768 | 16.720 s | 8.865 s | 5.264 s | 3.604 s |
 
+To reproduce the table from the recorded runs, use Python 3.11 or later from the repository root. The command reads the saved timings, matches runs by random seed, and prints the median times and speedups. It only requires the Python standard library.
+
+```bash
+python -m benchmarks.workflow_report
+```
+
 Four CPU workers finished the smaller search and audit fastest. On the larger workload, optimized CUDA was **4.64× faster than one CPU worker** and **2.57× faster than four**. These speedups use the median of the comparisons for each seed. Relative to the original CUDA code, the optimized version achieved a 4.96× speedup on the smaller workload and 1.46× on the larger one.
 
 The times include setup, data transfers, training, evaluation, scheduling, database writes, and the audit. Including Python startup and exit brings the small workload to 1.165 s on optimized CUDA and 1.124 s on one CPU worker. All seven financial measures agreed within the study's numerical tolerances. In a separate profile of one warmed-up small evaluation, the GPU executed 361 kernels, down from 10,985. [CUDA results, profiles, and reproduction instructions](docs/evidence/cuda-launch-2026-11-04/README.md)
