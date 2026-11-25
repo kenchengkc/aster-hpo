@@ -17,6 +17,10 @@ python -m examples.hedging --workers 2 --configs 4 --output results/hedging-pilo
 
 The example tries four sets of model settings. It runs two searches on the same simulated market. One gives each candidate nine runs. The other can drop candidates after three. Both searches then evaluate their chosen model settings on fresh simulations. Open `results/hedging-pilot/summary.json` to compare the search times, number of runs, and mean squared hedging error in the final checks. Use a new output directory each time you run the example.
 
+## Compare hedging strategies
+
+Run `python -m examples.hedging_controls` to compare a neural hedge with fixed model settings, a Black–Scholes delta hedge, and an unhedged position. All three start with the same call premium and pay 0.10% of the value traded, including the cost of closing the position. On the same 2,048 simulated price paths held out from training (seed 42), mean squared hedging error was 0.000528 for the neural hedge, 0.000385 for delta, and 0.014849 without a hedge. The command also prints each strategy’s average trading cost and turnover. Use `--seed` to repeat the comparison on another sample. [Example source](examples/hedging_controls.py)
+
 ## Use your own simulation
 
 Write a function that takes a configuration and a replication (one run of the simulation) and returns a finite loss. Lower values are better. Here the function measures how far a setting is from a randomly drawn target. Candidates with the same replication index see the same target.
