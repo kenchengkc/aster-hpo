@@ -1,29 +1,31 @@
-# Native foundation: development profiling probe
+# Hedging performance before the C++ implementation
 
-This is a small probe of the existing Python/NumPy objective at source revision
-`065020f`, before any native implementation. It helps choose the next component;
-it is not a speedup comparison or a tail-latency study.
+This profile shows where the Python/NumPy hedging objective spent its time at
+revision `065020f`, before the C++ work began.
 
-Hardware: Apple M5, arm64. One numerical thread. Workload: 256 training epochs,
+The run used one numerical thread on an Apple M5 (arm64), with 256 training epochs,
 256 paths per training batch, 2,048 evaluation paths, and 12 trading intervals.
-Configurations use learning rate 0.03, regularization 0.0001, and widths 4/8/16.
-Each width has its own deterministic replication from root 1000, index 0,
-phase `pilot`, and shared scenarios. No financial comparison or independent audit
-was performed. No diagnostics were written inside the measured objective.
+The three networks had widths of 4, 8, and 16. All used a learning rate of 0.03
+and regularization of 0.0001. Each width used its own replication with root seed
+1000, index 0, phase `pilot`, and shared scenarios. The timed objective wrote no
+diagnostics. This run measured execution time only and included no independent
+audit of financial results.
 
-After one warm-up per width, three identical-input runs produced median wall times
-of about 79, 89, and 129 milliseconds respectively. Repeated losses matched within
-each width. The saved `summary.json` contains every duration and replication identity.
-These few samples do not support general performance or p99 claims.
+After one warm-up per width, each network ran three times on identical inputs.
+Median times were about 79 ms for width 4, 89 ms for width 8, and 129 ms for
+width 16. All three runs at each width returned the same loss. `summary.json`
+contains every duration and the replication details. Three samples per width are
+too few to estimate 99th percentile latency.
 
-A separate width-8 cProfile run produced `profile.txt`, with directory names stripped
-for portability. Accounting (`hedge_pnl`) accounts for about 6.3% of cumulative
-profile time. Forward computation accounts for 38.7%; loss/gradient computation
-accounts for 79.7%, including forward and accounting work. Cumulative entries overlap
-and cannot be added. Profiler overhead changes timings. No memory-allocation counts
-were measured.
+In a separate cProfile run at width 8, `hedge_pnl` accounted for about 6.3% of
+cumulative time and the forward pass for 38.7%. Computing loss and gradients
+took 79.7%, including time in the forward pass and accounting. Adding the three
+percentages would count some work twice. The profiler adds overhead.
+`profile.txt` lists the calls with directory names stripped. The run did not count
+memory allocations.
 
-To repeat the procedure from a checkout with the benchmark dependencies installed:
+To repeat the profile, install the benchmark dependencies and run this from the
+repository root.
 
 ```bash
 python - <<'PY'
@@ -55,6 +57,6 @@ pstats.Stats(profile).strip_dirs().sort_stats("cumulative").print_stats(25)
 PY
 ```
 
-Reproduction timings will vary. `SHA256SUMS` verifies the accompanying records.
-See the [proposed native design](../../superpowers/specs/2026-11-04-native-performance-design.md)
-for the interpretation and separate CPU/GPU measurement boundaries.
+`SHA256SUMS` lists the checksums for the saved records. The design describes
+which parts of the workload the later CPU and GPU benchmarks measure.
+[Native design](../../superpowers/specs/2026-11-04-native-performance-design.md)

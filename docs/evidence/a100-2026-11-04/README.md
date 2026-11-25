@@ -1,35 +1,38 @@
 # A100 hardware validation — November 2026
 
-Source revision `880b83c` was compiled and executed on an NVIDIA A100 PCIe 40GB,
-compute capability 8.0, with CUDA 13.2.86, driver 615.71.10, GCC 13.3.0,
-CMake 3.28.3, and Ubuntu 24.04. The build uses float64, path-major inputs, block
-size 128, and disabled fast-math/FMA contraction.
+The tests ran at revision `880b83c` on an NVIDIA A100 PCIe 40 GB (compute
+capability 8.0). The host ran Ubuntu 24.04 with CUDA 13.2.86, driver 615.71.10,
+GCC 13.3.0, and CMake 3.28.3. The kernel used float64 arrays with one row per
+path and 128 threads per block. The build disabled fast-math and fused multiply-add
+contraction.
 
-This is development hardware validation and a small diagnostic timing sweep.
-It does not establish whole-training speedup, trading latency, p99, or general
-financial quality preservation. No financial model was trained on the GPU.
+This run tested the accounting kernel and timed four batch sizes. The measurements
+cover batch accounting only. Training, model quality, trading latency, and 99th
+percentile latency fall outside this test.
 
 ## Validation
 
-- Smoke: 4 cases and 21 scalar comparisons passed.
-- Correctness: **98 cases and 22,641 scalar comparisons passed**, covering all three
-  outputs, opening/rebalance/liquidation, shorts, empty batches, partial blocks,
-  1–256 intervals, and exact/near cancellation.
-- Compute Sanitizer memcheck: the same suite passed, with **0 errors and 0 leaked
-  bytes**. This does not establish a general race-free guarantee.
-- Native Linux AddressSanitizer/UndefinedBehaviorSanitizer: accounting CTest passed.
-  Saved compile commands/cache and linked libraries substantiate instrumentation.
-- Fresh Linux Python 3.12.3/NumPy 2.4.1 environment: **35 companion tests passed**,
-  with the C++ extension compiled using GCC 13.3.0.
+- All 4 smoke cases passed, with 21 scalar comparisons.
+- The full suite passed **98 cases and 22,641 scalar comparisons** across P&L,
+  costs, and turnover. Cases included opening and closing trades, rebalancing,
+  short positions, empty batches, partial blocks, 1–256 intervals, and sums that
+  cancel exactly or nearly cancel.
+- Compute Sanitizer memcheck reported **0 errors and 0 leaked bytes** on that suite.
+  Memcheck covered memory errors. Race detection was outside the scope of the run.
+- The native accounting test passed on Linux with AddressSanitizer and
+  UndefinedBehaviorSanitizer. The archive includes the compile commands, build
+  cache, and list of linked libraries.
+- All **35 Python extension tests passed** in a fresh Linux environment with Python
+  3.12.3 and NumPy 2.4.1. GCC 13.3.0 compiled the extension.
 
-The largest aggregate absolute difference was `1.3877787807814457e-17`. This includes
-hand-written decimal literal comparisons, so it is not specifically CPU/GPU
-disagreement. Maximum normalized error was about `1.4e-6` of the allowed
-`atol=1e-12, rtol=1e-10` threshold; this is not relative numerical error.
+The largest absolute difference across all checks was `1.3877787807814457e-17`.
+The checks included comparisons against hand-written decimal values as well as
+CPU/GPU comparisons. The largest error was about `1.4e-6` times the allowed
+difference (`atol=1e-12, rtol=1e-10`).
 
 ## Observed batch timings
 
-Medians in microseconds; 12 intervals and five warm-up calls per workload.
+Times are medians in microseconds. Each workload used 12 intervals and five warm-up calls.
 
 | Paths | Prepared native CPU | GPU kernel only | Completed GPU host call | Samples |
 | ---: | ---: | ---: | ---: | ---: |
@@ -38,26 +41,27 @@ Medians in microseconds; 12 intervals and five warm-up calls per workload.
 | 2,048 | 19.969 | 10.976 | 74.068 | 30 |
 | 65,536 | 645.388 | 15.456 | 803.303 | 20 |
 
-Prepared CPU excludes allocation/validation. Kernel timing uses completed same-stream
-CUDA events. Completed host timing includes pageable input/output copies and
-synchronization; device buffers are reused. Cold stages are recorded separately.
-Transfers make the completed GPU call slower than prepared CPU accounting at each
-recorded size. This motivates keeping data on the device across operations; these
-four sizes do not establish a crossover threshold.
+CPU timing started after allocation and input checks. CUDA events in the same
+stream timed the kernel. The host clock also included copies to and from pageable
+host memory and the wait for the GPU to finish. The measurements reused device
+buffers and recorded initial setup separately. With transfers included, GPU calls
+took longer than the CPU calculation at all four sizes. This prompted a separate
+test of reusing inputs on the GPU across calls.
 
-There is one host/session and a fixed CPU-then-GPU order. Affinity, clocks, power,
-thermals, and host contention were not controlled. GPU process lists were empty at
-the before/after snapshots; that does not prove continuous exclusive use. Timer
-overhead especially affects the 40ns single-path CPU observation.
+All measurements came from one session on one host, with the CPU timed first.
+CPU affinity, clock rates, power, temperature, and competing work could vary.
+The GPU process list was empty before and after the run. Other processes could
+have run between those checks. Timer overhead matters for the 40 ns single-path
+CPU measurement.
 
 ## Records and reproduction
 
-`raw-records.tar.gz` includes raw JSON, source/binary hashes, compile commands,
-hardware inventory, sanitizer logs, Linux Python setup/results, and smaller-batch
-runs. `summary.json` is the compact summary; `SHA256SUMS` verifies artifact bytes.
-SSH connection details and keys are not included. Records were downloaded locally.
+`raw-records.tar.gz` contains the JSON measurements, source and binary hashes,
+compile commands, hardware details, sanitizer logs, Python test environment and
+results, and smaller batch runs. `summary.json` lists the results and
+`SHA256SUMS` contains file checksums.
 
-From source revision `880b83c` on a compatible CUDA development host:
+Run these commands from revision `880b83c` on a host with the CUDA development tools.
 
 ```bash
 bash cuda/run_tests.sh --output-dir /tmp/aster-a100-run-001 --sanitizer required
@@ -69,5 +73,5 @@ for count in 1 256 2048; do
 done
 ```
 
-Timings will vary. See the [CUDA guide](../../../cuda/README.md) and
-[native interface/measurement guide](../../NATIVE.md).
+The guides describe the build and the CPU and GPU timing methods.
+[CUDA guide](../../../cuda/README.md) · [Native interface and timings](../../NATIVE.md)

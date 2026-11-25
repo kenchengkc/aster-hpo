@@ -1,25 +1,29 @@
 # Archived CPU evidence
 
-See the [technical report](../../RESULTS.md) for interpretation and
-[commands](../../BENCHMARKING.md) for extraction and regeneration.
+This directory contains the recorded runs behind the CPU study. The report
+explains the results. The benchmark guide shows how to unpack the data and
+regenerate the analysis. [Technical report](../../RESULTS.md) · [Benchmark guide](../../BENCHMARKING.md)
 
-- `financial-artifacts.tar.gz`: all 80 campaigns, eight scaling runs, per-replication
-  financial diagnostics, the frozen protocol, the large disjoint pilot, and original
-  analysis before the zero-variance correction. JSON/Markdown only; no SQLite files.
-- `diagnostic-artifacts.tar.gz`: all 640 diagnostic runs with manifest and summaries.
-- `protocol.json`, `manifest.json`, `summary.json`, `report.md`: readable copies of
-  the frozen settings, execution environment, and corrected financial analysis.
-- `diagnostic-summary.json`: all diagnostic scenario/order slices, including losses.
-- PNGs: standalone figures generated from those raw artifacts.
-- `provenance.json`: execution/reporting revisions and the disclosed correction.
-- `SHA256SUMS`: checksums for the archives and accompanying evidence files.
+- `financial-artifacts.tar.gz` contains all 80 searches, eight worker-scaling runs,
+  the financial measurements for each simulation, the protocol set before the study,
+  the separate large pilot, and the original analysis. The files are JSON and Markdown.
+- `diagnostic-artifacts.tar.gz` contains all 640 diagnostic runs with their manifest
+  and summaries.
+- `protocol.json` records the study settings. `manifest.json` describes the machine
+  and software. `summary.json` and `report.md` contain the corrected results.
+- `diagnostic-summary.json` lists results and losses for each scenario and candidate order.
+- The PNG files are plots of the recorded data.
+- `provenance.json` lists the code revisions and explains the correction.
+- `SHA256SUMS` lists checksums for the archives and the files in this directory.
 
-Financial execution: `bef29bf`. Reporting and diagnostic execution: `89e75c6`.
-The original analysis in `financial-study/original-analysis/` is retained for audit
-history and is superseded by the corrected report; its non-inferiority labels should
-not be used as a supported claim.
+The financial searches ran at commit `bef29bf`. The reports and diagnostic runs
+used `89e75c6`. Across all 20 seeds, the methods picked the same settings and
+the paired differences in audit error were zero. The original analysis incorrectly
+reported non-inferiority. With zero variance, the planned test could not give
+a statistical bound for this comparison. The archive keeps the original analysis
+in `financial-study/original-analysis/`.
 
-Archive members use relative paths under `financial-study/`, `hedging-pilot-large/`,
-and `diagnostics-v02/`, plus `financial-protocol.json`. Extract into a fresh directory.
-The archives preserve observations and telemetry needed for analysis; they do not
-contain execution databases for resuming optimization.
+Extract the archives into a fresh directory. They contain `financial-study/`,
+`hedging-pilot-large/`, `diagnostics-v02/`, and `financial-protocol.json`.
+You can rebuild the analysis from these files. Resuming a search requires the
+original SQLite database, which the archives omit.

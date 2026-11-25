@@ -1,25 +1,24 @@
-# A100 accounting correctness and timing package
+# Testing GPU hedge accounting on an A100
 
-This standalone C++20/CUDA executable compares a float64, path-major GPU kernel
-with the checked native CPU library on identical arrays. Each path includes the
-opening trade, every rebalance, and terminal liquidation. All three outputs
-(P&L, costs, turnover) must satisfy `abs(actual - expected) <= 1e-12 +
-1e-10 * abs(expected)`; a mismatch, nonfinite result, or CUDA error exits nonzero.
+This C++20/CUDA program runs the same hedging calculation on a GPU and a CPU.
+Both use 64-bit floats with one row per price path. They calculate profit and
+loss (P&L), transaction costs, and turnover from the opening trade through the
+final trade that closes the position. Each GPU output must satisfy
+`abs(actual - expected) <= 1e-12 + 1e-10 * abs(expected)` against the native CPU
+result. The program exits with an error on a mismatch, a nonfinite value, or a
+CUDA error.
 
-Local Apple hardware cannot compile or run this CUDA package. NVIDIA compilation,
-GPU correctness, and Compute Sanitizer results require execution on the rented
-A100. The host-only checks below are separate from GPU validation.
-
-The [recorded A100 run](../docs/evidence/a100-2026-11-04/README.md) compiled and passed
-the CUDA suite and required memcheck on actual hardware. Raw records and limitations
-are preserved there; the small timing sweep does not establish whole-objective speedup.
+The CUDA suite and Compute Sanitizer memcheck passed on an NVIDIA A100. The
+timings in that run cover the accounting calculation. Building and testing the
+GPU code requires a CUDA development host. On an Apple machine, use the
+[host-only checks](#host-only-checks). [A100 test results](../docs/evidence/a100-2026-11-04/README.md)
 
 ## Run on the rented Ubuntu instance
 
-Use an existing CUDA **devel** image containing `nvcc` (CUDA 12.6 or newer), a
-compatible C++20 GCC host compiler, CMake 3.24+, Python 3, and `nvidia-smi`.
-Ubuntu 24.04 supplies a sufficiently recent CMake. A runtime-only CUDA image is
-insufficient. Install host tools if needed, then run from the repository checkout:
+Use a CUDA **devel** image with `nvcc` (CUDA 12.6 or newer), a compatible GCC
+compiler with C++20 support, CMake 3.24 or later, Python 3, and `nvidia-smi`.
+Ubuntu 24.04 includes a suitable CMake version. Install any missing host tools
+and run the tests from the repository root.
 
 ```bash
 sudo apt-get update
@@ -29,25 +28,25 @@ nvidia-smi
 bash cuda/run_tests.sh --output-dir /tmp/aster-a100-run-001 --sanitizer required
 ```
 
-The result directory must not exist; its parent must exist. A failed run retains
-partial evidence. Choose a new directory for a rerun. No Python packages, Python
-extension, network service, or additional GPU instance are required.
+Pick a new output directory under an existing parent. If a run fails, the
+directory keeps its partial results. The runner needs one GPU, and its Python
+steps use only the standard library.
 
-The runner builds Release for `sm_80`, checks CLI/no-overwrite behavior and the
-numerical comparator, runs hand-checked smoke cases and the complete correctness
-suite (including resident input/output lifecycle and reload checks), runs Compute
-Sanitizer memcheck, then records 20 warmed benchmark samples.
-Only one GPU-owning process runs at a time. Device ordinal `0` means the first
-visible device; the process inventory is saved so other tenants/processes remain
-visible when interpreting timings. This does not establish an otherwise idle GPU.
+The runner builds in Release mode for `sm_80` and checks the command-line options,
+overwrite protection, and numerical comparisons. It runs hand-checked examples,
+the full correctness suite (including input reloads and output reuse), and Compute
+Sanitizer memcheck. It records 20 timing samples after warm-up.
 
-`--sanitizer auto` is the default: it runs memcheck when available and explicitly
-records a missing tool. `--sanitizer required` makes absence fatal;
-`--sanitizer off` explicitly records that it was disabled. Instrumented timings
-in `sanitizer.json` are correctness evidence, not performance measurements.
+The runner starts one GPU process at a time. Device `0` is the first visible GPU.
+The results include a list of processes seen on the device so you can check for
+other users. Those snapshots cover only the times when the list was collected.
 
-For a different fixed workload, select it directly; this package does not perform
-a launch tuning study:
+The default, `--sanitizer auto`, runs memcheck if installed and records whether it
+ran. Use `--sanitizer required` to fail the run if the tool is missing.
+`--sanitizer off` skips memcheck and records that choice. Memcheck changes
+execution times, so use the separate benchmark samples for performance comparisons.
+
+To time a different workload, set its dimensions and launch settings explicitly.
 
 ```bash
 bash cuda/run_tests.sh --output-dir /tmp/aster-a100-run-002 \
@@ -67,61 +66,63 @@ ctest --test-dir /tmp/aster-cuda-build --output-on-failure
   --block-size 128 --warmups 5 --repeats 20 --output /tmp/aster-bench-001.json
 ```
 
-`--mode smoke` is the default; omit `--output` to emit JSON on standard output.
-An output file is reserved exclusively before GPU initialization and is never
-overwritten. On failure it may remain empty; only JSON with `"passed": true`
-constitutes a successful report. `--help` and invalid CLI arguments need no GPU.
+The default mode is `--mode smoke`. Omit `--output` to print JSON on standard
+output. The program creates the output file before initializing the GPU and
+refuses to overwrite an existing file. A failed run may leave an empty file.
+A successful JSON report contains `"passed": true`. You can run `--help` and
+check invalid command-line arguments without a GPU.
 
-Correctness includes literal results `0.089 / 0.011 / 1.1`, shorts, one interval,
-zero holdings/costs, an empty batch, partial blocks, 1–256 intervals, and exact or
-near cancellation in both gross gain and final P&L. Random prices are in
-`[0.5, 2]`, holdings in `[-1, 1]`, and cost rates in `[0, 0.01]`. Every benchmark
-repeat compares every output against the same CPU reference outside timing.
-The kernel uses one thread per path and preserves chronological summation.
-CUDA FMA contraction and fast arithmetic are disabled; the host uses
-`-ffp-contract=off -fno-fast-math`. Do not add conflicting compiler flags.
+One hand-checked case expects P&L of 0.089, costs of 0.011, and turnover of 1.1.
+Other cases cover shorts, one interval, zero holdings or costs, empty batches,
+partial blocks, 1–256 intervals, and sums that cancel exactly or nearly cancel
+in gross gain or final P&L. Random prices range from 0.5 to 2, holdings from
+−1 to 1, and cost rates from 0 to 0.01. After each timed repeat the program
+compares every output with the CPU result.
+
+One GPU thread processes each path in time order. The CUDA build disables fused
+multiply-add contraction and fast arithmetic. The host build uses
+`-ffp-contract=off -fno-fast-math`. Keep these flags when reproducing the tests.
 
 ## Read the evidence
 
-`benchmark.json` retains each completed sample; no averages are relabeled as tail
-latency, and no whole-objective speedup is inferred.
+`benchmark.json` stores the individual timings. Each field covers a different
+part of one batch calculation.
 
-| Field | Measured boundary |
+| Field | What the timer covers |
 | --- | --- |
 | `kernel_event_ms` | Kernel only, CUDA events in the same stream, read after completion |
 | `completed_host_ms` | Host-to-device copies, kernel, all three device-to-host copies, stream synchronization |
-| `native_cpu_prepared_ms` | One-thread native arithmetic and output writes on prevalidated inputs; allocation/validation excluded |
+| `native_cpu_prepared_ms` | Single-threaded CPU calculation and output writes, timed after allocation and input checks |
 | `cold.runtime_setup_ms` | First runtime/device initialization and hardware queries |
 | `cold.device_allocation_ms` | Reusable device buffers, stream, and events |
 | `cold.first_completed_host_ms` | First small smoke call, including transfers and first kernel launch |
 
-Device buffers and events are reused. Host arrays are pageable; host timing
-includes any transfer staging. JSON construction, correctness comparison, input
-creation, allocation, and checksums are outside warmed samples. The cold fields
-are separate stages, not a full process startup measurement. Cold smoke and warm
-benchmark have different shapes.
+The benchmark reuses device buffers and events. It uses pageable host memory, so
+host timing includes any temporary copies the driver needs for transfers. Input
+creation, allocation, JSON formatting, correctness checks, and checksums happen
+outside the warmed samples. The cold fields time individual setup stages. The
+initial smoke call uses a different workload size from the warm benchmark.
 
-The exclusive evidence directory also contains device/driver/runtime and compiler
-metadata, process inventory, complete build commands, source and binary SHA-256
-hashes, build logs, and explicit sanitizer status. JSON contains the input hash
-(FNV-1a over host-native input bytes and rate), seed, shape, launch settings,
-checksums, errors, and raw durations. Retain this directory when sharing results.
-Source files do not contain remote access details or credentials.
+The output directory includes device, driver, runtime, and compiler details,
+a process list, build commands and logs, source and binary SHA-256 hashes, and
+the sanitizer result. The JSON also records the seed, array dimensions, launch
+settings, checksums, errors, and raw times. The input hash uses FNV-1a over the
+host bytes for the input arrays and cost rate. Keep this directory with any
+published results.
 
 ## Resident accounting sessions
 
-For the actual resident simulation, neural training, evaluation, and HPO objective,
-use the [CUDA workflow guide](../docs/CUDA_WORKFLOW.md). Its
-[full-workflow measurements](../docs/evidence/cuda-launch-2026-11-04/README.md)
-include search and independent winner audits; the accounting sweep below is a
-separate fixed-input workload.
+This benchmark holds prices and positions fixed while changing the transaction
+cost rate. For timings that include simulation, neural network training, search,
+and an independent check of the winner, see the full workflow.
+[CUDA workflow guide](../docs/CUDA_WORKFLOW.md) · [Full workflow measurements](../docs/evidence/cuda-launch-2026-11-04/README.md)
 
-`--mode pipeline` runs a transaction-cost sensitivity sweep on fixed prices and
-holdings. `--operations 1..256` selects K distinct rates spanning `[0, 0.01]`;
-K=1 uses `0.01`, and the default is K=8. Every rate invokes the unchanged float64
-accounting kernel. Each method returns **all K operations' three per-path arrays**
-in flat `[operation][path]` order. The CPU comparison recomputes the same K calls;
-it does not measure a CPU algorithm that caches gain and turnover across rates.
+Run `--mode pipeline` and set `--operations` to the number of rates (K), from 1
+to 256. The default is 8. For one rate, the program uses 0.01. For multiple rates,
+they span 0 to 0.01. Each rate uses the same float64 kernel. Every method returns
+P&L, costs, and turnover for every path, with its output arrays ordered by
+`[operation][path]`. The CPU runs the full calculation for each rate without
+caching gain or turnover between calls.
 
 ```bash
 /tmp/aster-cuda-build/aster_cuda --mode pipeline --paths 65536 --intervals 12 \
@@ -129,40 +130,40 @@ it does not measure a CPU algorithm that caches gain and turnover across rates.
   --output /tmp/aster-pipeline-001.json
 ```
 
-| Pipeline field | Completed timing boundary |
+| Pipeline field | What the timer covers |
 | --- | --- |
 | `copy_per_call_ms` | K operations, each uploading both inputs, running one kernel, downloading three output arrays, and synchronizing |
 | `resident_session_ms` | One input upload, K kernels writing distinct retained slots, three bulk downloads covering every operation, and one synchronization |
-| `resident_preloaded_ms` | Inputs uploaded and synchronized before timing; K kernels, all output downloads, and synchronization |
+| `resident_preloaded_ms` | K kernels, all output downloads, and synchronization, with inputs already on the device |
 | `native_cpu_sequence_ms` | K prepared native calls and all output writes on one CPU thread |
 
-The primary comparison is `resident_session_ms` against `copy_per_call_ms`.
-Residency, batched output copies, and fewer synchronizations all contribute to the
-change. Pipeline measurements use completed host durations and introduce no CUDA
-event calls within these methods. The older benchmark's `kernel_event_ms` remains
-a separate single-kernel measurement.
+Compare `resident_session_ms` with `copy_per_call_ms` to see how long the full
+set of calculations takes with each transfer method. The resident session uploads
+the inputs once, copies results back in larger batches, and waits for the GPU
+once. Both methods use a host clock and run without CUDA timing events. The
+single-kernel benchmark reports CUDA event times in `kernel_event_ms`.
 
-All input arrays, output arrays, device slots, and sample storage are allocated
-before warmups and timed sessions. The copy-per-call method writes directly into
-views of its contiguous all-operation host outputs; it performs no extra vector
-copies. Host vectors are pageable, so completed host durations include any driver
-transfer staging. The separate cold fields record runtime/device setup, host
-preparation, device allocation, and the first complete single-operation call on
-the selected shape. These are not a full process startup measurement.
+The program allocates input arrays, output arrays, device slots, and sample
+storage before warm-up. Each copy-per-call download writes directly to its slice
+of the host output array. Host vectors use pageable memory, so host times include
+any staging by the driver. The cold fields time device setup, host preparation,
+device allocation, and the first single-operation call at the chosen size.
+They cover only those stages of startup.
 
-Pipeline JSON uses `schema_version: 2`; smoke, correctness, and the older benchmark
-retain version 1. It records exact `workload.rates`, the input hash, device/build
-identity, all raw `pipeline_samples`, each sample's reproducibly shuffled
-`method_order`, all-output comparisons, and per-method numeric sums and an ordered
-FNV-1a hash of the final checked outputs. The hash covers P&L, then costs, then
-turnover, with operation and path order preserved. Comparisons check every output
-of every measured repeat outside timing, using the same tolerances as the older
-modes. A zero CPU duration from clock quantization is retained; GPU completed
-samples must be positive.
+The pipeline report uses JSON schema version 2. Smoke, correctness, and
+single-kernel benchmark reports use version 1. The pipeline report records the
+exact `workload.rates`, input hash, device and build details, and raw
+`pipeline_samples`. Each sample records its reproducibly shuffled `method_order`.
+After timing each repeat, the program compares every result using the same
+tolerances as the other modes. It saves numeric sums for each method and an
+FNV-1a hash of the final checked outputs. It hashes P&L first, then costs, then
+turnover, preserving operation and path order. A CPU sample shorter than one
+clock tick can appear as zero. Each completed GPU sample must be positive.
 
-Every sample's `transfers` records actual successful `cudaMemcpyAsync` requests at
-the copy helper. For N paths, T intervals, and K operations, define input bytes
-`I = N * (2*T + 1) * 8` and output bytes `O = K * N * 3 * 8`:
+The `transfers` field counts successful `cudaMemcpyAsync` requests. For N paths,
+T intervals, and K rates, the input size is `I = N * (2*T + 1) * 8` bytes and
+the output size is `O = K * N * 3 * 8` bytes. H2D means host to device, and D2H
+means device to host.
 
 | Method | H2D bytes / calls | D2H bytes / calls |
 | --- | --- | --- |
@@ -170,30 +171,29 @@ the copy helper. For N paths, T intervals, and K operations, define input bytes
 | `resident_session` | `I` / `2` | `O` / `3` |
 | `resident_preloaded` | `0` / `0` inside timing | `O` / `3` |
 
-These counters measure requested copy payloads, not physical PCIe traffic. Input
-changes require an explicit upload even when dimensions stay the same. Upload
-invalidates every old output; launch before upload, invalid rates/slots/shapes,
-incomplete outputs, and repeated readback without a fresh launch are rejected
-before the corresponding CUDA calls.
+The counts give the bytes requested by the code. Measuring traffic on the PCIe
+bus would require separate instrumentation. Upload inputs again whenever they
+change, even if their dimensions stay the same. Uploading invalidates previous
+results. The session checks rates, output slots, and dimensions before calling
+CUDA. It also rejects attempts to launch before upload, read incomplete outputs,
+or read outputs a second time without running another kernel.
 
-Default correctness mode exercises the resident paths, so the existing
-`--sanitizer required` runner checks them under Compute Sanitizer too. Cases cover
-K=1 and multiple distinct rates, literal outputs, shorts, cancellation, partial
-blocks, empty batches, changed shapes, and same-shape changed-input reloads.
-This standalone session benchmark excludes Python binding costs, neural training,
-and complete hyperparameter-optimization runtime. It measures fixed-input reuse;
-it does not establish gains for a workload that changes prices or holdings on
-every call.
+The default correctness suite tests single and multiple rates, hand-checked
+outputs, short positions, cancellation, partial blocks, empty batches, new
+dimensions, and reloading different inputs with the same dimensions.
+`--sanitizer required` also runs these cases under Compute Sanitizer. The
+benchmark covers reuse of fixed inputs. Python calls, training, and
+hyperparameter search fall outside the timed work.
 
-The [A100 session report](../docs/evidence/cuda-resident-2026-11-04/README.md)
-records the fixed 36-process protocol, raw results, correctness checks, and
-reproduction commands. At 65,536 paths and 32 operations, the primary session
-falls from 26.41ms to 4.42ms (5.97× median paired process speedup). K=1 remains
-approximately unchanged.
+At 65,536 paths and 32 operations, uploading prices and holdings once reduced
+session time from 26.41 ms to 4.42 ms. The median speedup across paired runs was
+5.97×. With one operation the two methods took about the same time. The report
+includes the 36-process protocol, results, checks, and commands.
+[A100 session report](../docs/evidence/cuda-resident-2026-11-04/README.md)
 
 ## Host-only checks
 
-These need neither CUDA nor the optional Python extension:
+These tests run with a C++20 compiler and standard Python.
 
 ```bash
 python3 -m unittest discover -s cuda/tests -v
@@ -204,9 +204,9 @@ cuda/.build-local/test_comparison
 bash -n cuda/run_tests.sh
 ```
 
-The comparator regression test deliberately corrupts each output, checks nonfinite
-values and near-zero tolerance, and must reject those cases. The shell tests run
-the real argument/output boundary and verify existing evidence is preserved.
+The comparison test corrupts each output and checks that the comparator catches
+errors, including nonfinite values and values outside the near-zero tolerance.
+The shell tests cover command-line arguments and check that existing output
+files survive a second run.
 
-References: [NVIDIA asynchronous execution and events](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html),
-[NVIDIA Compute Sanitizer and nonzero error exit codes](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html).
+[NVIDIA guide to asynchronous execution and events](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/asynchronous-execution.html) · [Compute Sanitizer error exit codes](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html)

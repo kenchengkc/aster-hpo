@@ -1,22 +1,27 @@
 # CUDA simulation and HPO — A100, November 2026
 
-The actual float64 neural-hedging search-plus-audit workflow takes **5.44s on CUDA**
-versus **18.41s with one NumPy worker** and **8.65s with four** on this host. Median
-paired speedups are **3.38×** and **1.58×** respectively for the larger workload.
-The original small workload is faster on CPU, which remains the default.
+On the larger workload, a fixed-budget hedging search and its audit took
+**5.44 s on CUDA**, **18.41 s with one NumPy worker**, and **8.65 s with four**.
+Across matching seeds, the median CUDA speedup was **3.38×** over one CPU
+worker and **1.58×** over four. NumPy was faster on the original small
+workload and remains the default.
 
-This integrates simulation, neural forward/backward calculations, gradient clipping,
-Adam, accounting, evaluation, ordinary `Study` scheduling, SQLite journaling, winner
-locking, and independent winner audits. It does not extrapolate the earlier
-fixed-input accounting sweep's speedup to training.
+The benchmark runs the full search in float64. It simulates prices, runs the
+model forward and backward, clips gradients, applies Adam updates, accounts
+for trading costs, and evaluates the hedge. `Study` schedules each run and
+records it in SQLite. After the search
+selects a winner, the audit evaluates it on fresh simulations. The earlier
+accounting benchmark measured only the cost of calculating results for fixed
+inputs.
 
 ![Workflow runtime and independent audit differences](workflow-performance.png)
 
 ## Frozen protocol
 
-Executed source **`f7d5669`**, verified against all 35 files in the manifest's source
-map. The 30 campaigns run in fresh processes with 30 distinct process IDs, in the
-saved deterministic order. Settings were fixed before comparative timing:
+All 35 source files listed in the manifest match commit **`f7d5669`**.
+The study ran the 30 searches in the order listed in the manifest, each in a
+fresh process with a distinct process ID. The table lists the settings chosen
+before timing began.
 
 | Setting | Original workload | Larger workload |
 | --- | ---: | ---: |
@@ -27,22 +32,24 @@ saved deterministic order. Settings were fixed before comparative timing:
 | Candidates per search | 4 | 4 |
 | Full-budget replications per candidate | 4 | 4 |
 | Racing checkpoints | 2, 4 | 2, 4 |
-| Independent audits per locked winner | 3 | 3 |
+| Independent audits per winner | 3 | 3 |
 
-The existing candidate sampler tunes width, learning rate, and regularization.
-Each workload/seed runs full-budget and racing searches with NumPy/one worker and
-CUDA/one worker, plus a NumPy/four-worker full-budget control. Every CPU worker uses
-one BLAS thread. Audits use one worker for each backend. GPU campaigns run sequentially;
-empty before/after GPU process snapshots do not establish continuous exclusive use.
+The sampler varies model width, learning rate, and regularization. For each
+workload and seed, one NumPy worker and one CUDA worker each ran a fixed-budget
+search and a racing search. Four NumPy workers also ran the fixed-budget search.
+Each CPU worker used one BLAS thread. All audits used one worker. The GPU
+searches ran one at a time. Snapshots taken before and after showed no other
+GPU processes. Activity during each search was unmonitored.
 
-Hardware/software: A100 PCIe 40GB, compute capability 8.0, driver 615.71.10,
-CUDA 13.2.86, CuPy 14.2.0, NumPy 2.5.4, Python 3.12.3, Ubuntu 24.04. Detailed CPU,
-compiler, library, environment, and device records are archived.
+The host ran Ubuntu 24.04 with an A100 PCIe 40 GB (compute capability 8.0),
+driver 615.71.10, CUDA 13.2.86, CuPy 14.2.0, NumPy 2.5.4, and Python 3.12.3.
+The archive lists the CPU, compiler, libraries, environment, and device settings.
 
 ## Complete workflow results
 
-Times below are medians across optimizer seeds. Speedups are calculated within
-paired seeds first, then summarized; they need not equal ratios of displayed medians.
+Times are medians across the three optimizer seeds. Speedup is the median of
+the CPU time divided by the GPU time for each seed. It can differ from the
+ratio of the two times shown in the table.
 
 | Workload / scheduler | NumPy, 1 worker (s) | NumPy, 4 workers (s) | CUDA (s) | Paired speedup vs 1 worker | vs 4 workers |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -51,52 +58,60 @@ paired seeds first, then summarized; they need not equal ratios of displayed med
 | Original / race | 0.945 | — | 3.885 | 0.242× | — |
 | Larger / race | 13.581 | — | 4.487 | **3.480×** | — |
 
-The larger full-budget speedup ranges from **2.57–3.78×** versus one worker and
-**1.39–1.92×** versus four. Whiskers in the figure show descriptive min–max across
-seeds, not confidence intervals. CUDA is roughly 3.5× slower than one NumPy worker
-on the original full-budget workload by the paired median. Small operations do
-not amortize GPU execution and setup costs here.
+For the larger fixed-budget search, CUDA speedups ranged from **2.57–3.78×**
+over one CPU worker and **1.39–1.92×** over four. The figure's whiskers span the
+lowest and highest values observed across the three seeds. On the original
+fixed-budget workload, CUDA took about 3.5 times as long as one NumPy worker by
+the median paired comparison. At that size the GPU did too little work per
+operation to recover its setup and execution overhead.
 
-The workflow clock starts before numerical imports and backend/context setup and
-ends after completed device work and result writes. It includes host random-number
-preparation, transfers, simulation, training, evaluation, scheduling, journals,
-winner locking, and audits. Timing-file publication is outside that clock. The
-parent additionally measures interpreter startup, imports, workflow, trailer, and
-exit: larger full-budget process medians are **18.504s / 8.749s / 5.728s** for NumPy
-one worker / four workers / CUDA. Paired process speedups are **3.230× / 1.522×**.
+The workflow timer starts before numerical imports and backend setup and stops
+when computation finishes and the results have been written. It covers random
+number generation on the CPU, transfers, simulation, training, evaluation,
+scheduling, SQLite writes, winner selection, and audits. The parent process
+also times Python startup and exit, including the final timing-file write.
+On the larger fixed-budget workload, median process times were **18.504 s**
+with one NumPy worker, **8.749 s** with four, and **5.728 s** on CUDA. Using
+that clock, CUDA speedups across matching seeds were **3.230×** and **1.522×**.
 
-No objective warmup precedes a campaign. Fresh processes inherit the normal shared
-CuPy disk cache, populated in part by correctness validation; these are not empty
-JIT-cache measurements. CUDA context setup and module loading are included. Clocks,
-thermals, CPU affinity, and host contention are uncontrolled. These are descriptive
-results on one host, not p99 measurements, a fully tuned CPU comparison, or a
-quality guarantee for other markets.
+Each search started in a new process without a warmup and used the shared CuPy
+disk cache that earlier correctness checks had helped populate. Timing included
+CUDA context setup and module loading. Clock speeds, temperatures, CPU placement,
+and competing work on the host could vary. The study measured three seeds on
+one host. The 99th-percentile runtime, further CPU tuning, and hedging quality
+in other markets remain untested.
 
 ## Work and quality checks
 
-- Full-budget searches execute 16 accepted objective calls each, plus three audits.
-  Across all campaigns: **428 search observations + 90 audit observations**, zero
-  objective failures and zero unsuccessful attempts.
-- All 12 paired NumPy/one-worker and CUDA searches select the same winners. The six
-  four-worker full-budget controls agree too. Racing allocation counts agree by
-  seed: `12, 12, 10` for the larger workload and `14, 10, 12` for the original.
-- All matched losses and all seven financial metrics satisfy the fixed development
-  check `rtol=1e-6, atol=1e-8`. Maximum matched MSE difference is **2.17e-18**;
-  maximum difference across any metric is **8.88e-16**, in mean turnover.
-- Locked-winner audit mean differences are at most **1.63e-19** in absolute MSE.
-  Audit training/scenario seeds use a namespace disjoint from search. Audit MSEs
-  are about `4.2e-4` to `5.6e-4` in this synthetic market.
-- CUDA uses the same NumPy initialization and shocks, uploaded once per objective;
-  subsequent price formation, parameters, positions, accounting, gradients, and
-  Adam moments stay on device. Host RNG is included in the runtime. The shared
-  accounting kernel retains float64 arithmetic and original transaction-cost rules.
+- Each fixed-budget search completed 16 evaluations and three audits. Across
+  all searches and audits there were **428 search observations and 90 audit
+  observations**. Every objective and every attempt succeeded.
+- The one-worker NumPy and CUDA searches picked the same settings in all 12
+  comparisons. The six fixed-budget searches with four NumPy workers picked
+  the same winners as well. Both backends completed the same number of racing
+  evaluations for each seed, with counts of `12, 12, 10` for the larger
+  workload and `14, 10, 12` for the original.
+- Every matched loss and all seven financial metrics agreed within
+  `rtol=1e-6, atol=1e-8`. The largest difference in mean squared hedging error
+  (MSE) was **2.17e-18**. Across all metrics, the largest difference was
+  **8.88e-16**, in mean turnover.
+- The audits used separate training and price-path seeds from the search.
+  Audit MSEs ranged from about `4.2e-4` to `5.6e-4` in this synthetic market.
+  Comparing the same winners, the largest absolute difference in audit mean
+  MSE between backends was **1.63e-19**.
+- Each evaluation uploads the initial NumPy parameters and random shocks once.
+  Price simulation, model parameters, positions, accounting, gradients, and
+  Adam updates then stay on the GPU. The timer includes random number generation
+  on the CPU. The shared accounting kernel uses float64 and the original
+  transaction-cost rules.
 
-An independent data audit checked 731 finite JSON files, 60 SQLite journals,
-518 metric files, all process identities, frozen order, and source hashes. The
-summary regenerates exactly from unedited records. Three optimizer seeds and
-three audits per winner provide development evidence, not a formal financial
-non-inferiority conclusion. Adaptive runtime comparisons retain their observed
-work counts separately from fixed-budget comparisons.
+An independent check covered 731 JSON files with finite values, 60 SQLite
+journals, 518 metric files, every process ID, the run order, and the source
+hashes. The original records reproduced the summary exactly. With three
+optimizer seeds and three audits per winner, the study could check agreement
+on these runs. Testing whether any loss in hedging quality stays within an
+acceptable margin would require a larger study. The racing results include
+their actual run counts because the scheduler can stop candidates early.
 
 ## Correctness and memory checks
 
@@ -123,7 +138,7 @@ archive; the default extended integrated run is not reported as a pass.
 
 ## Reproduce and inspect
 
-From the recorded source on a compatible CUDA development host:
+Run these commands from the recorded source on a compatible CUDA development host.
 
 ```bash
 python -m pip install -e '.[dev,benchmark,cuda13]'
@@ -136,13 +151,14 @@ bash cuda/run_tests.sh --output-dir /tmp/aster-workflow-validation --sanitizer r
 python -m benchmarks.cuda_workflow run --output results/cuda-workflow-new
 ```
 
-Use fresh output paths. The manifest records executed library versions. Regenerate
-this figure with `python docs/evidence/cuda-workflow-2026-11-04/plot.py` and the
-benchmark plotting dependencies installed. `records.json` and `summary.json`
-provide direct access; `raw-records.tar.gz` includes every campaign's logs, metrics,
-journals, winner, source identities, and validation reports. `validation.json`
-records provenance; `SHA256SUMS` verifies the artifacts. The final integrated
-memcheck log is stored separately alongside the archive.
+Use fresh output paths for each run. The manifest lists the library versions
+used. With the benchmark plotting dependencies installed, run
+`python docs/evidence/cuda-workflow-2026-11-04/plot.py` to redraw the figure.
+Read `records.json` for individual runs and `summary.json` for the comparisons.
+`raw-records.tar.gz` contains each run's logs, metrics, journals, winner, source
+hashes, and validation reports. `validation.json` lists the checks on the source
+and results. The final integrated memcheck log and file checksums (`SHA256SUMS`)
+are in this directory.
 
 See the [integration guide](../../CUDA_WORKFLOW.md),
 [design](../../superpowers/specs/2026-11-04-cuda-workflow-design.md), and

@@ -1,34 +1,40 @@
 # Resident CUDA accounting sessions — November 2026
 
-On the A100 PCIe 40GB, a 65,536-path, 32-operation accounting session fell from
-**26.41ms to 4.42ms**. Median paired process speedup was **5.97×**, with a
-**5.82–6.44×** range across three process sessions.
+Uploading 65,536 price paths and their holdings once cut the time for 32
+accounting calculations on the A100 PCIe 40 GB from **26.41 ms to 4.42 ms**.
+Across three fresh processes, the speedup ranged from **5.82× to 6.44×**, with
+a median of **5.97×**.
 
-Both methods run the same float64 kernel K times on identical prices/holdings,
-using K different transaction-cost rates. Both return **all K operations' P&L,
-cost, and turnover arrays**. The main resident timing includes initial upload,
-every kernel, all output downloads, and synchronization. GPU context and reusable
-host/device capacity are prepared before timing.
+Both methods run the same float64 kernel once per transaction-cost rate. For
+each rate, both return profit and loss, cost, and turnover for every path. The
+resident version keeps the prices and holdings on the GPU between calls,
+copies results back in batches, and synchronizes less often. Its timing includes
+the first upload, every kernel, all downloads, and synchronization. Both methods
+set up the GPU context and allocate reusable host and device memory before timing.
 
-This is a controlled accounting sensitivity workload, not GPU neural training or
-complete HPO. CPU context measurements do not use an optimally cached sensitivity
-algorithm. Gains combine input residency, bulk result copies, and fewer
-synchronizations; the arithmetic is unchanged.
+The benchmark times the accounting step across different transaction-cost
+rates for fixed prices and holdings. The CPU reference computes each rate
+separately and could reuse more work across rates.
 
 ![Completed sessions and paired process speedups](session-performance.png)
 
 ## Protocol and results
 
-Executed source `6cb9805`; CUDA 13.2.86, driver 615.71.10, GCC 13.3.0, Ubuntu 24.04,
-block size 128, float64, no fast-math/FMA contraction. Workloads use 12 intervals,
-seed 1729, and rates spanning `[0,0.01]` (K=1 uses 0.01).
+The benchmark used commit `6cb9805`, CUDA 13.2.86, driver 615.71.10,
+GCC 13.3.0, and Ubuntu 24.04. The kernel used 128 threads per block and
+float64 arithmetic with fast math and fused multiply-add contraction disabled.
+Each workload used 12 intervals and seed 1729. The number of transaction-cost
+rates is K. Rates span `[0,0.01]` when K is greater than one. The single-rate
+run uses 0.01.
 
-Four path counts × three operation counts × three fresh processes produce **36
-process runs and 540 sample sets**. Every process has five warmups and 15 samples;
-each sample times four methods in reproducibly shuffled order. Settings are
-interleaved and GPU processes sequential. Clocks, thermals, affinity, and host
-contention are uncontrolled. Empty GPU process snapshots do not prove continuous
-exclusive use. Three processes on one host do not establish p99 or general speedup.
+Each combination of four path counts and three operation counts ran in three
+fresh processes, giving **36 process runs and 540 sample sets**. Each process
+ran five warmups and 15 timed samples. Each sample timed four methods in a
+reproducibly shuffled order. The benchmark interleaved settings and ran one GPU
+process at a time. Clock speeds, temperatures, CPU placement, and competing work
+could vary. GPU process snapshots covered only the start and end of a run. The
+three processes per setting on this host give a range of observed speedups. The
+99th-percentile runtime and performance on other hardware remain unmeasured.
 
 | Paths | Operations | Copy-per-call (ms) | Resident session (ms) | Median paired speedup |
 | ---: | ---: | ---: | ---: | ---: |
@@ -37,17 +43,21 @@ exclusive use. Three processes on one host do not establish p99 or general speed
 | 2,048 | 32 | 2.3289 | 0.3747 | 6.22× |
 | 65,536 | 32 | 26.4086 | 4.4219 | 5.97× |
 
-Times are medians of process medians. Speedups are calculated within each process
-first; dividing displayed times can differ from the paired summary. Whiskers in
-the figure show descriptive min–max across processes, not confidence intervals.
-The full 12-setting table is in `summary.json`. K=8 gives roughly 4× speedup;
-K=1 is approximately unchanged or slightly slower, with no input reuse to exploit.
+For each setting, the table shows the median of the three process medians.
+Speedups were calculated within each process before taking their median, so
+they can differ from the ratio of the two times shown. The figure's whiskers
+span the lowest and highest observed values across processes. The full table
+for all 12 settings is in `summary.json`. Reusing inputs for eight rates gave
+roughly a 4× speedup. With one rate, both methods uploaded the inputs once and
+the resident version took about the same time or slightly longer.
 
-At 65,536 paths/K32, requested input copies fall from **400 MiB / 64 calls** to
-**12.5 MiB / 2 calls**. Both return **48 MiB** of outputs: 96 copies for the baseline,
-3 for the resident session. Counters describe CUDA copy requests, not measured
-physical PCIe traffic or implicit kernel arguments. The **3.4124ms** preloaded
-median additionally excludes input upload and is not the primary 4.4219ms result.
+At 65,536 paths and 32 rates, input copies fell from **400 MiB in 64 calls** to
+**12.5 MiB in two calls**. Both methods copied **48 MiB** of results back to
+the host. The baseline needed 96 copies and the resident version needed three.
+These counts come from explicit CUDA copy requests. Physical PCIe traffic and
+implicit kernel arguments were outside the measurement. Starting the clock
+after the input upload gave a separate median of **3.4124 ms**. The
+**4.4219 ms** in the table includes that upload.
 
 ## Correctness and records
 
@@ -57,16 +67,19 @@ median additionally excludes input upload and is not the primary 4.4219ms result
   zero leaked bytes**. The K=256 boundary also passes.
 - Every measured operation's three arrays are compared against the CPU reference;
   all four methods' ordered output hashes agree in these records.
-- All 36 records pass the strengthened validator's exact integer comparison count
-  `12 * paths * operations * repeats`, transfer counts, all-output flags, finite
-  times, and hashes. Hardening at `3f2da2b` changes no GPU or timing code.
-- Sources match `6cb9805`, the binary hash matches its recorded identity, and the
-  summary regenerates exactly using manifest job order. No measurements were edited.
+- All 36 records passed checks on the number of comparisons
+  (`12 * paths * operations * repeats`), the transfer counts, whether every
+  output was returned, finite timings, and hashes. Commit `3f2da2b` tightened
+  the check on the comparison count after the run.
+- The source files match `6cb9805`, and the executable matches its recorded
+  hash. Reading the original measurements in the order listed in the manifest
+  reproduced the summary exactly.
 
-`raw-records.tar.gz` contains build logs/metadata, source/binary hashes, correctness/sanitizer
-reports, boundary/smoke checks, inventory, and all raw process records. The manifest,
-summary, and validation JSON files provide compact access. `SHA256SUMS` verifies
-artifacts.
+`raw-records.tar.gz` contains the build logs and settings, source and binary
+hashes, correctness and sanitizer reports, boundary and smoke tests, machine
+inventory, and individual process records. The manifest, summary, and validation
+reports are also available as JSON files in this directory. `SHA256SUMS` lists
+the file checksums.
 
 ## Reproduce
 
@@ -88,4 +101,5 @@ python3 cuda/benchmark_pipeline.py \
 Choose fresh output paths. Regenerate the figure with
 `python docs/evidence/cuda-resident-2026-11-04/plot.py` and the benchmark plotting
 dependencies installed. See the [design](../../superpowers/specs/2026-11-04-resident-cuda-design.md)
-and [CUDA guide](../../../cuda/README.md) for the state/output contract.
+and [CUDA guide](../../../cuda/README.md) for details on reusing buffers and
+reading the output arrays.

@@ -1,20 +1,22 @@
 # Budget and resume demonstration
 
-The standard-library Monte Carlo example ran with two workers, a 0.300-second
-wall allowance, and zero infrastructure retries. It stopped at 0.315 seconds,
-with 30 accepted observations and two deliberately cancelled attempts. A new
-invocation reused committed work and completed all 36 observations. Each accepted
-value was recomputed from its saved seeds; values and committed observations match.
+The Monte Carlo example ran on two workers with a 0.300-second time limit and
+retries disabled. It stopped after 0.315 seconds with 30 results saved and two
+attempts cancelled. A second run picked up where the first left off and finished
+all 36 observations. Recomputing each result from its saved seeds gave the same value.
 
-This demonstrates runtime controls, not algorithmic speedup. The two interrupted
-attempts have unknown CPU cost; no zero-cost assumption or quality inference is made.
-Observed stopping latency is one run on the recorded machine, not a guaranteed bound.
+The 0.315 seconds is the observed stopping time for one run on this machine.
+The CPU time spent on the two cancelled attempts is unknown. This example
+tests whether work can stop and resume. Measuring speedup or model quality
+would require a separate comparison.
 
-The JSON exports preserve session events, budgets, stop reasons, attempts, configurations,
-seeds, and observations. The SQLite execution database is not included. See
-[the runtime contract](../../RUNTIME.md#resource-limits-in-v03) and run
-`python -m examples.budgeted_search --output results/new-budget-demo` to reproduce
-the procedure; exact timings and the number of accepted observations can differ.
+The JSON files record events from both runs, including their budgets, stop
+reasons, attempts, configurations, seeds, and observations. The archive omits
+the SQLite database.
 
-Execution revision: `6eec3d2`. Source changes after this snapshot do not change these
-historical records. `SHA256SUMS` verifies the accompanying artifact bytes.
+Run `python -m examples.budgeted_search --output results/new-budget-demo` to
+repeat the example using only the Python standard library. The stopping time
+and number of observations saved before the stop can vary. [Time limits and retries](../../RUNTIME.md#resource-limits-in-v03)
+
+The example ran at commit `6eec3d2`. The checksums for the saved files are in
+`SHA256SUMS`.

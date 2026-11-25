@@ -1,6 +1,6 @@
 # Aster
 
-Aster is a Python library for finding good model settings when simulation results vary from run to run. For example, a hedging model can show a small error because it learned a good strategy or because it drew a favorable set of prices. Aster can compare model settings on the same test paths, stop spending runs on settings that perform poorly, and check the winner on fresh simulations.
+Aster runs parallel hyperparameter searches for simulations in Python. A hedge can look good on one set of simulated prices and do poorly on another. Aster can test candidate hedges on the same price paths, drop settings with higher losses, and check the winner on a fresh sample.
 
 [Project website](https://aster-hpo.vercel.app/) · [CPU study](docs/RESULTS.md) · [CUDA study](docs/evidence/cuda-launch-2026-11-04/README.md)
 
@@ -15,15 +15,17 @@ python -m pip install -e '.[benchmark]'
 python -m examples.hedging --workers 2 --configs 4 --output results/hedging-pilot
 ```
 
-The example tries four sets of model settings. It runs two searches on the same simulated market. One gives each candidate nine runs. The other can drop candidates after three. Both searches then evaluate their chosen model settings on fresh simulations. Open `results/hedging-pilot/summary.json` to compare the search times, number of runs, and mean squared hedging error in the final checks. Use a new output directory each time you run the example.
+The example compares two ways to search the same four configurations. The fixed-budget search gives each configuration nine runs. The racing search can drop a configuration after three. Each search then tests its winner on fresh simulations. Open `results/hedging-pilot/summary.json` to compare elapsed time, the number of runs, and the winners’ mean squared hedging errors. Choose a new output directory for each run.
 
 ## Compare hedging strategies
 
-Run `python -m examples.hedging_controls` to compare a neural hedge with fixed model settings, a Black–Scholes delta hedge, and an unhedged position. All three start with the same call premium and pay 0.10% of the value traded, including the cost of closing the position. On the same 2,048 simulated price paths held out from training (seed 42), mean squared hedging error was 0.000528 for the neural hedge, 0.000385 for delta, and 0.014849 without a hedge. The command also prints each strategy’s average trading cost and turnover. Use `--seed` to repeat the comparison on another sample. [Example source](examples/hedging_controls.py)
+Run `python -m examples.hedging_controls` to compare a neural hedge with fixed settings, a Black–Scholes delta hedge, and an unhedged position. Each starts with the call premium. Trades cost 0.10% of the value traded, including the final trade to close the hedge.
+
+With seed 42, the delta hedge had the lowest mean squared hedging error on 2,048 paths held out from training. Its error was 0.000385, compared with 0.000528 for the neural hedge and 0.014849 without a hedge. The example also prints average trading cost and turnover. To try another sample, change `--seed`. [Example source](examples/hedging_controls.py)
 
 ## Use your own simulation
 
-Write a function that takes a configuration and a replication (one run of the simulation) and returns a finite loss. Lower values are better. Here the function measures how far a setting is from a randomly drawn target. Candidates with the same replication index see the same target.
+Write a function that takes a configuration and a replication (one simulation run) and returns a finite loss. Aster minimizes that loss. In this example, the loss is the squared distance from a random target. Every configuration sees the same target for a given replication index.
 
 ```python
 import random
@@ -51,7 +53,7 @@ if __name__ == "__main__":
         print(winner, checked.mean, checked.standard_error)
 ```
 
-`ReplicationRace` compares candidates after 3, 9, and 27 runs in this example. It uses the difference in their average losses and the uncertainty in that difference to decide where to spend more runs. It can discard the best candidate when losses are close. `FullBudget` evaluates every candidate equally. A third option, `ASHA`, ranks candidates at each checkpoint and stops those that rank poorly. [Scheduler details](docs/BASELINES.md)
+`ReplicationRace` compares candidates after 3, 9, and 27 runs. It can stop a candidate early if its average loss is high enough relative to the uncertainty in the comparison. When losses are close, it can drop the best candidate by mistake. `FullBudget` gives every candidate the same number of runs. `ASHA` ranks candidates at each checkpoint and stops the lowest-ranked ones. [Scheduler details](docs/BASELINES.md)
 
 The search selects the lowest average loss among candidates that reached the final checkpoint. `audit` evaluates the selected settings using a separate set of random seeds. For longer studies, set `storage` and `objective_id` to save results in SQLite and resume after an interruption. You can also limit elapsed time, cap attempts, set a timeout for individual runs, or cancel a search. [Recovery and time limits](docs/RUNTIME.md) · [Stop and resume example](examples/budgeted_search.py)
 
@@ -70,22 +72,22 @@ python -m examples.hedging --backend cuda --workers 1 --configs 4 --output resul
 
 ## Benchmark results
 
-**CPU search.** In a simulated options market on an Apple M5, racing averaged 25.75 runs per search compared with 54 for a fixed budget, a **52.3% reduction**. Both methods used four workers. Across 20 random seeds, racing achieved a **1.43× median search speedup**, excluding the final audit. Both methods chose the same settings for all 20 seeds and had identical audit results. How often they would agree on other markets remains an open question. [CPU results and limitations](docs/RESULTS.md) · [Reproduction instructions](docs/BENCHMARKING.md)
+**CPU search.** On an Apple M5 with four workers, racing used **52.3% fewer runs** than a fixed-budget search in the simulated options market (25.75 on average versus 54). Across 20 random seeds, the median search speedup was **1.43×**, excluding the final audit. For every seed, both methods picked the same settings and got the same audit result. The study covered one market. [CPU results and limitations](docs/RESULTS.md) · [Reproduction instructions](docs/BENCHMARKING.md)
 
-**CPU and GPU search times.** A separate study on one NVIDIA A100 PCIe 40 GB host used three random seeds and 42 fresh processes across all comparisons. The table shows median seconds for a fixed-budget search and its audit. Each search tested four configurations four times each, then ran three independent checks on the winner. Both GPU columns used one worker.
+**CPU and GPU search times.** On a machine with one NVIDIA A100 PCIe 40 GB, the study ran 42 fresh processes across three random seeds. The table shows the median time for a fixed-budget search and its audit. Each search tested four configurations with four simulations apiece, then ran three independent checks on the winner. Both CUDA versions used one worker.
 
 | Simulated paths per training batch / evaluation | NumPy, 1 worker | NumPy, 4 workers | Original CUDA | Optimized CUDA |
 | --- | ---: | ---: | ---: | ---: |
 | 128 / 2,048 | 1.032 s | 0.742 s | 4.625 s | 0.923 s |
 | 4,096 / 32,768 | 16.720 s | 8.865 s | 5.264 s | 3.604 s |
 
-To reproduce the table from the recorded runs, use Python 3.11 or later from the repository root. The command reads the saved timings, matches runs by random seed, and prints the median times and speedups. It only requires the Python standard library.
+To reproduce the table, run this command from the repository root with Python 3.11 or later. It reads the saved timings and uses only the standard library.
 
 ```bash
 python -m benchmarks.workflow_report
 ```
 
-Four CPU workers finished the smaller search and audit fastest. On the larger workload, optimized CUDA was **4.64× faster than one CPU worker** and **2.57× faster than four**. These speedups use the median of the comparisons for each seed. Relative to the original CUDA code, the optimized version achieved a 4.96× speedup on the smaller workload and 1.46× on the larger one.
+Four CPU workers finished the smaller search and audit fastest. On the larger workload, optimized CUDA was **4.64× faster than one CPU worker** and **2.57× faster than four**. Compared with the original CUDA code, the speedups were 4.96× on the smaller workload and 1.46× on the larger one. Each speedup is the median of three time ratios, one for each seed.
 
 The times include setup, data transfers, training, evaluation, scheduling, database writes, and the audit. Including Python startup and exit brings the small workload to 1.165 s on optimized CUDA and 1.124 s on one CPU worker. All seven financial measures agreed within the study's numerical tolerances. In a separate profile of one warmed-up small evaluation, the GPU executed 361 kernels, down from 10,985. [CUDA results, profiles, and reproduction instructions](docs/evidence/cuda-launch-2026-11-04/README.md)
 
@@ -93,7 +95,7 @@ The times include setup, data transfers, training, evaluation, scheduling, datab
 
 ## Persistent workers
 
-**The repeated-run performance study is pending.** `WorkerPool` is available for searches and audits that share worker processes. A GPU worker can keep its CUDA context and compiled kernels while each evaluation starts with fresh model weights and price paths. The planned study compares direct calls, starting a pool for each run, and reusing a pool. It will measure the first run, later runs, and total time including shutdown. [Worker pool usage](docs/WORKER_POOLS.md) · [Benchmark protocol](docs/PERSISTENT_BENCHMARK.md)
+**The repeated-run performance study is pending.** Searches and audits can reuse the same processes through `WorkerPool`. A GPU worker keeps its CUDA context and compiled kernels between evaluations. Each evaluation still starts with fresh model weights and price paths. The study will compare direct calls, a new pool for each run, and one pool shared across runs. It will time the first run, later runs, and the whole series through shutdown. [Worker pool usage](docs/WORKER_POOLS.md) · [Benchmark protocol](docs/PERSISTENT_BENCHMARK.md)
 
 ## Development
 
