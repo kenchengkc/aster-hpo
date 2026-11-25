@@ -50,9 +50,7 @@ The objective is a serializable callable usable by the regular optimizer:
 from aster_hpo import FullBudget, Study
 from benchmarks.hedging import HedgingObjective, Market, hedging_pool
 
-objective = HedgingObjective(
-    Market(batch_paths=4096, evaluation_paths=32768), backend="cuda"
-)
+objective = HedgingObjective(Market(batch_paths=4096, evaluation_paths=32768), backend="cuda")
 result = Study(
     hedging_pool(31000, 4),
     scheduler=FullBudget(4),

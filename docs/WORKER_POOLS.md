@@ -30,16 +30,23 @@ if __name__ == "__main__":
             folder = Path("results") / f"request-{seed}"
             objective = HedgingObjective(market, folder / "metrics", backend="cuda")
             result = Study(
-                configs, scheduler=FullBudget(4), workers=1, seed=seed,
+                configs,
+                scheduler=FullBudget(4),
+                workers=1,
+                seed=seed,
                 storage=folder / "search.sqlite",
                 objective_id="hedging-cuda-market-v1",
             ).optimize(objective, worker_pool=pool)
             if result.best_trial is None:
                 raise RuntimeError("Search did not complete a candidate")
             checked = audit(
-                objective, result.best_trial.config, replications=3, seed=seed,
+                objective,
+                result.best_trial.config,
+                replications=3,
+                seed=seed,
                 storage=folder / "audit.sqlite",
-                objective_id="hedging-cuda-market-v1", worker_pool=pool,
+                objective_id="hedging-cuda-market-v1",
+                worker_pool=pool,
             )
             print(seed, checked.mean)
 ```

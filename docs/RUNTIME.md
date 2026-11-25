@@ -83,7 +83,7 @@ partial = study.optimize(
         evaluation_timeout_seconds=10,
     ),
 )
-print(partial.metadata['termination_reason'])
+print(partial.metadata["termination_reason"])
 # A new invocation has a fresh allowance and reuses committed progress.
 continued = study.optimize(objective, budget=RunBudget(max_wall_seconds=120))
 ```

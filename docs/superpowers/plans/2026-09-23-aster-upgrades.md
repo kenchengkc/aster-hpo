@@ -38,8 +38,7 @@
   ```python
   @pytest.mark.parametrize("xs", [[0, 5, 10], [10, 5, 0]])
   def test_candidate_order_uses_available_checkpoint_peers(xs):
-      result = Study([{"x": x} for x in xs],
-                     scheduler=ReplicationRace((3, 9))).optimize(noisy)
+      result = Study([{"x": x} for x in xs], scheduler=ReplicationRace((3, 9))).optimize(noisy)
       assert sum(len(t.observations) for t in result.trials) == 15
       assert result.best_trial.config == {"x": 0}
   ```
@@ -68,8 +67,7 @@
 - [ ] Test the reporting contract before implementation:
 
   ```python
-  report = run_suite(tmp_path / "run", seeds=(7,), workers=1,
-                     count=3, checkpoints=(3, 9))
+  report = run_suite(tmp_path / "run", seeds=(7,), workers=1, count=3, checkpoints=(3, 9))
   assert report["interpretation"] == "synthetic diagnostic"
   assert report["runs"] > 0
   assert (tmp_path / "run" / "report.md").exists()
