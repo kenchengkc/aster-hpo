@@ -1,5 +1,6 @@
 import multiprocessing
 import os
+import pickle
 import threading
 import time
 from pathlib import Path
@@ -241,7 +242,7 @@ def test_serialization_error_reaps_previously_started_workers_and_keeps_journal(
 
 
 def test_timed_single_worker_requires_a_picklable_objective():
-    with pytest.raises((AttributeError, TypeError), match="pickle"):
+    with pytest.raises((AttributeError, TypeError, pickle.PicklingError), match="<lambda>"):
         Study([{"x": 0}]).optimize(lambda c, r: 0, budget=RunBudget(max_wall_seconds=1))
     assert_workers_stopped()
 

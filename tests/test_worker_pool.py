@@ -435,7 +435,7 @@ def test_prior_run_response_cannot_satisfy_reused_attempt_id(tmp_path, monkeypat
 
 def test_unpicklable_binding_reaps_pool_and_next_run_can_succeed():
     with pool_type()() as pool:
-        with pytest.raises((AttributeError, TypeError), match="pickle"):
+        with pytest.raises((AttributeError, TypeError, pickle.PicklingError), match="<lambda>"):
             hpo.Study([{"x": 0}], scheduler=hpo.FullBudget(1)).optimize(
                 lambda c, r: 0, worker_pool=pool
             )
